@@ -176,10 +176,10 @@ jobs:
           labels: ${{ needs.metadata.outputs.image_labels }}
           platforms: linux/amd64
           cache-from: |
+            ${{ inputs.additional_build_caches }}
             ${{ steps.cache.outputs.cache_from_gha }}
             ${{ steps.cache.outputs.cache_from_registry }}
             ${{ steps.cache.outputs.cache_from_nvidia_registry }}
-            ${{ inputs.additional_build_caches }}
           cache-to: ${{ steps.cache.outputs.cache_destination }},mode=max,ignore-error=${{ ! inputs.environment }}
           outputs: type=docker,dest=/tmp/${{ needs.metadata.outputs.image_id }}.tar
 
