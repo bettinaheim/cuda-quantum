@@ -16,12 +16,23 @@ concurrency:
   cancel-in-progress: true
 
 jobs:
-  # split out to make the llvm build optional for now
-  setup_llvm:
-    name: Load dependencies (llvm)
+  build_caches:
+    name: Load build caches
     uses: ./.github/workflows/dev_environment.yml
     with:
       dockerfile: build/devdeps.Dockerfile
+      build_target: doxygenbuild
+      build_cache_only: true
+
+  # split out to make the llvm build optional for now
+  setup_llvm:
+    name: Load dependencies (llvm)
+    needs: build_caches
+    uses: ./.github/workflows/dev_environment.yml
+    with:
+      dockerfile: build/devdeps.Dockerfile
+      additional_build_caches: |
+        ${{ needs.build_caches.outputs.build_cache }}
       toolchain: llvm
 
   build_and_test_llvm:
