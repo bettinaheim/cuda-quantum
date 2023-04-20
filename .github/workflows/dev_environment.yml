@@ -141,17 +141,14 @@ jobs:
           cache_from_nvidia_registry="type=registry,ref=${nvidia_registry_cache}-${cache_id}:${cache_base}"
           if ${{ inputs.environment == 'ghcr-deployment' }}; then
             cache_destination="type=registry,ref=${registry_cache}-${cache_id}:${cache_target}"
-            cache_to="type=registry,mode=max,ref=${registry_cache}-${cache_id}:${cache_target}"
           else
             cache_destination="type=gha,scope=${cache_target}-cuda-quantum-${cache_id}"
-            cache_to=""
           fi
 
           echo "cache_from_gha=$cache_from_gha" >> $GITHUB_OUTPUT
           echo "cache_from_registry=$cache_from_registry" >> $GITHUB_OUTPUT
           echo "cache_from_nvidia_registry=$cache_from_nvidia_registry" >> $GITHUB_OUTPUT
           echo "cache_destination=$cache_destination" >> $GITHUB_OUTPUT
-          echo "cache_to=$cache_to" >> $GITHUB_OUTPUT
           if ${{ ! inputs.build_cache_only }}; then
             echo "tar_cache=tar-${cache_id}-${{ github.sha }}" >> $GITHUB_OUTPUT
           fi
@@ -183,7 +180,7 @@ jobs:
             ${{ steps.cache.outputs.cache_from_registry }}
             ${{ steps.cache.outputs.cache_from_nvidia_registry }}
             ${{ inputs.additional_build_caches }}
-          cache-to: ${{ steps.cache.outputs.cache_to }}
+          cache-to: ${{ steps.cache.outputs.cache_destination }},mode=max
           outputs: type=docker,dest=/tmp/${{ needs.metadata.outputs.image_id }}.tar
 
       - name: Cache ${{ needs.metadata.outputs.image_title }} image
