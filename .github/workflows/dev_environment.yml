@@ -180,7 +180,7 @@ jobs:
             ${{ steps.cache.outputs.cache_from_registry }}
             ${{ steps.cache.outputs.cache_from_nvidia_registry }}
             ${{ inputs.additional_build_caches }}
-          cache-to: ${{ steps.cache.outputs.cache_destination }},mode=max,ignore-error=true
+          cache-to: ${{ steps.cache.outputs.cache_destination }},mode=max,ignore-error=${{ ! inputs.environment }}
           outputs: type=docker,dest=/tmp/${{ needs.metadata.outputs.image_id }}.tar
 
       - name: Cache ${{ needs.metadata.outputs.image_title }} image
