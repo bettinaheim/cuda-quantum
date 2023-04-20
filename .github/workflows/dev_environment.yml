@@ -38,7 +38,7 @@ on:
         value: ${{ jobs.finalize.outputs.digest }}
       cache_key:
         description: "The cache key to retrieve a tar archive containing the built image(s)."
-        value: ${{ jobs.finalize.outputs.tar_cache }}
+        value: ${{ jobs.finalize.outputs.cache_key }}
       build_cache:
         description: "The location from which the build cache can be loaded in subsequent builds."
         value: ${{ jobs.finalize.outputs.build_cache }}
