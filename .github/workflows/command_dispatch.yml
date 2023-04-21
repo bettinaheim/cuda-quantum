@@ -17,4 +17,5 @@ jobs:
           issue-type: pull-request
           commands: |
             example
-          allow-edits: false
+          # This is only fine if the commands do not edit comments with commands in them!
+          allow-edits: true
