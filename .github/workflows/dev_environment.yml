@@ -149,12 +149,12 @@ jobs:
           cache_from_registry="type=registry,ref=${registry_cache}-${cache_id}:${cache_base}"
           cache_from_nvidia_registry="type=registry,ref=${nvidia_registry_cache}-${cache_id}:${cache_base}"
           if ${{ inputs.environment == 'ghcr-deployment' }}; then
-            cache_destination="type=registry,ref=${registry_cache}-${cache_id}:${cache_target}"
-            echo "build_cache=$cache_destination" >> $GITHUB_OUTPUT
+            build_cache="type=registry,ref=${registry_cache}-${cache_id}:${cache_target}"
+            cache_to="${build_cache},mode=max,ignore-error=false"
           elif ${{ inputs.local_cache != '' }}; then
             # In general, using the build cache from the registry/parent branch is the quickest.
             # We hence only create a build cache upon request (i.e. if local_cache is defined).
-            cache_destination="type=local,dest=${local_buildcache_path}-new"
+            cache_to="type=local,dest=${local_buildcache_path}-new,mode=max,ignore-error=true"
             # We don't define a value for build_cache here, since the local build cache 
             # is not usable after this job without restoring it from the cache.
           fi
@@ -164,7 +164,8 @@ jobs:
           echo "cache_from_gh=$cache_from_gh" >> $GITHUB_OUTPUT
           echo "cache_from_registry=$cache_from_registry" >> $GITHUB_OUTPUT
           echo "cache_from_nvidia_registry=$cache_from_nvidia_registry" >> $GITHUB_OUTPUT
-          echo "cache_destination=$cache_destination" >> $GITHUB_OUTPUT
+          echo "cache_to=$cache_to" >> $GITHUB_OUTPUT
+          echo "build_cache=$build_cache" >> $GITHUB_OUTPUT
           if ${{ ! inputs.build_cache_only }}; then
             echo "tar_cache=tar-${cache_id}-${{ github.sha }}" >> $GITHUB_OUTPUT
           fi
@@ -197,7 +198,7 @@ jobs:
             ${{ steps.cache.outputs.cache_from_registry }}
             ${{ steps.cache.outputs.cache_from_nvidia_registry }}
             ${{ inputs.additional_build_caches }}
-          cache-to: ${{ steps.cache.outputs.cache_destination }},mode=max,ignore-error=${{ ! inputs.environment }}
+          cache-to: ${{ steps.cache.outputs.cache_to }}
           outputs: type=docker,dest=/tmp/${{ needs.metadata.outputs.image_id }}.tar
 
         # See also https://github.com/moby/buildkit/issues/1896
