@@ -29,7 +29,11 @@ jobs:
                 "issue_type": "pull-request",
                 "dispatch-type": "workflow",
                 "permission": "write",
-                "allow_edits": true
+                "allow_edits": true,
+                "static_args": [
+                  "repository=${{ github.repository }}",
+                  "comment-id=${{ github.event.comment.id }}"
+                ]
               }
             ]
 
