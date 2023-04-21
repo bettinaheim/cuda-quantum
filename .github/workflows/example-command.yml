@@ -13,4 +13,6 @@ jobs:
           token: ${{ secrets.REPO_BOT_ACCESS_TOKEN }}
           repository: ${{ github.event.client_payload.github.payload.repository.full_name }}
           comment-id: ${{ github.event.client_payload.github.payload.comment.id }}
-          reaction-type: hooray
+          body: |
+            **Edit:** ${{ github.ref_name }}
+          reactions: eyes
