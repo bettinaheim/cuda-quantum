@@ -27,7 +27,7 @@ jobs:
       - name: Add reaction
         uses: peter-evans/create-or-update-comment@v2
         with:
-          token: ${{ github.token }}
+          token: ${{ secrets.REPO_BOT_ACCESS_TOKEN }}
           repository: ${{ github.event.inputs.repository }}
           comment-id: ${{ github.event.inputs.comment-id }}
           reaction-type: hooray
