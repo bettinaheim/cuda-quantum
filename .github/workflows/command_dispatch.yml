@@ -15,6 +15,7 @@ jobs:
           issue-type: pull-request
           permission: write
           token: ${{ github.token }}
+          allow-edits: true
           dispatch-type: workflow
           commands: |
             ci
