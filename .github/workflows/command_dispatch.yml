@@ -17,4 +17,4 @@ jobs:
           issue-type: pull-request
           commands: |
             example
-          allow-edits: true
+          allow-edits: false
