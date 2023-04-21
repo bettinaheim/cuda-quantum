@@ -12,10 +12,13 @@ jobs:
       - name: PR related commands
         uses: peter-evans/slash-command-dispatch@v3
         with:
+          token: ${{ github.token }}
           issue-type: pull-request
           permission: write
-          token: ${{ github.token }}
           allow-edits: true
           dispatch-type: workflow
           commands: |
-            ci
+            testing
+          static-args: |
+            repository=${{ github.repository }}
+            comment-id=${{ github.event.comment.id }}
