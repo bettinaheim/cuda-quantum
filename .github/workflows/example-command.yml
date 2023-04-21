@@ -5,6 +5,7 @@ on:
 
 jobs:
   example:
+    if: ${{ github.event.client_payload.github.job == 'command_dispatch' }}
     runs-on: ubuntu-latest
     steps:
       - name: Add reaction
@@ -15,11 +16,17 @@ jobs:
           body: |
             **Command Bot:** Processed `/${{ github.event.client_payload.slash_command.command }}` command. 
             GH ref: ${{ github.ref_name }}
+            Source branch: ${{ github.event.client_payload.pull_request.head.ref }}
+            Target branch: ${{ github.event.client_payload.pull_request.base.ref }}
+            Better: ${{ github.event.client_payload.pull_request.number }}/merge
+
             Command name: ${{ github.event.client_payload.slash_command.command }}
-            Command args: ${{ github.event.client_payload.slash_command.command.args.all }}
+            Command args: ${{ github.event.client_payload.slash_command.args.all }}
             
             Full context: 
+            ```json
             ${{ toJson(github.event.client_payload) }}
+            ```
           # We replace the original comment after processing it to avoid an infinite loop
           edit-mode: replace
           reactions: eyes
