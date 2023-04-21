@@ -13,8 +13,13 @@ jobs:
           repository: ${{ github.event.client_payload.github.payload.repository.full_name }}
           comment-id: ${{ github.event.client_payload.github.payload.comment.id }}
           body: |
-            **Command Bot:** Processed `\example` command. 
+            **Command Bot:** Processed `\${{ github.event.client_payload.slash_command.command }}` command. 
             GH ref: ${{ github.ref_name }}
+            Command name: ${{ github.event.client_payload.slash_command.command }}
+            Command args: ${{ github.event.client_payload.slash_command.command.args.all }}
+            
+            Full context: 
+            ${{ toJson(github.event.client_payload) }}
           # We replace the original comment after processing it to avoid an infinite loop
           edit-mode: replace
           reactions: eyes
