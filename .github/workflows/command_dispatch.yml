@@ -21,14 +21,14 @@ jobs:
               {
                 "command": "example",
                 "issue_type": "pull-request",
-                "dispatch-type": "repository",
+                "dispatch_type": "repository",
                 "permission": "write",
                 "allow_edits": true
               },
               {
                 "command": "create-cache",
                 "issue_type": "pull-request",
-                "dispatch-type": "workflow",
+                "dispatch_type": "workflow",
                 "permission": "write",
                 "allow_edits": true,
                 "static_args": [
