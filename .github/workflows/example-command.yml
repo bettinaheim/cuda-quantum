@@ -29,4 +29,5 @@ jobs:
             ```
           # We replace the original comment after processing it to avoid an infinite loop
           edit-mode: replace
-          reactions: eyes
+          reactions-edit-mode: replace
+          reactions: |
