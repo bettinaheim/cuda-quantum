@@ -8,6 +8,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Add reaction
+        if: false
         uses: peter-evans/create-or-update-comment@v2
         with:
           token: ${{ secrets.REPO_BOT_ACCESS_TOKEN }}
