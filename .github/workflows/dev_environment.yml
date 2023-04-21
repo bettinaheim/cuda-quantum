@@ -125,10 +125,6 @@ jobs:
 
       - name: Set up buildx runner
         uses: docker/setup-buildx-action@v2
-        with:
-          driver-opts: |
-            network=host
-            image=moby/buildkit:v0.9.1
 
       - name: Log in to GitHub CR
         uses: docker/login-action@v2
@@ -158,11 +154,11 @@ jobs:
             cache_destination="type=local,dest=${local_buildcache_path}-new" 
           fi
 
+          echo "local_buildcache_key=$local_buildcache_key" >> $GITHUB_OUTPUT
+          echo "local_buildcache_path=$local_buildcache_path" >> $GITHUB_OUTPUT
           echo "cache_from_gh=$cache_from_gh" >> $GITHUB_OUTPUT
           echo "cache_from_registry=$cache_from_registry" >> $GITHUB_OUTPUT
           echo "cache_from_nvidia_registry=$cache_from_nvidia_registry" >> $GITHUB_OUTPUT
-          echo "local_buildcache_key=$local_buildcache_key" >> $GITHUB_OUTPUT
-          echo "local_buildcache_path=$local_buildcache_path" >> $GITHUB_OUTPUT
           echo "cache_destination=$cache_destination" >> $GITHUB_OUTPUT
           if ${{ ! inputs.build_cache_only }}; then
             echo "tar_cache=tar-${cache_id}-${{ github.sha }}" >> $GITHUB_OUTPUT
