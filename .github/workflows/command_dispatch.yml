@@ -45,6 +45,7 @@ jobs:
           comment-id: ${{ github.event.comment.id }}
           body: |
             > ${{ github.event.comment.body }}
+  
             **Command Bot:** Could not process command.
             ```
             ${{ steps.dispatch.outputs.error-message }}
