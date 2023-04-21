@@ -13,7 +13,7 @@ jobs:
           repository: ${{ github.event.client_payload.github.payload.repository.full_name }}
           comment-id: ${{ github.event.client_payload.github.payload.comment.id }}
           body: |
-            **Command Bot:** Processed `\${{ github.event.client_payload.slash_command.command }}` command. 
+            **Command Bot:** Processed `/${{ github.event.client_payload.slash_command.command }}` command. 
             GH ref: ${{ github.ref_name }}
             Command name: ${{ github.event.client_payload.slash_command.command }}
             Command args: ${{ github.event.client_payload.slash_command.command.args.all }}
