@@ -130,6 +130,13 @@ jobs:
             network=host
             image=moby/buildkit:v0.9.1
 
+      - name: Log in to GitHub CR
+        uses: docker/login-action@v2
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
       - name: Create cache locations
         id: cache
         run: |
@@ -140,29 +147,34 @@ jobs:
           registry_cache=ghcr.io/${{ needs.metadata.outputs.owner }}/buildcache-cuda-quantum
           nvidia_registry_cache=ghcr.io/nvidia/buildcache-cuda-quantum
 
-          cache_from_gha="type=gha,scope=${cache_target}-cuda-quantum-${cache_id}"
+          local_buildcache_path="/tmp/.buildcache-${cache_id}"
+          local_buildcache_key="${cache_target}-cuda-quantum-${cache_id}"
+          cache_from_gh="type=local,dest=${local_buildcache_path}"
           cache_from_registry="type=registry,ref=${registry_cache}-${cache_id}:${cache_base}"
           cache_from_nvidia_registry="type=registry,ref=${nvidia_registry_cache}-${cache_id}:${cache_base}"
           if ${{ inputs.environment == 'ghcr-deployment' }}; then
             cache_destination="type=registry,ref=${registry_cache}-${cache_id}:${cache_target}"
           else
-            cache_destination="type=gha,scope=${cache_target}-cuda-quantum-${cache_id}"
+            cache_destination="type=local,dest=${local_buildcache_path}-new" 
           fi
 
-          echo "cache_from_gha=$cache_from_gha" >> $GITHUB_OUTPUT
+          echo "cache_from_gh=$cache_from_gh" >> $GITHUB_OUTPUT
           echo "cache_from_registry=$cache_from_registry" >> $GITHUB_OUTPUT
           echo "cache_from_nvidia_registry=$cache_from_nvidia_registry" >> $GITHUB_OUTPUT
+          echo "local_buildcache_key=$local_buildcache_key" >> $GITHUB_OUTPUT
+          echo "local_buildcache_path=$local_buildcache_path" >> $GITHUB_OUTPUT
           echo "cache_destination=$cache_destination" >> $GITHUB_OUTPUT
           if ${{ ! inputs.build_cache_only }}; then
             echo "tar_cache=tar-${cache_id}-${{ github.sha }}" >> $GITHUB_OUTPUT
           fi
 
-      - name: Log in to GitHub CR
-        uses: docker/login-action@v2
+      - name: Check out local cache
+        uses: actions/cache/restore@v3
         with:
-          registry: ghcr.io
-          username: ${{ github.actor }}
-          password: ${{ secrets.GITHUB_TOKEN }}
+          path: ${{ steps.cache.outputs.local_buildcache_path }}
+          key: ${{ steps.cache.outputs.local_buildcache_key }}-${{ github.sha }}
+          restore-keys: |
+            ${{ steps.cache.outputs.local_buildcache_key }}
 
       - name: Build ${{ needs.metadata.outputs.image_title }} image
         id: build_image
@@ -180,12 +192,24 @@ jobs:
           labels: ${{ needs.metadata.outputs.image_labels }}
           platforms: linux/amd64
           cache-from: |
-            ${{ inputs.additional_build_caches }}
-            ${{ steps.cache.outputs.cache_from_gha }}
+            ${{ steps.cache.outputs.cache_from_gh }}
             ${{ steps.cache.outputs.cache_from_registry }}
             ${{ steps.cache.outputs.cache_from_nvidia_registry }}
+            ${{ inputs.additional_build_caches }}
           cache-to: ${{ steps.cache.outputs.cache_destination }},mode=max,ignore-error=${{ ! inputs.environment }}
           outputs: type=docker,dest=/tmp/${{ needs.metadata.outputs.image_id }}.tar
+
+        # See also https://github.com/moby/buildkit/issues/1896
+        name: Clean up local cache
+        run: |
+          rm -rf "${{ steps.cache.outputs.local_buildcache_path }}"
+          mv "${{ steps.cache.outputs.local_buildcache_path }}-new" "${{ steps.cache.outputs.local_buildcache_path }}"
+
+      - name: Upload build cache
+        uses: actions/cache/save@v3
+        with:
+          path: ${{ steps.cache.outputs.local_buildcache_path }}
+          key: ${{ steps.cache.outputs.local_buildcache_key }}-${{ github.sha }}
 
       - name: Cache ${{ needs.metadata.outputs.image_title }} image
         uses: actions/cache/save@v3
