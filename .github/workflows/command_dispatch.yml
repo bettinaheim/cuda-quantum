@@ -9,13 +9,51 @@ jobs:
     name: Process slash commands
     runs-on: ubuntu-latest
     steps:
-      - name: PR comments
+      - name: Dispatch
+        id: dispatch
         uses: peter-evans/slash-command-dispatch@v3
         with:
           token: ${{ secrets.REPO_BOT_ACCESS_TOKEN }}
-          permission: write
-          issue-type: pull-request
-          commands: |
-            example
-          # This is only fine if the commands do not edit comments with commands in them!
-          allow-edits: true
+          # The setting allow_edits means that edited comments can trigger a dispatch to that command.
+          # This is only fine if the command does not edit comments in a way that would cause an infinite loop!
+          config: >
+            [
+              {
+                "command": "example",
+                "issue_type": "pull-request",
+                "dispatch_type": "repository",
+                "permission": "write",
+                "allow_edits": true
+              },
+              {
+                "command": "create-cache",
+                "issue_type": "pull-request",
+                "dispatch_type": "workflow",
+                "permission": "write",
+                "allow_edits": true,
+                "static_args": [
+                  "repository=${{ github.repository }}",
+                  "comment-id=${{ github.event.comment.id }}"
+                ]
+              }
+            ]
+
+      - name: Edit comment with error message
+        if: steps.dispatch.outputs.error-message
+        uses: peter-evans/create-or-update-comment@v3
+        with:
+          comment-id: ${{ github.event.comment.id }}
+          body: |
+            **Command Bot:** Could not process command.
+            > ${{ steps.dispatch.outputs.error-message }}
+          # We replace the original comment after processing it to avoid an infinite loop
+          edit-mode: replace
+          reactions-edit-mode: replace
+          reactions: |
+
+      - name: Comment on completion
+        uses: peter-evans/create-or-update-comment@v3
+        with:
+          issue-number: ${{ github.event.issue.number }}
+          body: |
+            **Command Bot:** Completed processing.
