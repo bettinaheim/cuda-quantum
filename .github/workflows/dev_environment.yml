@@ -20,7 +20,7 @@ on:
       toolchain:
         required: false
         type: string
-      cache_location:
+      local_cache:
         required: false
         type: string
       matrix_key:
@@ -131,14 +131,14 @@ jobs:
         with:
           registry: ghcr.io
           username: ${{ github.actor }}
-          password: ${{ secrets.GITHUB_TOKEN }}
+          password: ${{ github.token }}
 
       - name: Create cache locations
         id: cache
         run: |
           toolchain=${{ inputs.toolchain }}
           cache_id=$(echo ${{ needs.metadata.outputs.image_id }} | tr . -)${toolchain:+-$toolchain}
-          cache_target=${{ inputs.cache_location || github.ref_name }}
+          cache_target=${{ inputs.local_cache || github.ref_name }}
           cache_base=${{ github.event.pull_request.base.ref || 'main' }}
           registry_cache=ghcr.io/${{ needs.metadata.outputs.owner }}/buildcache-cuda-quantum
           nvidia_registry_cache=ghcr.io/nvidia/buildcache-cuda-quantum
@@ -151,9 +151,12 @@ jobs:
           if ${{ inputs.environment == 'ghcr-deployment' }}; then
             cache_destination="type=registry,ref=${registry_cache}-${cache_id}:${cache_target}"
             echo "build_cache=$cache_destination" >> $GITHUB_OUTPUT
-          else
+          elif ${{ inputs.local_cache }}; then
+            # In general, using the build cache from the registry/parent branch is the quickest.
+            # We hence only create a build cache upon request (i.e. if local_cache is defined).
             cache_destination="type=local,dest=${local_buildcache_path}-new"
-            # the local build cache won't persist in that form after this job completes
+            # We don't define a value for build_cache here, since the local build cache 
+            # is not usable after this job without restoring it from the cache.
           fi
 
           echo "local_buildcache_key=$local_buildcache_key" >> $GITHUB_OUTPUT
@@ -201,9 +204,13 @@ jobs:
       - name: Clean up local cache
         run: |
           rm -rf "${{ steps.cache.outputs.local_buildcache_path }}"
-          mv "${{ steps.cache.outputs.local_buildcache_path }}-new" "${{ steps.cache.outputs.local_buildcache_path }}"
+          build_cache="${{ steps.cache.outputs.local_buildcache_path }}-new"
+          if [ -d "$build_cache" ]; then
+            mv "$build_cache" "${{ steps.cache.outputs.local_buildcache_path }}"
+          fi
 
       - name: Upload build cache
+        if: inputs.local_cache
         uses: actions/cache/save@v3
         with:
           path: ${{ steps.cache.outputs.local_buildcache_path }}
@@ -244,7 +251,7 @@ jobs:
         with:
           registry: ${{ vars.registry }}
           username: ${{ github.actor }}
-          password: ${{ secrets.GITHUB_TOKEN }}
+          password: ${{ github.token }}
 
       - name: Push ${{ needs.metadata.outputs.image_title }} image
         id: push_image
