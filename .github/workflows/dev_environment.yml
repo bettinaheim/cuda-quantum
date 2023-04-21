@@ -200,7 +200,7 @@ jobs:
           outputs: type=docker,dest=/tmp/${{ needs.metadata.outputs.image_id }}.tar
 
         # See also https://github.com/moby/buildkit/issues/1896
-        name: Clean up local cache
+      - name: Clean up local cache
         run: |
           rm -rf "${{ steps.cache.outputs.local_buildcache_path }}"
           mv "${{ steps.cache.outputs.local_buildcache_path }}-new" "${{ steps.cache.outputs.local_buildcache_path }}"
