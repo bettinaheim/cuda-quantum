@@ -11,4 +11,7 @@ jobs:
         uses: peter-evans/slash-command-dispatch@v3
         with:
           token: ${{ secrets.REPO_BOT_ACCESS_TOKEN }}
-          commands: example
+          permission: write
+          commands: |
+            example
+          allow-edits: true
