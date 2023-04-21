@@ -50,10 +50,3 @@ jobs:
           edit-mode: replace
           reactions-edit-mode: replace
           reactions: |
-
-      - name: Comment on completion
-        uses: peter-evans/create-or-update-comment@v3
-        with:
-          issue-number: ${{ github.event.issue.number }}
-          body: |
-            **Command Bot:** Completed processing.
