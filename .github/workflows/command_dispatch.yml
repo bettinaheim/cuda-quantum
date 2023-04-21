@@ -54,9 +54,17 @@ jobs:
           edit-mode: replace
           reactions-edit-mode: replace
           reactions: |
+          
+      - name: Check whether to give a status report
+        id: report
+        run: |
+          first_char=`echo "${{ github.event.comment.body }}" | head -n 1 | xargs -0 | cut -c 1`
+          if [ "$first_char" == "/" ]; then
+            echo "react=true" >> $GITHUB_OUTPUT
+          fi
 
       - name: Indicate successful completion
-        if: ${{ ! steps.dispatch.outputs.error-message }}
+        if: ${{ steps.reports.outputs.react == 'true' && ! steps.dispatch.outputs.error-message }}
         uses: peter-evans/create-or-update-comment@v3
         with:
           comment-id: ${{ github.event.comment.id }}
