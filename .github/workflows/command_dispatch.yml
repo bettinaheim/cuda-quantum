@@ -1,0 +1,21 @@
+on:
+  issue_comment: # applies to PR and issue comments
+    types: [created, edited]
+
+name: Slash command dispatch
+
+jobs:
+  command_dispatch:
+    name: Process slash commands
+    runs-on: ubuntu-latest
+    steps:
+      - name: PR comments
+        uses: peter-evans/slash-command-dispatch@v3
+        with:
+          token: ${{ secrets.REPO_BOT_ACCESS_TOKEN }}
+          permission: write
+          issue-type: pull-request
+          commands: |
+            example
+          # This is only fine if the commands do not edit comments with commands in them!
+          allow-edits: true
