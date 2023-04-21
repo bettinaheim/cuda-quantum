@@ -10,6 +10,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Dispatch
+        id: dispatch
         uses: peter-evans/slash-command-dispatch@v3
         with:
           token: ${{ secrets.REPO_BOT_ACCESS_TOKEN }}
@@ -37,3 +38,15 @@ jobs:
               }
             ]
 
+      - name: Edit comment with error message
+        if: steps.dispatch.outputs.error-message
+        uses: peter-evans/create-or-update-comment@v3
+        with:
+          comment-id: ${{ github.event.comment.id }}
+          body: |
+            **Command Bot:** Could not process command.
+            > ${{ steps.dispatch.outputs.error-message }}
+          # We replace the original comment after processing it to avoid an infinite loop
+          edit-mode: replace
+          reactions-edit-mode: replace
+          reactions: |
