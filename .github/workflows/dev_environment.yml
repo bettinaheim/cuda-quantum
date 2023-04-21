@@ -151,7 +151,7 @@ jobs:
           if ${{ inputs.environment == 'ghcr-deployment' }}; then
             cache_destination="type=registry,ref=${registry_cache}-${cache_id}:${cache_target}"
             echo "build_cache=$cache_destination" >> $GITHUB_OUTPUT
-          elif ${{ inputs.local_cache }}; then
+          elif ${{ inputs.local_cache != '' }}; then
             # In general, using the build cache from the registry/parent branch is the quickest.
             # We hence only create a build cache upon request (i.e. if local_cache is defined).
             cache_destination="type=local,dest=${local_buildcache_path}-new"
