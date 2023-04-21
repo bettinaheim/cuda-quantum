@@ -117,7 +117,7 @@ jobs:
 
     outputs:
       tar_cache: ${{ steps.cache.outputs.tar_cache }}
-      build_cache: ${{ steps.cache.outputs.cache_destination }}
+      build_cache: ${{ steps.cache.outputs.build_cache }}
 
     steps:
       - name: Checkout repository
@@ -150,8 +150,10 @@ jobs:
           cache_from_nvidia_registry="type=registry,ref=${nvidia_registry_cache}-${cache_id}:${cache_base}"
           if ${{ inputs.environment == 'ghcr-deployment' }}; then
             cache_destination="type=registry,ref=${registry_cache}-${cache_id}:${cache_target}"
+            echo "build_cache=$cache_destination" >> $GITHUB_OUTPUT
           else
-            cache_destination="type=local,dest=${local_buildcache_path}-new" 
+            cache_destination="type=local,dest=${local_buildcache_path}-new"
+            # the local build cache won't persist in that form after this job completes
           fi
 
           echo "local_buildcache_key=$local_buildcache_key" >> $GITHUB_OUTPUT
