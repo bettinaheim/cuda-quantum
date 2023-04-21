@@ -8,12 +8,13 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Add reaction
-        if: false
-        uses: peter-evans/create-or-update-comment@v2
+        uses: peter-evans/create-or-update-comment@v3
         with:
-          token: ${{ secrets.REPO_BOT_ACCESS_TOKEN }}
           repository: ${{ github.event.client_payload.github.payload.repository.full_name }}
           comment-id: ${{ github.event.client_payload.github.payload.comment.id }}
           body: |
-            **Edit:** ${{ github.ref_name }}
+            **Command Bot:** Processed `\example` command. 
+            GH ref: ${{ github.ref_name }}
+          # We replace the original comment after processing it to avoid an infinite loop
+          edit-mode: replace
           reactions: eyes
