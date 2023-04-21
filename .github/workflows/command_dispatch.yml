@@ -44,9 +44,19 @@ jobs:
         with:
           comment-id: ${{ github.event.comment.id }}
           body: |
+            > ${{ github.event.comment.body }}
             **Command Bot:** Could not process command.
-            > ${{ steps.dispatch.outputs.error-message }}
-          # We replace the original comment after processing it to avoid an infinite loop
+            ```
+            ${{ steps.dispatch.outputs.error-message }}
+            ```
+          # We replace the original comment to avoid an infinite loop
           edit-mode: replace
           reactions-edit-mode: replace
           reactions: |
+
+      - name: Indicate successful completion
+        if: ${{ ! steps.dispatch.outputs.error-message }}
+        uses: peter-evans/create-or-update-comment@v3
+        with:
+          comment-id: ${{ github.event.comment.id }}
+          reactions: hooray
