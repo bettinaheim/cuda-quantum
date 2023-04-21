@@ -1,0 +1,20 @@
+on:
+  issue_comment: # applies to PR and issue comments
+    types: [created, edited]
+
+name: Slash command dispatch
+
+jobs:
+  command_dispatch:
+    name: Command dispatch
+    runs-on: ubuntu-latest
+    steps:
+      - name: PR related commands
+        uses: peter-evans/slash-command-dispatch@v3
+        with:
+          issue-type: pull-request
+          permission: write
+          token: ${{ github.token }}
+          dispatch-type: workflow
+          commands: |
+            ci
