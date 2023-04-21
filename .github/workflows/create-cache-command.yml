@@ -1,12 +1,5 @@
 on:
   workflow_dispatch:
-    inputs:
-      repository:
-        description: 'The repository from which the slash command was dispatched'
-        required: true
-      comment-id:
-        description: 'The comment-id of the slash command'
-        required: true
 
 name: Dispatchable command
 
@@ -22,11 +15,3 @@ jobs:
       - id: write
         run: |
           echo "args=$args" >> $GITHUB_OUTPUT
-
-      - name: Add reaction
-        uses: peter-evans/create-or-update-comment@v2
-        with:
-          token: ${{ secrets.REPO_BOT_ACCESS_TOKEN }}
-          repository: ${{ github.event.inputs.repository }}
-          comment-id: ${{ github.event.inputs.comment-id }}
-          reaction-type: +1
