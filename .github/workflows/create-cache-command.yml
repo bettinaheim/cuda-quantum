@@ -12,13 +12,21 @@ name: Dispatchable command
 
 jobs:
   dummy:
-    name: Dummy
+    name: Configure build
     runs-on: ubuntu-latest
-
-    outputs:
-      json: "${{ steps.write.outputs.args }}"
 
     steps:
       - id: write
         run: |
           echo "args=$args" >> $GITHUB_OUTPUT
+
+      - name: Add reaction
+        uses: peter-evans/create-or-update-comment@v3
+        with:
+          repository: ${{ github.event.inputs.repository }}
+          comment-id: ${{ github.event.inputs.comment-id }}
+          body: |
+            GH ref name: ${{ github.ref_name  }}
+          edit-mode: replace
+          reactions-edit-mode: replace
+          reactions: |
