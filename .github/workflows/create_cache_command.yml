@@ -9,6 +9,10 @@ on:
         required: false
         type: string
         description: 'The id of the comment that contains the slash command that triggered this workflow.'
+      comment_body:
+        required: false
+        type: string
+        description: 'The original body of the comment that contains the slash command that triggered this workflow.'
 
 name: Create CI cache
 
@@ -22,25 +26,25 @@ jobs:
         id: pr_info
         run: |
           pr_info=`wget -O - ${{ inputs.pr_url }}`
-          pr_nr=`echo $pr_info | jq '.number'`
-          head_ref=`echo $pr_info | jq '.head.ref'`
-          head_sha=`echo $pr_info | jq '.head.sha'`
-          base_ref=`echo $pr_info | jq '.base.ref'`
-          echo "number=$pr_nr" >> $GITHUB_OUTPUT
-          echo "source=$head_ref" >> $GITHUB_OUTPUT
+          pr_nr=`echo $pr_info | jq -r '.number'`
+          head_ref=`echo $pr_info | jq -r '.head.ref'`
+          head_label=`echo $pr_info | jq -r '.head.label'`
+          head_sha=`echo $pr_info | jq -r '.head.sha'`
+          base_ref=`echo $pr_info | jq -r '.base.ref'`
+
+          echo "source_label=$head_label" >> $GITHUB_OUTPUT
           echo "source_sha=$head_sha" >> $GITHUB_OUTPUT
-          echo "target=$base_ref" >> $GITHUB_OUTPUT
 
       - name: Add reaction
-        if: inputs.comment_id
+        if: ${{ inputs.comment_id && inputs.comment_body }}
         uses: peter-evans/create-or-update-comment@v3
         with:
           comment-id: ${{ inputs.comment_id }}
           body: |
-            > ${{ github.event.comment.body }}
+            > ${{ inputs.comment_body }}
 
             Running workflow from ${{ github.ref_type }} `${{ github.ref_name }}`. The created cache will be owned by that branch.
-            Checking out source code from `${{ steps.pr_info.outputs.source }}` (sha: ${{ steps.pr_info.outputs.source_sha }}).
+            Checking out source code from head `${{ steps.pr_info.outputs.source_label }}` (sha: ${{ steps.pr_info.outputs.source_sha }}).
           edit-mode: replace
           reactions-edit-mode: replace
           reactions: |
