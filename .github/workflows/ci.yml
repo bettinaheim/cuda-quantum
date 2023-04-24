@@ -32,7 +32,7 @@ jobs:
       build_target: doxygenbuild
       build_cache_only: true
       create_local_cache: true
-      github_ref: ${{ inputs.github_ref }}
+      github_ref: ${{ inputs.github_ref || '' }}
 
   setup:
     name: Load dependencies
@@ -96,7 +96,7 @@ jobs:
     with:
       devdeps_cache: ${{ fromJson(needs.config.outputs.json).cache_key[format('{0}', matrix.toolchain)] }}
       export_environment: ${{ github.event_name == 'workflow_dispatch' && inputs.export_environment }}
-      github_ref: ${{ inputs.github_ref }}
+      github_ref: ${{ inputs.github_ref || '' }}
 
   build_and_test_llvm:
     name: Build and test (llvm)
@@ -105,7 +105,7 @@ jobs:
     with:
       devdeps_cache: ${{ needs.setup_llvm.outputs.cache_key }}
       export_environment: ${{ github.event_name == 'workflow_dispatch' && inputs.export_environment }}
-      github_ref: ${{ inputs.github_ref }}
+      github_ref: ${{ inputs.github_ref || '' }}
 
   docker_image:
     name: Create Packages
@@ -113,4 +113,4 @@ jobs:
     uses: ./.github/workflows/build_packages.yml
     with:
       devdeps_cache: ${{ fromJson(needs.config.outputs.json).cache_key.gcc12 }}
-      github_ref: ${{ inputs.github_ref }}
+      github_ref: ${{ inputs.github_ref || '' }}
