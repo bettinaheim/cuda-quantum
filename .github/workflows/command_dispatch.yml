@@ -49,6 +49,7 @@ jobs:
                 ]
               }
             ]
+        continue-on-error: true
 
       - name: Edit comment with error message
         if: steps.dispatch.outputs.error-message
@@ -59,13 +60,11 @@ jobs:
             > ${{ github.event.comment.body }}
   
             **Command Bot:** Could not process command.
-            ```
             ${{ steps.dispatch.outputs.error-message }}
-            ```
           # We replace the original comment to avoid an infinite loop
           edit-mode: replace
           reactions-edit-mode: replace
-          reactions: |
+          reactions: eyes
           
       - name: Check whether to give a status report
         id: report
@@ -75,8 +74,25 @@ jobs:
             echo "react=true" >> $GITHUB_OUTPUT
           fi
 
+      - name: Indicate unsuccessful completion
+        if: ${{ steps.reports.outputs.react == 'true' && steps.dispatch.outcome == 'failure' && ! steps.dispatch.outputs.error-message }}
+        uses: peter-evans/create-or-update-comment@v3
+        with:
+          comment-id: ${{ github.event.comment.id }}
+          body: |
+            > ${{ github.event.comment.body }}
+  
+            **Command Bot:** Failed to dispatch command.
+            ```
+            ${{ steps.dispatch.outputs.error-message }}
+            ```
+          # We replace the original comment to avoid an infinite loop
+          edit-mode: replace
+          reactions-edit-mode: replace
+          reactions: eyes
+
       - name: Indicate successful completion
-        if: ${{ steps.reports.outputs.react == 'true' && ! steps.dispatch.outputs.error-message }}
+        if: ${{ steps.reports.outputs.react == 'true' && steps.dispatch.outcome == 'success' && ! steps.dispatch.outputs.error-message }}
         uses: peter-evans/create-or-update-comment@v3
         with:
           comment-id: ${{ github.event.comment.id }}
