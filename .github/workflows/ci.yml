@@ -25,7 +25,6 @@ concurrency:
 jobs:
   setup:
     name: Load dependencies
-    needs: build_caches
     strategy:
       matrix:
         toolchain: [clang16, gcc12]
@@ -42,7 +41,6 @@ jobs:
   # split out to make the llvm build optional for now
   setup_llvm:
     name: Load dependencies (llvm)
-    needs: build_caches
     uses: ./.github/workflows/dev_environment.yml
     with:
       dockerfile: build/devdeps.Dockerfile
