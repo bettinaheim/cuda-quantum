@@ -34,7 +34,8 @@ jobs:
                 "allow_edits": true,
                 "static_args": [
                   "pr_url=${{ github.event.issue.pull_request.url }}",
-                  "comment_id=${{ github.event.comment.id }}"
+                  "comment_id=${{ github.event.comment.id }}",
+                  "comment_body=${{ github.event.comment.body }}"
                 ]
               }
             ]
