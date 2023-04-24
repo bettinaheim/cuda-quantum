@@ -33,8 +33,8 @@ jobs:
           comment-id: ${{ github.event.inputs.comment-id }}
           body: |
             Hello from GH ref ${{ github.ref_name  }}
-            Issue: fromJson(${{ inputs.issue }})
-            PR: fromJson(${{ inputs.pr }})
+            Issue: ${{ toJson(format('{0}', inputs.issue)) }}
+            PR: ${{ toJson(format('{0}', inputs.pr)) }}
           edit-mode: replace
           reactions-edit-mode: replace
           reactions: |
