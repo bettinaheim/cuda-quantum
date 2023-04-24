@@ -1,14 +1,16 @@
 on:
   workflow_dispatch:
     inputs:
-      repository:
-        description: 'The repository from which the slash command was dispatched'
+      pr_url:
         required: true
-      comment-id:
-        description: 'The comment-id of the slash command'
-        required: true
+        type: string
+        description: 'The url of the pull_request json object that contains the information about the PR on which the slash command was triggered.'
+      comment_id:
+        required: false
+        type: string
+        description: 'The id of the comment that contains the slash command that triggered this workflow.'
 
-name: Dispatchable command
+name: Create CI cache
 
 jobs:
   dummy:
@@ -16,17 +18,33 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      - id: write
+      - name: Download PR info
+        id: pr_info
         run: |
-          echo "args=$args" >> $GITHUB_OUTPUT
+          pr_info=`wget -O - ${{ inputs.pr_url }}`
+          pr_nr=`echo $pr_info | jq '.number'`
+          head_ref=`echo $pr_info | jq '.head.ref'`
+          head_sha=`echo $pr_info | jq '.head.sha'`
+          base_ref=`echo $pr_info | jq '.base.ref'`
+          echo "number=$pr_nr" >> $GITHUB_OUTPUT
+          echo "source=$head_ref" >> $GITHUB_OUTPUT
+          echo "source_sha=$head_sha" >> $GITHUB_OUTPUT
+          echo "target=$base_ref" >> $GITHUB_OUTPUT
 
       - name: Add reaction
+        if: comment_id
         uses: peter-evans/create-or-update-comment@v3
         with:
-          repository: ${{ github.event.inputs.repository }}
-          comment-id: ${{ github.event.inputs.comment-id }}
+          comment-id: ${{ inputs.comment_id }}
           body: |
-            GH ref name: ${{ github.ref_name  }}
+            > ${{ github.event.comment.body }}
+
+            Running workflow from ${{ github.ref_type }} `${{ github.ref_name }}`. The created cache will be owned by that branch.
+            Checking out source code from `${{ steps.pr_info.outputs.source }}` (sha: ${{ steps.pr_info.outputs.source_sha }}).
           edit-mode: replace
           reactions-edit-mode: replace
           reactions: |
+
+      - name: Set inputs
+        id: inputs
+        run: |
