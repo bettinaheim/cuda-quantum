@@ -26,7 +26,7 @@ jobs:
           repository: ${{ github.event.inputs.repository }}
           comment-id: ${{ github.event.inputs.comment-id }}
           body: |
-            GH ref name: ${{ github.ref_name  }}
+            Hello from GH ref ${{ github.ref_name  }}
           edit-mode: replace
           reactions-edit-mode: replace
           reactions: |
