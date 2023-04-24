@@ -23,8 +23,21 @@ concurrency:
   cancel-in-progress: true
 
 jobs:
+  build_caches:
+    name: Load build caches
+    uses: ./.github/workflows/dev_environment.yml
+    if: inputs.create_local_cache
+    with:
+      dockerfile: build/devdeps.Dockerfile
+      build_target: doxygenbuild
+      create_local_cache: true
+      build_cache_only: true
+      github_ref: ${{ inputs.github_ref }}
+
   setup:
     name: Load dependencies
+    needs: build_caches
+    if: always() && !cancelled()
     strategy:
       matrix:
         toolchain: [clang16, gcc12]
@@ -33,6 +46,8 @@ jobs:
     with:
       dockerfile: build/devdeps.Dockerfile
       toolchain: ${{ matrix.toolchain }}
+      additional_local_caches: |
+        ${{ needs.build_caches.outputs.build_cache }}
       # needed only for the cloudposse GitHub action
       matrix_key: ${{ matrix.toolchain }}
       create_local_cache: ${{ inputs.create_local_cache }}
@@ -41,10 +56,14 @@ jobs:
   # split out to make the llvm build optional for now
   setup_llvm:
     name: Load dependencies (llvm)
+    needs: build_caches
+    if: always() && !cancelled()
     uses: ./.github/workflows/dev_environment.yml
     with:
       dockerfile: build/devdeps.Dockerfile
       toolchain: llvm
+      additional_local_caches: |
+        ${{ needs.build_caches.outputs.build_cache }}
       create_local_cache: ${{ inputs.create_local_cache }}
       github_ref: ${{ inputs.github_ref }}
 
