@@ -83,9 +83,6 @@ jobs:
             > ${{ github.event.comment.body }}
   
             **Command Bot:** Failed to dispatch command.
-            ```
-            ${{ steps.dispatch.outputs.error-message }}
-            ```
           # We replace the original comment to avoid an infinite loop
           edit-mode: replace
           reactions-edit-mode: replace
