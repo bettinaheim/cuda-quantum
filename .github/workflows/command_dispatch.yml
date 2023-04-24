@@ -98,8 +98,7 @@ jobs:
           comment-id: ${{ github.event.comment.id }}
           reactions: hooray
 
-      - name: Indicate unsuccessful completion
-        if: ${{ steps.reports.outputs.react == 'true' && ! steps.dispatch.outputs.error-message }}
+      - name: Indicate status
         uses: peter-evans/create-or-update-comment@v3
         with:
           comment-id: ${{ github.event.comment.id }}
