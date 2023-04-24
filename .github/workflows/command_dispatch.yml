@@ -9,6 +9,26 @@ jobs:
     name: Process slash commands
     runs-on: ubuntu-latest
     steps:
+      - name: Preprocessing
+        id: preprocessing
+        run: |
+          first_char=`echo "${{ github.event.comment.body }}" | head -n 1 | xargs -0 | cut -c 1`
+          if [ "$first_char" == "/" ]; then
+            echo "react=true" >> $GITHUB_OUTPUT
+          fi
+
+      - name: React to comment
+        if: steps.preprocessing.outputs.react == 'true'
+        uses: peter-evans/create-or-update-comment@v3
+        with:
+          comment-id: ${{ github.event.comment.id }}
+          body: |
+            > ${{ github.event.comment.body }}
+  
+            **Command Bot:** Processing...
+          edit-mode: replace
+          reactions: eyes
+
       - name: Dispatch
         id: dispatch
         uses: peter-evans/slash-command-dispatch@v3
@@ -34,8 +54,7 @@ jobs:
                 "allow_edits": true,
                 "static_args": [
                   "pr_url=${{ github.event.issue.pull_request.url }}",
-                  "comment_id=${{ github.event.comment.id }}",
-                  "comment_body=\\\"${{ github.event.comment.body }}\\\""
+                  "comment_id=${{ github.event.comment.id }}"
                 ]
               }
             ]
@@ -55,17 +74,9 @@ jobs:
           edit-mode: replace
           reactions-edit-mode: replace
           reactions: |
-          
-      - name: Check whether to give a status report
-        id: report
-        run: |
-          first_char=`echo "${{ github.event.comment.body }}" | head -n 1 | xargs -0 | cut -c 1`
-          if [ "$first_char" == "/" ]; then
-            echo "react=true" >> $GITHUB_OUTPUT
-          fi
 
       - name: Indicate unsuccessful completion
-        if: ${{ steps.report.outputs.react == 'true' && steps.dispatch.outcome == 'failure' && ! steps.dispatch.outputs.error-message }}
+        if: ${{ steps.preprocessing.outputs.react == 'true' && steps.dispatch.outcome == 'failure' && ! steps.dispatch.outputs.error-message }}
         uses: peter-evans/create-or-update-comment@v3
         with:
           comment-id: ${{ github.event.comment.id }}
@@ -79,7 +90,7 @@ jobs:
           reactions: |
 
       - name: Indicate successful completion
-        if: ${{ steps.report.outputs.react == 'true' && steps.dispatch.outcome == 'success' && ! steps.dispatch.outputs.error-message }}
+        if: ${{ steps.preprocessing.outputs.react == 'true' && steps.dispatch.outcome == 'success' && ! steps.dispatch.outputs.error-message }}
         uses: peter-evans/create-or-update-comment@v3
         with:
           comment-id: ${{ github.event.comment.id }}
