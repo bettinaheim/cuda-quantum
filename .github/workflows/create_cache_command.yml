@@ -9,10 +9,6 @@ on:
         required: false
         type: string
         description: 'The id of the comment that contains the slash command that triggered this workflow.'
-      comment_body:
-        required: false
-        type: string
-        description: 'The original body of the comment that contains the slash command that triggered this workflow.'
 
 name: Create CI cache
 
@@ -36,18 +32,14 @@ jobs:
           echo "source_sha=$head_sha" >> $GITHUB_OUTPUT
 
       - name: Add reaction
-        if: ${{ inputs.comment_id && inputs.comment_body }}
+        if: inputs.comment_id
         uses: peter-evans/create-or-update-comment@v3
         with:
           comment-id: ${{ inputs.comment_id }}
           body: |
-            > ${{ inputs.comment_body }}
-
             Running workflow from ${{ github.ref_type }} `${{ github.ref_name }}`. The created cache will be owned by that branch.
             Checking out source code from head `${{ steps.pr_info.outputs.source_label }}` (sha: ${{ steps.pr_info.outputs.source_sha }}).
-          edit-mode: replace
-          reactions-edit-mode: replace
-          reactions: |
+          edit-mode: append
 
       - name: Set inputs
         id: inputs
