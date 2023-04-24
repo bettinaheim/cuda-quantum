@@ -99,11 +99,12 @@ jobs:
           reactions: hooray
 
       - name: Indicate status
+        if: ${{ steps.dispatch.outcome == 'failure' && ! steps.dispatch.outputs.error-message }}
         uses: peter-evans/create-or-update-comment@v3
         with:
           comment-id: ${{ github.event.comment.id }}
           body: |
-            **Command Bot:** Dispatch outcome was ${{ steps.dispatch.outcome }}.
+            **Command Bot:** Dispatch outcome was ${{ steps.dispatch.outcome }} (react: ${{ steps.reports.outputs.react }}).
           edit-mode: replace
           reactions-edit-mode: replace
           reactions: |
