@@ -43,7 +43,7 @@ jobs:
           config: >
             [
               {
-                "command": "example",
+                "command": "show_context",
                 "event_type_suffix": "${{ steps.preprocessing.outputs.command_suffix }}",
                 "issue_type": "pull-request",
                 "dispatch_type": "repository",
