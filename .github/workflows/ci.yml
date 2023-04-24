@@ -50,7 +50,7 @@ jobs:
         ${{ needs.build_caches.outputs.build_cache }}
       # needed only for the cloudposse GitHub action
       matrix_key: ${{ matrix.toolchain }}
-      create_local_cache: ${{ inputs.create_local_cache }}
+      create_local_cache: ${{ inputs.create_local_cache || false }}
       github_ref: ${{ inputs.github_ref || '' }}
 
   # split out to make the llvm build optional for now
@@ -64,7 +64,7 @@ jobs:
       toolchain: llvm
       additional_local_caches: |
         ${{ needs.build_caches.outputs.build_cache }}
-      create_local_cache: ${{ inputs.create_local_cache }}
+      create_local_cache: ${{ inputs.create_local_cache || false }}
       github_ref: ${{ inputs.github_ref || '' }}
 
   # This job is needed only when using the cloudposse GitHub action to read
