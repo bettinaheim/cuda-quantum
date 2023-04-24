@@ -8,9 +8,9 @@ on:
         type: boolean
         description: Create and store a local build cache for the current github reference.
       github_ref:
-        required: false
         type: string
-      description: The branch, tag or SHA to checkout. Permits to run the workflow from a different branch than the one the workflow applies to.
+        required: false
+        description: The branch, tag or SHA to checkout. Permits to run the workflow from a different branch than the one the workflow applies to.
   pull_request:
     branches:
       - 'main'
