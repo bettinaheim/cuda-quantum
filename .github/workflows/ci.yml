@@ -30,6 +30,7 @@ jobs:
     with:
       dockerfile: build/devdeps.Dockerfile
       build_target: doxygenbuild
+      create_local_cache: true
       build_cache_only: true
       github_ref: ${{ inputs.github_ref }}
 

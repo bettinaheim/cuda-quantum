@@ -13,9 +13,12 @@ on:
 name: Create CI cache
 
 jobs:
-  dummy:
+  config:
     name: Configure build
     runs-on: ubuntu-latest
+
+    output:
+      github_ref: steps.pr_info.outputs.source_sha
 
     steps:
       - name: Download PR info
@@ -41,6 +44,10 @@ jobs:
             Checking out source code from head `${{ steps.pr_info.outputs.source_label }}` (sha: ${{ steps.pr_info.outputs.source_sha }}).
           edit-mode: append
 
-      - name: Set inputs
-        id: inputs
-        run: |
+  run_ci:
+    name: Create caches
+    needs: config
+    uses: ./.github/workflows/ci.yml
+    with:
+      create_local_cache: true
+      github_ref: ${{ needs.config.outputs.github_ref }}
