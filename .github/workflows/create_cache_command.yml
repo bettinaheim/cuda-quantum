@@ -26,7 +26,8 @@ jobs:
         id: pr_info
         run: |
           pr_info=`wget -O - ${{ inputs.pr }}`
-          echo "json=${pr_info}" >> $GITHUB_OUTPUT
+          pr_nr=`echo $pr_info | jq '.number'`
+          echo "number=${pr_nr}" >> $GITHUB_OUTPUT
 
       - name: Add reaction
         uses: peter-evans/create-or-update-comment@v3
@@ -35,7 +36,7 @@ jobs:
           comment-id: ${{ github.event.inputs.comment-id }}
           body: |
             Hello from GH ref ${{ github.ref_name  }}
-            PR #: ${{ fromJson(steps.pr_info.outputs.json).number }}
+            PR #: ${{ steps.pr_info.outputs.number }}
           edit-mode: replace
           reactions-edit-mode: replace
           reactions: |
