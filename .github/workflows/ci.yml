@@ -37,7 +37,7 @@ jobs:
   setup:
     name: Load dependencies
     needs: build_caches
-    if: always() && needs.build_caches.result != 'cancelled'
+    if: ${{ always() && needs.build_caches.result != 'cancelled' }}
     strategy:
       matrix:
         toolchain: [clang16, gcc12]
@@ -57,7 +57,7 @@ jobs:
   setup_llvm:
     name: Load dependencies (llvm)
     needs: build_caches
-    if: always() && needs.build_caches.result != 'cancelled'
+    if: ${{ always() && needs.build_caches.result != 'cancelled' }}
     uses: ./.github/workflows/dev_environment.yml
     with:
       dockerfile: build/devdeps.Dockerfile
