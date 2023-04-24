@@ -7,6 +7,12 @@ on:
       comment-id:
         description: 'The comment-id of the slash command'
         required: true
+      issue:
+        required: true
+        type: string
+      pr:
+        required: true
+        type: string
 
 name: Dispatchable command
 
