@@ -75,7 +75,7 @@ jobs:
           fi
 
       - name: Indicate unsuccessful completion
-        if: ${{ steps.reports.outputs.react == 'true' && steps.dispatch.outcome == 'failure' && ! steps.dispatch.outputs.error-message }}
+        if: ${{ steps.report.outputs.react == 'true' && steps.dispatch.outcome == 'failure' && ! steps.dispatch.outputs.error-message }}
         uses: peter-evans/create-or-update-comment@v3
         with:
           comment-id: ${{ github.event.comment.id }}
@@ -92,19 +92,8 @@ jobs:
           reactions: |
 
       - name: Indicate successful completion
-        if: ${{ steps.reports.outputs.react == 'true' && steps.dispatch.outcome == 'success' && ! steps.dispatch.outputs.error-message }}
+        if: ${{ steps.report.outputs.react == 'true' && steps.dispatch.outcome == 'success' && ! steps.dispatch.outputs.error-message }}
         uses: peter-evans/create-or-update-comment@v3
         with:
           comment-id: ${{ github.event.comment.id }}
           reactions: hooray
-
-      - name: Indicate status
-        if: ${{ steps.dispatch.outcome == 'failure' && ! steps.dispatch.outputs.error-message }}
-        uses: peter-evans/create-or-update-comment@v3
-        with:
-          comment-id: ${{ github.event.comment.id }}
-          body: |
-            **Command Bot:** Dispatch outcome was ${{ steps.dispatch.outcome }} (react: ${{ steps.reports.outputs.react }}).
-          edit-mode: replace
-          reactions-edit-mode: replace
-          reactions: |
