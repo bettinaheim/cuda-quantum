@@ -38,6 +38,7 @@ jobs:
               },
               {
                 "command": "create_cache",
+                "event_type_suffix": "_command",
                 "issue_type": "pull-request",
                 "dispatch_type": "workflow",
                 "permission": "write",
