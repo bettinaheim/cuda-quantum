@@ -35,8 +35,21 @@ jobs:
                   "repository=${{ github.repository }}",
                   "comment-id=${{ github.event.comment.id }}"
                 ]
+              },
+              {
+                "command": "create_cache",
+                "event_type_suffix": "_command",
+                "issue_type": "pull-request",
+                "dispatch_type": "workflow",
+                "permission": "write",
+                "allow_edits": true,
+                "static_args": [
+                  "repository=${{ github.repository }}",
+                  "comment-id=${{ github.event.comment.id }}"
+                ]
               }
             ]
+        continue-on-error: true
 
       - name: Edit comment with error message
         if: steps.dispatch.outputs.error-message
@@ -44,16 +57,40 @@ jobs:
         with:
           comment-id: ${{ github.event.comment.id }}
           body: |
+            > ${{ github.event.comment.body }}
+  
             **Command Bot:** Could not process command.
-            > ${{ steps.dispatch.outputs.error-message }}
-          # We replace the original comment after processing it to avoid an infinite loop
+            ${{ steps.dispatch.outputs.error-message }}
+          # We replace the original comment to avoid an infinite loop
+          edit-mode: replace
+          reactions-edit-mode: replace
+          reactions: |
+          
+      - name: Check whether to give a status report
+        id: report
+        run: |
+          first_char=`echo "${{ github.event.comment.body }}" | head -n 1 | xargs -0 | cut -c 1`
+          if [ "$first_char" == "/" ]; then
+            echo "react=true" >> $GITHUB_OUTPUT
+          fi
+
+      - name: Indicate unsuccessful completion
+        if: ${{ steps.report.outputs.react == 'true' && steps.dispatch.outcome == 'failure' && ! steps.dispatch.outputs.error-message }}
+        uses: peter-evans/create-or-update-comment@v3
+        with:
+          comment-id: ${{ github.event.comment.id }}
+          body: |
+            > ${{ github.event.comment.body }}
+  
+            **Command Bot:** Failed to dispatch command.
+          # We replace the original comment to avoid an infinite loop
           edit-mode: replace
           reactions-edit-mode: replace
           reactions: |
 
-      - name: Comment on completion
+      - name: Indicate successful completion
+        if: ${{ steps.report.outputs.react == 'true' && steps.dispatch.outcome == 'success' && ! steps.dispatch.outputs.error-message }}
         uses: peter-evans/create-or-update-comment@v3
         with:
-          issue-number: ${{ github.event.issue.number }}
-          body: |
-            **Command Bot:** Completed processing.
+          comment-id: ${{ github.event.comment.id }}
+          reactions: hooray
