@@ -64,7 +64,7 @@ jobs:
           # We replace the original comment to avoid an infinite loop
           edit-mode: replace
           reactions-edit-mode: replace
-          reactions: eyes
+          reactions: |
           
       - name: Check whether to give a status report
         id: report
@@ -89,7 +89,7 @@ jobs:
           # We replace the original comment to avoid an infinite loop
           edit-mode: replace
           reactions-edit-mode: replace
-          reactions: eyes
+          reactions: |
 
       - name: Indicate successful completion
         if: ${{ steps.reports.outputs.react == 'true' && steps.dispatch.outcome == 'success' && ! steps.dispatch.outputs.error-message }}
