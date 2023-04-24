@@ -32,7 +32,7 @@ jobs:
           echo "target=$base_ref" >> $GITHUB_OUTPUT
 
       - name: Add reaction
-        if: comment_id
+        if: inputs.comment_id
         uses: peter-evans/create-or-update-comment@v3
         with:
           comment-id: ${{ inputs.comment_id }}
