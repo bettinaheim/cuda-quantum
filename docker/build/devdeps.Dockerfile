@@ -17,7 +17,7 @@
 #
 # The variable $toolchain indicates which compiler toolchain to build the LLVM libraries with. 
 # The toolchain used to build the LLVM binaries that CUDA Quantum depends on must be used to build
-# CUDA Quantum. This image sets the CC and CXX environment variables to use that toolchain. 
+# CUDA Quantum. This image sets the CC, CXX, and CUDAHOSTCXX environment variables to use that toolchain. 
 # Currently, llvm (default), clang16, clang15, gcc12, and gcc11 are supported. To use a different 
 # toolchain, add support for it to the install_toolchain.sh script. If the toolchain is set to llvm, 
 # then the toolchain will be built from source.
@@ -118,6 +118,8 @@ ENV CPLUS_INCLUDE_PATH="$CPLUS_INCLUDE_PATH:/usr/include/c++/12/:/usr/include/x8
 # a wrapper script so that the path that we set CC and CXX to is independent 
 # on the installed toolchain. Unfortunately, a symbolic link won't work.
 # Using update-alternatives for c++ and cc could maybe be a better option.
+# We also set the CUDA host compiler to CXX, see e.g. the issue filed here:
+# https://gitlab.kitware.com/cmake/cmake/-/issues/19458.
 RUN source "$LLVM_INSTALL_PREFIX/bootstrap/init_command.sh" \
     && echo -e '#!/bin/bash\n"'$CC'" "$@"' > "$LLVM_INSTALL_PREFIX/bootstrap/cc" \
     && echo -e '#!/bin/bash\n"'$CXX'" "$@"' > "$LLVM_INSTALL_PREFIX/bootstrap/cxx" \
@@ -125,6 +127,7 @@ RUN source "$LLVM_INSTALL_PREFIX/bootstrap/init_command.sh" \
     && chmod +x "$LLVM_INSTALL_PREFIX/bootstrap/cxx"
 ENV CC="$LLVM_INSTALL_PREFIX/bootstrap/cc"
 ENV CXX="$LLVM_INSTALL_PREFIX/bootstrap/cxx"
+ENV CUDAHOSTCXX="$CXX"
 
 # Install additional dependencies required to build and test CUDA Quantum.
 COPY --from=cmakebuild /usr/local/cmake-3.26/ /usr/local/cmake-3.26/

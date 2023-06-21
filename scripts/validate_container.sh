@@ -70,7 +70,7 @@ echo "Testing backends:"
 echo "$requested_backends"
 echo
 
-if $missing_backend || [ "$available_backends" == "" ]; 
+if $missing_backend || [ -z "$available_backends" ]; 
 then
     echo "Abort due to missing backend configuration."
     exit 1 

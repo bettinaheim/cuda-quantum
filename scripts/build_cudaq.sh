@@ -123,7 +123,8 @@ if [ -x "$(command -v "$LLVM_INSTALL_PREFIX/bin/ld.lld")" ]; then
 fi
 
 # Generate CMake files 
-# (utils are needed for custom testing tools, e.g. CircuitCheck)
+# CUDA compatibility: https://docs.nvidia.com/cuda/cuda-installation-guide-linux/index.html#system-requirements
+# See also e.g. https://github.com/k2-fsa/k2/issues/972, https://gitlab.kitware.com/cmake/cmake/-/issues/19458
 echo "Preparing CUDA Quantum build with LLVM installation in $LLVM_INSTALL_PREFIX..."
 cmake_args="-G Ninja "$repo_root" \
   -DCMAKE_COMPILE_WARNING_AS_ERROR=ON \
