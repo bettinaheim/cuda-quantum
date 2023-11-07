@@ -55,7 +55,7 @@ const thebe_selector_output = ".output, .cell_output"
             NVIDIA CUDA Quantum
           </a>
               <div class="version">
-                amd64-docs-experimental
+                latest
               </div>
 <div role="search">
   <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
@@ -414,14 +414,12 @@ const thebe_selector_output = ".output, .cell_output"
 <p>Welcome to CUDA Quantum!
 This is a introduction by example for using CUDA Quantum in Python.</p>
 <div id="interactive-frame">
-
-  <iframe id="jupyterlab-mynotebook" src="../_static/cuda_quantum_icon.svg" name="JupyterLab"></iframe>
-  <button id="jupyter-lab-launch" title="Open JupyterLab" class="jupyterlab-button" onclick="launchJupyterLab('jupyterlab-mynotebook', 'mynotebook')">
-    Open JupyterLab
- </button>
-
+  <iframe id="jupyterlab-vqe" src="../_static/cuda_quantum_icon.svg" name="JupyterLab"></iframe>
+  <p><a href="http://localhost:5801/lab" target="JupyterLab">Open JupyterLab</a></p>
 </div>
-<section id="introduction">
+<button id="jupyter-lab-launch" title="Open JupyterLab" class="jupyterlab-button" onclick="launchJupyterLab('jupyterlab-vqe', 'tutorials/vqe.ipynb')">
+   Open JupyterLab
+</button><section id="introduction">
 <h2>Introduction<a class="headerlink" href="#introduction" title="Permalink to this heading">¶</a></h2>
 <p>We’re going to take a look at how to construct quantum programs through CUDA Quantum’s <code class="code docutils literal notranslate"><span class="pre">Kernel</span></code> API.</p>
 <button title="Launch Interactive" class="thebelab-button thebe-launch-button" onclick="initThebe()">
