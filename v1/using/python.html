@@ -28,6 +28,7 @@
         <script src="../_static/tabs.js"></script>
         <script src="../_static/clipboard.min.js"></script>
         <script src="../_static/copybutton.js"></script>
+        <script src="../_static/js/jupyterlab.js"></script>
         <script crossorigin="anonymous" integrity="sha256-Ae2Vz/4ePdIu6ZyI/5ZGsYnb+m0JlOmKPjt6XZ9JJkA=" src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
         <script>const THEBE_JS_URL = "https://unpkg.com/thebe@0.8.2/lib/index.js"
 const thebe_selector = ".thebe,.cell"
@@ -413,9 +414,14 @@ const thebe_selector_output = ".output, .cell_output"
 <p>Welcome to CUDA Quantum!
 This is a introduction by example for using CUDA Quantum in Python.</p>
 <div id="interactive-frame">
-  <iframe src="../_static/cuda_quantum_icon.svg" name="JupyterLab"></iframe>
-  <p><a href="http://localhost:5801/lab" target="JupyterLab">Open JupyterLab</a></p>
-</div><section id="introduction">
+
+  <iframe id="jupyterlab-mynotebook" src="../_static/cuda_quantum_icon.svg" name="JupyterLab"></iframe>
+  <button id="jupyter-lab-launch" title="Open JupyterLab" class="jupyterlab-button" onclick="launchJupyterLab('jupyterlab-mynotebook', 'mynotebook')">
+    Open JupyterLab
+ </button>
+
+</div>
+<section id="introduction">
 <h2>Introduction<a class="headerlink" href="#introduction" title="Permalink to this heading">¶</a></h2>
 <p>We’re going to take a look at how to construct quantum programs through CUDA Quantum’s <code class="code docutils literal notranslate"><span class="pre">Kernel</span></code> API.</p>
 <button title="Launch Interactive" class="thebelab-button thebe-launch-button" onclick="initThebe()">
