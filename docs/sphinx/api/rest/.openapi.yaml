@@ -11,7 +11,7 @@
 swagger: "2.0"
 info:
   title: CUDA-Q Remote Simulation Runtime REST API
-  version: "1.0.0"
+  version: "1.1.0"
 paths:
   /job:
     post:
@@ -51,7 +51,7 @@ definitions:
       clientVersion:
         type: string
         description: Version description of the CUDA-Q client generating the request.
-        example: CUDA-Q Version 0.7.0 (https://github.com/NVIDIA/cuda-quantum 8650fb9d79e7e780ea95d9506a513162daf84b80)
+        example: CUDA-Q Version 0.9.0 (https://github.com/NVIDIA/cuda-quantum 8650fb9d79e7e780ea95d9506a513162daf84b80)
       entryPoint:
         type: string
         description: Entry point kernel identifier as a fully-qualified name.
@@ -94,7 +94,7 @@ definitions:
     properties:
       name:
         type: string
-        enum: [sample, observe, extract-state]
+        enum: [sample, observe, extract-state, evolve]
         description: Name of the execution context.
       shots:
         type: integer
@@ -113,6 +113,38 @@ definitions:
         type: object
         description: Optional spin operator. Required for "observe" execution context.
         $ref: '#/definitions/spin_op'
+      hamiltonian:
+        type: object
+        description: Hamiltonian operator used for time evolution. Required for "evolve" execution context.
+        $ref: '#/definitions/operator'
+      dimensions:
+        type: object
+        additionalProperties:
+          type: integer
+        description: Mapping of degrees of freedom to their corresponding dimensions. Required for "evolve" execution context.
+        example:
+          0: 2
+          1: 2
+      schedule:
+        type: array
+        items:
+          type: object
+          additionalProperties:
+            type: number
+          description: Time evolution schedule as a sequence of parameter mappings. Required for "evolve" execution context.
+      initialState:
+        type: object
+        description: Initial quantum state or sequence of states. Required for "evolve" execution context.
+        $ref: '#/definitions/state'
+      observables:
+        type: array
+        items:
+          $ref: '#/definitions/operator'
+        description: Sequence of operators for computing expectation values. Optional for "evolve" execution context.
+      storeIntermediateResults:
+        type: boolean
+        description: If true, store results after each step. Optional for "evolve" execution context.
+        example: "false"
 
   ResultExecutionContext:
     type: object
@@ -121,7 +153,7 @@ definitions:
     properties:
       name:
         type: string
-        enum: [sample, observe, extract-state]
+        enum: [sample, observe, extract-state, evolve]
         description: Name of the execution context.
       shots:
         type: integer
@@ -153,7 +185,7 @@ definitions:
         description: Optional computed expectation value.
       simulationData:
         type: object 
-        description: Underlying simulation data when using "extract-state" execution context.
+        description: Underlying simulation data when using "extract-state" or "evolve" execution context.
         properties: 
           dim:
             type: array
@@ -170,6 +202,27 @@ definitions:
                     type: number
                     format: double   
             description: State data as a vector of complex numbers. Each complex number is represented as an array of size 2 for the real and imaginary parts.
+      evolveResult:
+        type: object
+        description: Execution result for 'evolve' context.
+        $ref: '#/definitions/EvolveResult'
+
+  operator:
+    type: object
+    required:
+      - num_degrees
+      - data
+    properties:
+      num_degrees:
+        type: integer
+        description: Number of degrees of freedom the operator acts on.
+        example: 2
+      data:
+        type: array
+        items:
+          type: number
+          format: double
+        description: Serialized representation of the operator.
 
   spin_op:
     type: object
@@ -188,6 +241,33 @@ definitions:
           format: double 
         description: Serialized representation of this spin_op (as an array of floating point numbers)
  
+  EvolveResult:
+    type: object
+    properties:
+      final_state:
+        type: object
+        $ref: '#/definitions/simulationData' # Using simulationData for state
+        description: The final quantum state after evolution.
+      intermediate_states:
+        type: array
+        items:
+          $ref: '#/definitions/simulationData' # Using simulationData for state
+        description: The sequence of states after each step in the evolution, including the final state.
+      final_expectation:
+        type: array
+        items:
+          type: number
+          format: double
+        description: Final expectation values as a sequence of complex numbers represented by an array of size 2 (real and imaginary parts).
+      expectation_values:
+        type: array
+        items:
+          type: array
+          items:
+            type: number
+            format: double
+          description: Sequence of expectation values after each step in the evolution, represented by an array of size 2 (real and imaginary parts).
+
   ExecutionResult:
     type: object
     properties:
