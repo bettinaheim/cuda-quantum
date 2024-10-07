@@ -57,6 +57,9 @@ public:
   /// @brief Return the number of columns
   std::size_t cols() const { return nCols; }
 
+  /// @brief Return the total number of elements in the matrix
+  std::size_t size() const { return nRows * nCols; }
+
   /// @brief Multiply this matrix with the provided other matrix.
   /// This does not modify this matrix but instead returns a
   /// new matrix value.
@@ -68,6 +71,12 @@ public:
 
   /// @brief Return the element at the row `i` and column `j`.
   value_type &operator()(std::size_t i, std::size_t j) const;
+
+  /// @brief Check for equality between two complex matrices.
+  bool operator==(complex_matrix &other);
+
+  /// @brief Return the exponential of the matrix.
+  complex_matrix exp() const;
 
   /// @brief Return the minimal eigenvalue for this matrix.
   value_type minimal_eigenvalue() const;

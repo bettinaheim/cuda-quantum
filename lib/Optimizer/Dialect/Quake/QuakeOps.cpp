@@ -81,7 +81,7 @@ LogicalResult quake::verifyWireArityAndCoarity(Operation *op) {
 }
 
 bool quake::isSupportedMappingOperation(Operation *op) {
-  return isa<OperatorInterface, MeasurementInterface, SinkOp>(op);
+  return isa<OperatorInterface, MeasurementInterface, SinkOp, ReturnWireOp>(op);
 }
 
 ValueRange quake::getQuantumTypesFromRange(ValueRange range) {
@@ -443,11 +443,13 @@ struct ForwardConcatExtractPattern
       auto index = extract.getConstantIndex();
       if (index < concatQubits.size()) {
         auto qOpValue = concatQubits[index];
-        if (isa<quake::RefType>(qOpValue.getType()))
+        if (isa<quake::RefType>(qOpValue.getType())) {
           rewriter.replaceOp(extract, {qOpValue});
+          return success();
+        }
       }
     }
-    return success();
+    return failure();
   }
 };
 
@@ -824,7 +826,7 @@ ParseResult quake::WireSetOp::parse(OpAsmParser &parser,
     if (parser.parseAttribute(sparseEle, getAdjacencyAttrName(result.name),
                               result.attributes))
       return failure();
-  if (parser.parseOptionalAttrDict(result.attributes))
+  if (parser.parseOptionalAttrDictWithKeyword(result.attributes))
     return failure();
   return success();
 }
