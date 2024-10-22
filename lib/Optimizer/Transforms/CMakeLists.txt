@@ -22,6 +22,7 @@ add_cudaq_library(OptTransforms
   Decomposition.cpp
   DecompositionPatterns.cpp
   DelayMeasurements.cpp
+  DeleteStates.cpp
   EraseNopCalls.cpp
   ExpandControlVeqs.cpp
   ExpandMeasurements.cpp
@@ -49,6 +50,7 @@ add_cudaq_library(OptTransforms
   RefToVeqAlloc.cpp
   RegToMem.cpp
   StatePreparation.cpp
+  WiresToWiresets.cpp
 
   DEPENDS
     OptTransformsPassIncGen

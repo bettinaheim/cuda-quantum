@@ -12,6 +12,9 @@
 #include <iostream>
 #include <unordered_map>
 
+#include <unsupported/Eigen/KroneckerProduct>
+#include <unsupported/Eigen/MatrixFunctions>
+
 namespace cudaq {
 
 /// @brief Hash function for an Eigen::MatrixXcd
@@ -53,6 +56,28 @@ complex_matrix::complex_matrix(complex_matrix::value_type *rawData,
   internalData = rawData;
 }
 
+complex_matrix::complex_matrix(const complex_matrix &other) {
+  internalData = other.data();
+  // std::memcpy(internalData, other.data(), sizeof(value_type) * other.size());
+  nRows = other.rows();
+  nCols = other.cols();
+}
+
+complex_matrix &complex_matrix::operator=(const complex_matrix &other) {
+  internalData = other.data();
+  // std::memcpy(internalData, other.data(), sizeof(value_type) * other.size());
+  nRows = other.rows();
+  nCols = other.cols();
+  return *this;
+}
+
+complex_matrix complex_matrix::identity(const std::size_t rows,
+                                        const std::size_t cols) {
+  auto returnMatrix = complex_matrix(rows, cols);
+  returnMatrix.set_identity();
+  return returnMatrix;
+}
+
 complex_matrix::value_type *complex_matrix::data() const {
   return internalData;
 }
@@ -66,6 +91,11 @@ void complex_matrix::dump(std::ostream &os) {
 void complex_matrix::set_zero() {
   Eigen::Map<Eigen::MatrixXcd> map(internalData, nRows, nCols);
   map.setZero();
+}
+
+void complex_matrix::set_identity() {
+  Eigen::Map<Eigen::MatrixXcd> map(internalData, nRows, nCols);
+  map.setIdentity();
 }
 
 complex_matrix complex_matrix::operator*(complex_matrix &other) const {
@@ -97,6 +127,12 @@ complex_matrix::value_type &complex_matrix::operator()(std::size_t i,
                                                        std::size_t j) const {
   Eigen::Map<Eigen::MatrixXcd> map(internalData, nRows, nCols);
   return map(i, j);
+}
+
+bool complex_matrix::operator==(complex_matrix &other) {
+  Eigen::Map<Eigen::MatrixXcd> _self(internalData, nRows, nCols);
+  Eigen::Map<Eigen::MatrixXcd> _other(other.data(), nRows, nCols);
+  return (_self == _other);
 }
 
 std::vector<complex_matrix::value_type> complex_matrix::eigenvalues() const {
@@ -154,6 +190,37 @@ complex_matrix complex_matrix::eigenvectors() const {
 
 complex_matrix::value_type complex_matrix::minimal_eigenvalue() const {
   return eigenvalues()[0];
+}
+
+complex_matrix complex_matrix::exp() const {
+  Eigen::Map<Eigen::MatrixXcd> _self(internalData, nRows, nCols);
+  Eigen::MatrixXcd ret = _self.exp();
+  complex_matrix copy(ret.rows(), ret.cols());
+  std::memcpy(copy.data(), ret.data(), sizeof(value_type) * ret.size());
+  return copy;
+}
+
+complex_matrix complex_matrix::kronecker(complex_matrix &other) {
+  Eigen::Map<Eigen::MatrixXcd> map(internalData, nRows, nCols);
+  Eigen::Map<Eigen::MatrixXcd> otherMap(other.data(), other.rows(),
+                                        other.cols());
+  Eigen::MatrixXcd ret = Eigen::kroneckerProduct(map, otherMap).eval();
+  complex_matrix copy(ret.rows(), ret.cols());
+  std::memcpy(copy.data(), ret.data(),
+              sizeof(std::complex<double>) * ret.size());
+  return copy;
+}
+
+complex_matrix kronecker(complex_matrix &self, complex_matrix &other) {
+  Eigen::Map<Eigen::MatrixXcd> map(self.data(), self.rows(),
+                                        self.cols());
+  Eigen::Map<Eigen::MatrixXcd> otherMap(other.data(), other.rows(),
+                                        other.cols());
+  Eigen::MatrixXcd ret = Eigen::kroneckerProduct(map, otherMap).eval();
+  complex_matrix copy(ret.rows(), ret.cols());
+  std::memcpy(copy.data(), ret.data(),
+              sizeof(std::complex<double>) * ret.size());
+  return copy;
 }
 
 } // namespace cudaq
