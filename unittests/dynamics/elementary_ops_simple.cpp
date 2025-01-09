@@ -9,6 +9,7 @@
 #include "cudaq/operators.h"
 #include <gtest/gtest.h>
 
+
 namespace utils {
 void checkEqual(cudaq::matrix_2 a, cudaq::matrix_2 b) {
   ASSERT_EQ(a.get_rank(), b.get_rank());
