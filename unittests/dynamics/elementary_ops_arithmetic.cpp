@@ -239,6 +239,10 @@ TEST(ExpressionTester, checkPreBuiltElementaryOpsScalars) {
     ASSERT_TRUE(product.term_count() == 2);
     ASSERT_TRUE(reverse.term_count() == 2);
 
+    std::vector<int> want_degrees = {0};
+    ASSERT_TRUE(product.degrees() == want_degrees);
+    ASSERT_TRUE(reverse.degrees() == want_degrees);
+
     /// Check the matrices.
     /// FIXME: Comment me back in when `to_matrix` is implemented.
 
@@ -265,6 +269,10 @@ TEST(ExpressionTester, checkPreBuiltElementaryOpsScalars) {
 
     ASSERT_TRUE(product.term_count() == 2);
     ASSERT_TRUE(reverse.term_count() == 2);
+
+    std::vector<int> want_degrees = {0};
+    ASSERT_TRUE(product.degrees() == want_degrees);
+    ASSERT_TRUE(reverse.degrees() == want_degrees);
 
     /// Check the matrices.
     /// FIXME: Comment me back in when `to_matrix` is implemented.
@@ -378,6 +386,9 @@ TEST(ExpressionTester, checkPreBuiltElementaryOpsSelf) {
     auto product = self * other;
     ASSERT_TRUE(product.term_count() == 2);
 
+    std::vector<int> want_degrees = {0};
+    ASSERT_TRUE(product.degrees() == want_degrees);
+
     /// Check the matrices.
     /// FIXME: Comment me back in when `to_matrix` is implemented.
 
@@ -395,6 +406,9 @@ TEST(ExpressionTester, checkPreBuiltElementaryOpsSelf) {
     // Produces an `product_operator` type.
     auto product = self * other;
     ASSERT_TRUE(product.term_count() == 2);
+
+    std::vector<int> want_degrees = {0, 1};
+    ASSERT_TRUE(product.degrees() == want_degrees);
 
     /// Check the matrices.
     /// FIXME: Comment me back in when `to_matrix` is implemented.
