@@ -27,6 +27,7 @@ matrix_2 kronecker(const matrix_2 &, const matrix_2 &);
 template <typename Iterable,
           typename T = typename std::iterator_traits<Iterable>::value_type>
 matrix_2 kronecker(Iterable begin, Iterable end);
+matrix_2 exponential(const matrix_2 &);
 
 //===----------------------------------------------------------------------===//
 
@@ -98,6 +99,9 @@ public:
   /// Kronecker of two matrices.
   friend matrix_2 kronecker(const matrix_2 &, const matrix_2 &);
   matrix_2 &kronecker_inplace(const matrix_2 &);
+
+  /// Matrix exponential.
+  friend matrix_2 exponential(const matrix_2 &);
 
   /// Kronecker a list of matrices. The list can be any container that has
   /// iterators defined.
