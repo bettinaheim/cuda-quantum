@@ -16,9 +16,11 @@ namespace cudaq {
 
 /// Constructors.
 scalar_operator::scalar_operator(const scalar_operator &other)
-    : generator(other.generator), m_constant_value(other.m_constant_value) {}
+    : m_generator(other.m_generator), m_constant_value(other.m_constant_value) {
+}
 scalar_operator::scalar_operator(scalar_operator &other)
-    : generator(other.generator), m_constant_value(other.m_constant_value) {}
+    : m_generator(other.m_generator), m_constant_value(other.m_constant_value) {
+}
 
 /// @brief Constructor that just takes and returns a complex double value.
 scalar_operator::scalar_operator(std::complex<double> value) {
@@ -26,7 +28,7 @@ scalar_operator::scalar_operator(std::complex<double> value) {
   auto func = [&](std::map<std::string, std::complex<double>> _none) {
     return m_constant_value;
   };
-  generator = ScalarCallbackFunction(func);
+  m_generator = ScalarCallbackFunction(func);
 }
 
 /// @brief Constructor that just takes a double and returns a complex double.
@@ -36,12 +38,12 @@ scalar_operator::scalar_operator(double value) {
   auto func = [&](std::map<std::string, std::complex<double>> _none) {
     return m_constant_value;
   };
-  generator = ScalarCallbackFunction(func);
+  m_generator = ScalarCallbackFunction(func);
 }
 
 std::complex<double> scalar_operator::evaluate(
     std::map<std::string, std::complex<double>> parameters) {
-  return generator(parameters);
+  return m_generator(parameters);
 }
 
 matrix_2 scalar_operator::to_matrix(
@@ -63,18 +65,16 @@ matrix_2 scalar_operator::to_matrix(
     /* Store the previous generator functions in the new operator. This is     \
      * needed as the old generator functions would effectively be lost once we \
      * leave this function scope. */                                           \
-    returnOperator._operators_to_compose.push_back(self);                      \
-    returnOperator._operators_to_compose.push_back(otherOperator);             \
+    returnOperator.m_operators_to_compose.push_back(self);                     \
+    returnOperator.m_operators_to_compose.push_back(otherOperator);            \
     auto newGenerator =                                                        \
         [&](std::map<std::string, std::complex<double>> parameters) {          \
-          /* FIXME: I have to use this hacky `.get_val()` on the newly created \
-           * operator for the given complex double -- because calling the      \
-           * evaluate function returns 0.0 . I have no clue why??? */          \
-          return returnOperator._operators_to_compose[0]                       \
-              .evaluate(parameters) op returnOperator._operators_to_compose[1] \
-              .get_val();                                                      \
+          return returnOperator.m_operators_to_compose[0]                      \
+              .evaluate(parameters)                                            \
+                  op returnOperator.m_operators_to_compose[1]                  \
+              .m_constant_value;                                               \
         };                                                                     \
-    returnOperator.generator = ScalarCallbackFunction(newGenerator);           \
+    returnOperator.m_generator = ScalarCallbackFunction(newGenerator);         \
     return returnOperator;                                                     \
   }
 
@@ -89,18 +89,15 @@ matrix_2 scalar_operator::to_matrix(
     /* Store the previous generator functions in the new operator. This is     \
      * needed as the old generator functions would effectively be lost once we \
      * leave this function scope. */                                           \
-    returnOperator._operators_to_compose.push_back(self);                      \
-    returnOperator._operators_to_compose.push_back(otherOperator);             \
+    returnOperator.m_operators_to_compose.push_back(self);                     \
+    returnOperator.m_operators_to_compose.push_back(otherOperator);            \
     auto newGenerator =                                                        \
         [&](std::map<std::string, std::complex<double>> parameters) {          \
-          /* FIXME: I have to use this hacky `.get_val()` on the newly created \
-           * operator for the given complex double -- because calling the      \
-           * evaluate function returns 0.0 . I have no clue why??? */          \
-          return returnOperator._operators_to_compose[1]                       \
-              .get_val() op returnOperator._operators_to_compose[0]            \
+          return returnOperator.m_operators_to_compose[1]                      \
+              .m_constant_value op returnOperator.m_operators_to_compose[0]    \
               .evaluate(parameters);                                           \
         };                                                                     \
-    returnOperator.generator = ScalarCallbackFunction(newGenerator);           \
+    returnOperator.m_generator = ScalarCallbackFunction(newGenerator);         \
     return returnOperator;                                                     \
   }
 
@@ -114,18 +111,15 @@ matrix_2 scalar_operator::to_matrix(
     /* Store the previous generator functions in the new operator. This is     \
      * needed as the old generator functions would effectively be lost once we \
      * leave this function scope. */                                           \
-    self._operators_to_compose.push_back(copy);                                \
-    self._operators_to_compose.push_back(otherOperator);                       \
+    self.m_operators_to_compose.push_back(copy);                               \
+    self.m_operators_to_compose.push_back(otherOperator);                      \
     auto newGenerator =                                                        \
         [&](std::map<std::string, std::complex<double>> parameters) {          \
-          /* FIXME: I have to use this hacky `.get_val()` on the newly created \
-           * operator for the given complex double -- because calling the      \
-           * evaluate function returns 0.0 . I have no clue why??? */          \
-          return self._operators_to_compose[0]                                 \
-              .evaluate(parameters) op self._operators_to_compose[1]           \
-              .get_val();                                                      \
+          return self.m_operators_to_compose[0]                                \
+              .evaluate(parameters) op self.m_operators_to_compose[1]          \
+              .m_constant_value;                                               \
         };                                                                     \
-    self.generator = ScalarCallbackFunction(newGenerator);                     \
+    self.m_generator = ScalarCallbackFunction(newGenerator);                   \
   }
 
 #define ARITHMETIC_OPERATIONS_DOUBLES(op)                                      \
@@ -179,15 +173,16 @@ ARITHMETIC_OPERATIONS_DOUBLES_ASSIGNMENT(/=);
     /* Store the previous generator functions in the new operator. This is     \
      * needed as the old generator functions would effectively be lost once we \
      * leave this function scope. */                                           \
-    returnOperator._operators_to_compose.push_back(*this);                     \
-    returnOperator._operators_to_compose.push_back(other);                     \
+    returnOperator.m_operators_to_compose.push_back(*this);                    \
+    returnOperator.m_operators_to_compose.push_back(other);                    \
     auto newGenerator =                                                        \
         [&](std::map<std::string, std::complex<double>> parameters) {          \
-          return returnOperator._operators_to_compose[0]                       \
-              .evaluate(parameters) op returnOperator._operators_to_compose[1] \
+          return returnOperator.m_operators_to_compose[0]                      \
+              .evaluate(parameters)                                            \
+                  op returnOperator.m_operators_to_compose[1]                  \
               .evaluate(parameters);                                           \
         };                                                                     \
-    returnOperator.generator = ScalarCallbackFunction(newGenerator);           \
+    returnOperator.m_generator = ScalarCallbackFunction(newGenerator);         \
     return returnOperator;                                                     \
   }
 
@@ -199,15 +194,15 @@ ARITHMETIC_OPERATIONS_DOUBLES_ASSIGNMENT(/=);
     /* Store the previous generator functions in the new operator. This is     \
      * needed as the old generator functions would effectively be lost once we \
      * leave this function scope. */                                           \
-    self._operators_to_compose.push_back(selfCopy);                            \
-    self._operators_to_compose.push_back(other);                               \
+    self.m_operators_to_compose.push_back(selfCopy);                           \
+    self.m_operators_to_compose.push_back(other);                              \
     auto newGenerator =                                                        \
         [&](std::map<std::string, std::complex<double>> parameters) {          \
-          return self._operators_to_compose[0]                                 \
-              .evaluate(parameters) op self._operators_to_compose[1]           \
+          return self.m_operators_to_compose[0]                                \
+              .evaluate(parameters) op self.m_operators_to_compose[1]          \
               .evaluate(parameters);                                           \
         };                                                                     \
-    self.generator = ScalarCallbackFunction(newGenerator);                     \
+    self.m_generator = ScalarCallbackFunction(newGenerator);                   \
   }
 
 ARITHMETIC_OPERATIONS_SCALAR_OPS(+);

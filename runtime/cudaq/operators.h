@@ -108,6 +108,12 @@ public:
   operator_sum operator*=(const elementary_operator &other);
   operator_sum operator+=(const elementary_operator &other);
   operator_sum operator-=(const elementary_operator &other);
+  friend operator_sum operator*(std::complex<double> other, operator_sum self);
+  friend operator_sum operator+(std::complex<double> other, operator_sum self);
+  friend operator_sum operator-(std::complex<double> other, operator_sum self);
+  friend operator_sum operator*(double other, operator_sum self);
+  friend operator_sum operator+(double other, operator_sum self);
+  friend operator_sum operator-(double other, operator_sum self);
 
   /// @brief Return the operator_sum as a string.
   std::string to_string() const;
@@ -126,12 +132,6 @@ public:
   /// are guaranteed to represent the same transformation for all arguments.
   bool operator==(const operator_sum &other) const;
 };
-operator_sum operator*(std::complex<double> other, operator_sum self);
-operator_sum operator+(std::complex<double> other, operator_sum self);
-operator_sum operator-(std::complex<double> other, operator_sum self);
-operator_sum operator*(double other, operator_sum self);
-operator_sum operator+(double other, operator_sum self);
-operator_sum operator-(double other, operator_sum self);
 
 /// @brief Represents an operator expression consisting of a product of
 /// elementary and scalar operators. Operator expressions cannot be used within
@@ -181,6 +181,16 @@ public:
   operator_sum operator-(operator_sum other);
   operator_sum operator*(operator_sum other);
 
+  friend operator_sum operator+(std::complex<double> other,
+                                product_operator self);
+  friend operator_sum operator-(std::complex<double> other,
+                                product_operator self);
+  friend product_operator operator*(std::complex<double> other,
+                                    product_operator self);
+  friend operator_sum operator+(double other, product_operator self);
+  friend operator_sum operator-(double other, product_operator self);
+  friend product_operator operator*(double other, product_operator self);
+
   /// @brief True, if the other value is an operator_sum with equivalent terms,
   ///  and False otherwise. The equality takes into account that operator
   ///  addition is commutative, as is the product of two operators if they
@@ -217,12 +227,6 @@ public:
   /// operator.
   int term_count() const { return m_terms.size(); }
 };
-operator_sum operator+(std::complex<double> other, product_operator self);
-operator_sum operator-(std::complex<double> other, product_operator self);
-product_operator operator*(std::complex<double> other, product_operator self);
-operator_sum operator+(double other, product_operator self);
-operator_sum operator-(double other, product_operator self);
-product_operator operator*(double other, product_operator self);
 
 class elementary_operator : public product_operator {
 private:
@@ -262,6 +266,17 @@ public:
   operator_sum operator+=(operator_sum other);
   operator_sum operator-=(operator_sum other);
   operator_sum operator*(operator_sum other);
+
+  // Reverse order arithmetic for elementary operators against pure scalars.
+  friend operator_sum operator+(std::complex<double> other,
+                                elementary_operator self);
+  friend operator_sum operator-(std::complex<double> other,
+                                elementary_operator self);
+  friend product_operator operator*(std::complex<double> other,
+                                    elementary_operator self);
+  friend operator_sum operator+(double other, elementary_operator self);
+  friend operator_sum operator-(double other, elementary_operator self);
+  friend product_operator operator*(double other, elementary_operator self);
 
   /// @brief True, if the other value is an elementary operator with the same id
   /// acting on the same degrees of freedom, and False otherwise.
@@ -347,14 +362,6 @@ public:
   // can be passed as an argument to quantum kernels.
   // pauli_word to_pauli_word ovveride();
 };
-// Reverse order arithmetic for elementary operators against pure scalars.
-operator_sum operator+(std::complex<double> other, elementary_operator self);
-operator_sum operator-(std::complex<double> other, elementary_operator self);
-product_operator operator*(std::complex<double> other,
-                           elementary_operator self);
-operator_sum operator+(double other, elementary_operator self);
-operator_sum operator-(double other, elementary_operator self);
-product_operator operator*(double other, elementary_operator self);
 
 class scalar_operator : public product_operator {
 private:
@@ -362,12 +369,20 @@ private:
   // directly to them when they call `evaluate`.
   std::complex<double> m_constant_value;
 
+  // Only populated when we've performed arithmetic between various
+  // scalar operators.
+  std::vector<scalar_operator> m_operators_to_compose;
+
+  /// @brief The function that generates the value of the scalar operator.
+  /// The function can take a vector of complex-valued arguments
+  /// and returns a number.
+  ScalarCallbackFunction m_generator;
+
 public:
   /// @brief Constructor that just takes a callback function with no
   /// arguments.
-
   scalar_operator(ScalarCallbackFunction &&create) {
-    generator = ScalarCallbackFunction(create);
+    m_generator = ScalarCallbackFunction(create);
   }
 
   /// @brief Constructor that just takes and returns a complex double value.
@@ -392,6 +407,38 @@ public:
   operator_sum operator+(operator_sum other);
   operator_sum operator-(operator_sum other);
   operator_sum operator*(operator_sum other);
+  friend scalar_operator operator+(scalar_operator self,
+                                   std::complex<double> other);
+  friend scalar_operator operator-(scalar_operator self,
+                                   std::complex<double> other);
+  friend scalar_operator operator*(scalar_operator self,
+                                   std::complex<double> other);
+  friend scalar_operator operator/(scalar_operator self,
+                                   std::complex<double> other);
+  friend scalar_operator operator+(std::complex<double> other,
+                                   scalar_operator self);
+  friend scalar_operator operator-(std::complex<double> other,
+                                   scalar_operator self);
+  friend scalar_operator operator*(std::complex<double> other,
+                                   scalar_operator self);
+  friend scalar_operator operator/(std::complex<double> other,
+                                   scalar_operator self);
+  friend scalar_operator operator+(scalar_operator self, double other);
+  friend scalar_operator operator-(scalar_operator self, double other);
+  friend scalar_operator operator*(scalar_operator self, double other);
+  friend scalar_operator operator/(scalar_operator self, double other);
+  friend scalar_operator operator+(double other, scalar_operator self);
+  friend scalar_operator operator-(double other, scalar_operator self);
+  friend scalar_operator operator*(double other, scalar_operator self);
+  friend scalar_operator operator/(double other, scalar_operator self);
+  friend void operator+=(scalar_operator &self, std::complex<double> other);
+  friend void operator-=(scalar_operator &self, std::complex<double> other);
+  friend void operator*=(scalar_operator &self, std::complex<double> other);
+  friend void operator/=(scalar_operator &self, std::complex<double> other);
+  friend void operator+=(scalar_operator &self, scalar_operator other);
+  friend void operator-=(scalar_operator &self, scalar_operator other);
+  friend void operator*=(scalar_operator &self, scalar_operator other);
+  friend void operator/=(scalar_operator &self, scalar_operator other);
 
   /// @brief Return the scalar operator as a concrete complex value.
   std::complex<double>
@@ -406,56 +453,16 @@ public:
   // /// generator.
   // bool operator==(scalar_operator other);
 
-  /// @brief The function that generates the value of the scalar operator.
-  /// The function can take a vector of complex-valued arguments
-  /// and returns a number.
-  ScalarCallbackFunction generator;
-
-  // Only populated when we've performed arithmetic between various
-  // scalar operators.
-  std::vector<scalar_operator> _operators_to_compose;
-
-  /// NOTE: We should revisit these constructors and remove any that have
-  /// become unecessary as the implementation improves.
   scalar_operator() = default;
   // Copy constructor.
   scalar_operator(const scalar_operator &other);
   scalar_operator(scalar_operator &other);
-
   ~scalar_operator() = default;
 
   // Need this property for consistency with other inherited types.
   // Particularly, to be used when the scalar operator is held within
   // a variant type next to elementary operators.
   std::vector<int> degrees = {-1};
-
-  // REMOVEME: just using this as a temporary patch:
-  std::complex<double> get_val() { return m_constant_value; };
 };
-
-scalar_operator operator+(scalar_operator self, std::complex<double> other);
-scalar_operator operator-(scalar_operator self, std::complex<double> other);
-scalar_operator operator*(scalar_operator self, std::complex<double> other);
-scalar_operator operator/(scalar_operator self, std::complex<double> other);
-scalar_operator operator+(std::complex<double> other, scalar_operator self);
-scalar_operator operator-(std::complex<double> other, scalar_operator self);
-scalar_operator operator*(std::complex<double> other, scalar_operator self);
-scalar_operator operator/(std::complex<double> other, scalar_operator self);
-scalar_operator operator+(scalar_operator self, double other);
-scalar_operator operator-(scalar_operator self, double other);
-scalar_operator operator*(scalar_operator self, double other);
-scalar_operator operator/(scalar_operator self, double other);
-scalar_operator operator+(double other, scalar_operator self);
-scalar_operator operator-(double other, scalar_operator self);
-scalar_operator operator*(double other, scalar_operator self);
-scalar_operator operator/(double other, scalar_operator self);
-void operator+=(scalar_operator &self, std::complex<double> other);
-void operator-=(scalar_operator &self, std::complex<double> other);
-void operator*=(scalar_operator &self, std::complex<double> other);
-void operator/=(scalar_operator &self, std::complex<double> other);
-void operator+=(scalar_operator &self, scalar_operator other);
-void operator-=(scalar_operator &self, scalar_operator other);
-void operator*=(scalar_operator &self, scalar_operator other);
-void operator/=(scalar_operator &self, scalar_operator other);
 
 } // namespace cudaq
