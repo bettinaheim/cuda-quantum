@@ -246,27 +246,27 @@ operator_sum scalar_operator::operator-(product_operator other) {
 
 product_operator scalar_operator::operator*(product_operator other) {
   std::vector<std::variant<scalar_operator, elementary_operator>> other_terms =
-      other.get_terms();
+      other.m_terms;
   /// Insert this scalar operator to the front of the terms list.
   other_terms.insert(other_terms.begin(), *this);
   return product_operator(other_terms);
 }
 
 operator_sum scalar_operator::operator+(operator_sum other) {
-  std::vector<product_operator> other_terms = other.get_terms();
+  std::vector<product_operator> other_terms = other.m_terms;
   other_terms.insert(other_terms.begin(), *this);
   return operator_sum(other_terms);
 }
 
 operator_sum scalar_operator::operator-(operator_sum other) {
   auto negative_other = (-1. * other);
-  std::vector<product_operator> other_terms = negative_other.get_terms();
+  std::vector<product_operator> other_terms = negative_other.m_terms;
   other_terms.insert(other_terms.begin(), *this);
   return operator_sum(other_terms);
 }
 
 operator_sum scalar_operator::operator*(operator_sum other) {
-  std::vector<product_operator> other_terms = other.get_terms();
+  std::vector<product_operator> other_terms = other.m_terms;
   for (auto &term : other_terms)
     term = *this * term;
   return operator_sum(other_terms);

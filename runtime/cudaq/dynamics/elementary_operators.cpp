@@ -460,7 +460,7 @@ operator_sum elementary_operator::operator-(product_operator other) {
 
 product_operator elementary_operator::operator*(product_operator other) {
   std::vector<std::variant<scalar_operator, elementary_operator>> other_terms =
-      other.get_terms();
+      other.m_terms;
   /// Insert this elementary operator to the front of the terms list.
   other_terms.insert(other_terms.begin(), *this);
   return product_operator(other_terms);

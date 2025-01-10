@@ -9,12 +9,6 @@
 #include "cudaq/operators.h"
 #include <gtest/gtest.h>
 
-/// STATUS:
-/// 1. I've generated all of the `want` matrices for each test, and prepared
-///    the test to check against the `got` matrix. Now waiting on finishing the
-///    full `to_matrix` conversion to be able to do so.
-///
-
 namespace utils_0 {
 void checkEqual(cudaq::matrix_2 a, cudaq::matrix_2 b) {
   ASSERT_EQ(a.get_rank(), b.get_rank());
@@ -511,12 +505,6 @@ TEST(ExpressionTester, checkElementaryOpsAgainstOpSum) {
     ASSERT_TRUE(got.term_count() == 2);
     ASSERT_TRUE(reverse.term_count() == 2);
 
-    for (auto &term : got.get_terms())
-      ASSERT_TRUE(term.term_count() == 2);
-
-    for (auto &term : reverse.get_terms())
-      ASSERT_TRUE(term.term_count() == 2);
-
     /// Check the matrices.
     /// FIXME: Comment me back in when `to_matrix` is implemented.
 
@@ -595,9 +583,6 @@ TEST(ExpressionTester, checkElementaryOpsAgainstOpSum) {
     operator_sum *= self;
 
     ASSERT_TRUE(operator_sum.term_count() == 2);
-
-    for (auto &term : operator_sum.get_terms())
-      ASSERT_TRUE(term.term_count() == 2);
 
     /// Check the matrices.
     /// FIXME: Comment me back in when `to_matrix` is implemented.

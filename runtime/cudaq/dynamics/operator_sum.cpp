@@ -27,7 +27,7 @@ operator_sum::operator_sum(const std::vector<product_operator> &terms)
 // std::vector<scalar_operator> scalars;
 // std::vector<elementary_operator> non_scalars;
 
-// for (const auto &op : prod.get_terms()) {
+// for (const auto &op : prod.m_terms) {
 //   if (std::holds_alternative<scalar_operator>(op)) {
 //     scalars.push_back(*std::get<scalar_operator>(op));
 //   } else {
@@ -87,7 +87,7 @@ operator_sum::operator_sum(const std::vector<product_operator> &terms)
 // std::vector<int> operator_sum::degrees() const {
 //   std::set<int> unique_degrees;
 //   for (const auto &term : m_terms) {
-//     for (const auto &op : term.get_terms()) {
+//     for (const auto &op : term.m_terms) {
 //       unique_degrees.insert(op.get_degrees().begin(),
 //       op.get_degrees().end());
 //     }
@@ -100,7 +100,7 @@ operator_sum::operator_sum(const std::vector<product_operator> &terms)
 // std::map<std::string, std::string> operator_sum::parameters() const {
 //   std::map<std::string, std::string> param_map;
 //   for (const auto &term : m_terms) {
-//     for (const auto &op : term.get_terms()) {
+//     for (const auto &op : term.m_terms) {
 //       auto op_params = op.parameters();
 //       param_map.insert(op_params.begin(), op.params.end());
 //     }
@@ -113,8 +113,8 @@ operator_sum::operator_sum(const std::vector<product_operator> &terms)
 // bool operator_sum::_is_spinop() const {
 //   return std::all_of(
 //       m_terms.begin(), m_terms.end(), [](product_operator &term) {
-//         return std::all_of(term.get_terms().begin(),
-//                            term.get_terms().end(),
+//         return std::all_of(term.m_terms.begin(),
+//                            term.m_terms.end(),
 //                            [](const Operator &op) { return op.is_spinop();
 //                            });
 //       });
@@ -146,7 +146,7 @@ operator_sum operator_sum::operator+=(const operator_sum &other) {
 operator_sum operator_sum::operator*(operator_sum &other) const {
   auto self_terms = m_terms;
   std::vector<product_operator> product_terms;
-  auto other_terms = other.get_terms();
+  auto other_terms = other.m_terms;
   for (auto &term : self_terms) {
     for (auto &other_term : other_terms) {
       product_terms.push_back(term * other_term);

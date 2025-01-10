@@ -6,7 +6,6 @@
  * the terms of the Apache License 2.0 which accompanies this distribution.    *
  ******************************************************************************/
 
-#include "cudaq/matrix.h"
 #include "cudaq/operators.h"
 #include <gtest/gtest.h>
 
@@ -112,14 +111,6 @@ TEST(ExpressionTester, checkOperatorSumAgainstScalarOperator) {
 
     ASSERT_TRUE(product.term_count() == 2);
     ASSERT_TRUE(reverse.term_count() == 2);
-
-    for (auto term : product.get_terms()) {
-      ASSERT_TRUE(term.term_count() == 2);
-    }
-
-    for (auto term : reverse.get_terms()) {
-      ASSERT_TRUE(term.term_count() == 2);
-    }
   }
 
   // `operator_sum + scalar_operator` and `scalar_operator + operator_sum`
@@ -154,9 +145,6 @@ TEST(ExpressionTester, checkOperatorSumAgainstScalarOperator) {
     sum *= cudaq::scalar_operator(1.0);
 
     ASSERT_TRUE(sum.term_count() == 2);
-    for (auto term : sum.get_terms()) {
-      ASSERT_TRUE(term.term_count() == 2);
-    }
   }
 
   // `operator_sum += scalar_operator`
@@ -193,14 +181,6 @@ TEST(ExpressionTester, checkOperatorSumAgainstScalars) {
 
     ASSERT_TRUE(product.term_count() == 2);
     ASSERT_TRUE(reverse.term_count() == 2);
-
-    for (auto term : product.get_terms()) {
-      ASSERT_TRUE(term.term_count() == 2);
-    }
-
-    for (auto term : reverse.get_terms()) {
-      ASSERT_TRUE(term.term_count() == 2);
-    }
   }
 
   // `operator_sum + double` and `double + operator_sum`
@@ -235,9 +215,6 @@ TEST(ExpressionTester, checkOperatorSumAgainstScalars) {
     sum *= 2.0;
 
     ASSERT_TRUE(sum.term_count() == 2);
-    for (auto term : sum.get_terms()) {
-      ASSERT_TRUE(term.term_count() == 2);
-    }
   }
 
   // `operator_sum += double`
@@ -271,14 +248,6 @@ TEST(ExpressionTester, checkOperatorSumAgainstScalars) {
 
     ASSERT_TRUE(product.term_count() == 2);
     ASSERT_TRUE(reverse.term_count() == 2);
-
-    for (auto term : product.get_terms()) {
-      ASSERT_TRUE(term.term_count() == 2);
-    }
-
-    for (auto term : reverse.get_terms()) {
-      ASSERT_TRUE(term.term_count() == 2);
-    }
   }
 
   // `operator_sum + std::complex<double>` and `std::complex<double> +
@@ -315,9 +284,6 @@ TEST(ExpressionTester, checkOperatorSumAgainstScalars) {
     sum *= value;
 
     ASSERT_TRUE(sum.term_count() == 2);
-    for (auto term : sum.get_terms()) {
-      ASSERT_TRUE(term.term_count() == 2);
-    }
   }
 
   // `operator_sum += std::complex<double>`
@@ -379,8 +345,6 @@ TEST(ExpressionTester, checkOperatorSumAgainstOperatorSum) {
     auto sum_product = sum_0 * sum_1;
 
     ASSERT_TRUE(sum_product.term_count() == 6);
-    for (auto term : sum_product.get_terms())
-      ASSERT_TRUE(term.term_count() == 2);
   }
 
   // `operator_sum *= operator_sum`
@@ -394,8 +358,6 @@ TEST(ExpressionTester, checkOperatorSumAgainstOperatorSum) {
     sum *= sum_1;
 
     ASSERT_TRUE(sum.term_count() == 6);
-    for (auto term : sum.get_terms())
-      ASSERT_TRUE(term.term_count() == 2);
   }
 }
 
@@ -437,9 +399,5 @@ TEST(ExpressionTester, checkOperatorSumAgainstProduct) {
     sum *= product;
 
     ASSERT_TRUE(sum.term_count() == 2);
-
-    for (auto term : sum.get_terms()) {
-      ASSERT_TRUE(term.term_count() == 3);
-    }
   }
 }

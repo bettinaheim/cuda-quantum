@@ -26,6 +26,10 @@ class elementary_operator;
 /// expressions cannot be used within quantum kernels, but they provide methods
 /// to convert them to data types that can.
 class operator_sum {
+  friend class product_operator;
+  friend class scalar_operator;
+  friend class elementary_operator;
+
 private:
   std::vector<product_operator> m_terms;
 
@@ -121,10 +125,6 @@ public:
   /// If the equality evaluates to True, on the other hand, the operators
   /// are guaranteed to represent the same transformation for all arguments.
   bool operator==(const operator_sum &other) const;
-
-  /// FIXME: Protect this once I can do deeper testing in unittests.
-  // protected:
-  std::vector<product_operator> get_terms() { return m_terms; }
 };
 operator_sum operator*(std::complex<double> other, operator_sum self);
 operator_sum operator+(std::complex<double> other, operator_sum self);
@@ -138,6 +138,9 @@ operator_sum operator-(double other, operator_sum self);
 /// quantum kernels, but they provide methods to convert them to data types
 /// that can.
 class product_operator : public operator_sum {
+  friend class scalar_operator;
+  friend class elementary_operator;
+
 private:
   std::vector<std::variant<scalar_operator, elementary_operator>> m_terms;
 
@@ -213,12 +216,6 @@ public:
   /// @brief Return the number of operator terms that make up this product
   /// operator.
   int term_count() const { return m_terms.size(); }
-
-  /// FIXME: Protect this once I can do deeper testing in unittests.
-  // protected:
-  std::vector<std::variant<scalar_operator, elementary_operator>> get_terms() {
-    return m_terms;
-  };
 };
 operator_sum operator+(std::complex<double> other, product_operator self);
 operator_sum operator-(std::complex<double> other, product_operator self);
