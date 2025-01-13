@@ -135,19 +135,21 @@ double _factorial(std::size_t value) {
   return value * std::tgamma(value);
 }
 
-// Calculate the power of a given matrix.
-cudaq::matrix_2 _power(const cudaq::matrix_2 &right, int step) {
+// Calculate the power of a given matrix, `powers` times.
+cudaq::matrix_2 cudaq::matrix_2::power(int powers) {
   // Initialize as identity.
-  std::size_t rows = right.get_rows();
-  std::size_t columns = right.get_columns();
+  std::size_t rows = get_rows();
+  std::size_t columns = get_columns();
+  if (rows != columns)
+    throw std::runtime_error("Matrix power expects a square matrix.");
   auto result = cudaq::matrix_2(rows, columns);
   for (std::size_t i = 0; i < rows; i++) {
     result[{i, i}] = 1.0 + 0.0j;
   }
 
   // Calculate the matrix power iteratively.
-  for (std::size_t i = 0; i < step; i++) {
-    result = result * right;
+  for (std::size_t i = 0; i < powers; i++) {
+    result = result * *this;
   }
   return result;
 }
@@ -162,7 +164,7 @@ cudaq::matrix_2 cudaq::matrix_2::exponential() {
   // Taylor Series Approximation, fixed at 20 steps.
   std::size_t taylor_steps = 20;
   for (std::size_t step = 0; step < taylor_steps; step++) {
-    auto term = _power(*this, step);
+    auto term = this->power(step);
     for (std::size_t i = 0; i < rows; i++) {
       for (std::size_t j = 0; j < columns; j++) {
         result[{i, j}] += term[{i, j}] / _factorial(step);

@@ -302,11 +302,9 @@ public:
   static elementary_operator number(int degree);
   static elementary_operator parity(int degree);
   static elementary_operator position(int degree);
-  /// FIXME:
-  static elementary_operator squeeze(int degree,
-                                     std::complex<double> amplitude);
-  static elementary_operator displace(int degree,
-                                      std::complex<double> amplitude);
+  /// Operators that require runtime parameters from the user.
+  static elementary_operator squeeze(int degree);
+  static elementary_operator displace(int degree);
 
   /// @brief Adds the definition of an elementary operator with the given id to
   /// the class. After definition, an the defined elementary operator can be

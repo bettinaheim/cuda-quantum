@@ -102,6 +102,9 @@ public:
   /// Matrix exponential, uses 20 terms of Taylor Series approximation.
   matrix_2 exponential();
 
+  /// Matrix power.
+  matrix_2 power(int powers);
+
   /// Kronecker a list of matrices. The list can be any container that has
   /// iterators defined.
   template <typename Iterable, typename T>

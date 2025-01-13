@@ -84,18 +84,21 @@ cudaq::matrix_2 parity_matrix(std::size_t size) {
   return mat;
 }
 
-// cudaq::matrix_2 displace_matrix(std::size_t size,
-//                                       std::complex<double> amplitude) {
-//   auto mat = cudaq::matrix_2(size, size);
-//   for (std::size_t i = 0; i + 1 < size; i++) {
-//     mat[{i + 1, i}] =
-//         amplitude * std::sqrt(static_cast<double>(i + 1)) + 0.0 * 'j';
-//     mat[{i, i + 1}] = -1. * std::conj(amplitude) * (0.5 * 'j') *
-//                         std::sqrt(static_cast<double>(i + 1)) +
-//                     0.0 * 'j';
-//   }
-//   return mat.exp();
-// }
+cudaq::matrix_2 displace_matrix(std::size_t size,
+                                std::complex<double> amplitude) {
+  auto term1 = amplitude * create_matrix(size);
+  auto term2 = std::conj(amplitude) * annihilate_matrix(size);
+  auto difference = term1 - term2;
+  return difference.exponential();
+}
+
+cudaq::matrix_2 squeeze_matrix(std::size_t size,
+                               std::complex<double> amplitude) {
+  auto term1 = std::conj(amplitude) * annihilate_matrix(size).power(2);
+  auto term2 = amplitude * create_matrix(size).power(2);
+  auto difference = 0.5 * (term1 - term2);
+  return difference.exponential();
+}
 
 } // namespace utils_2
 

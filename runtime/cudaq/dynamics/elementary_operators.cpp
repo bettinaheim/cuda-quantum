@@ -41,10 +41,6 @@ elementary_operator elementary_operator::identity(int degree) {
       for (std::size_t i = 0; i < dimension; i++) {
         mat[{i, i}] = 1.0 + 0.0 * 'j';
       }
-
-      std::cout << "dumping the complex mat: \n";
-      std::cout << mat.dump();
-      std::cout << "\ndone\n\n";
       return mat;
     };
     op.define(op_id, op.expected_dimensions, func);
@@ -67,9 +63,6 @@ elementary_operator elementary_operator::zero(int degree) {
       auto degree = op.degrees[0];
       std::size_t dimension = dimensions[degree];
       auto mat = matrix_2(dimension, dimension);
-      std::cout << "dumping the complex mat: \n";
-      std::cout << mat.dump();
-      std::cout << "\ndone\n\n";
       return mat;
     };
     op.define(op_id, op.expected_dimensions, func);
@@ -92,9 +85,6 @@ elementary_operator elementary_operator::annihilate(int degree) {
       for (std::size_t i = 0; i + 1 < dimension; i++) {
         mat[{i, i + 1}] = std::sqrt(static_cast<double>(i + 1)) + 0.0 * 'j';
       }
-      std::cout << "dumping the complex mat: \n";
-      std::cout << mat.dump();
-      std::cout << "\ndone\n\n";
       return mat;
     };
     op.define(op_id, op.expected_dimensions, func);
@@ -117,9 +107,6 @@ elementary_operator elementary_operator::create(int degree) {
       for (std::size_t i = 0; i + 1 < dimension; i++) {
         mat[{i + 1, i}] = std::sqrt(static_cast<double>(i + 1)) + 0.0 * 'j';
       }
-      std::cout << "dumping the complex mat: \n";
-      std::cout << mat.dump();
-      std::cout << "\ndone\n\n";
       return mat;
     };
     op.define(op_id, op.expected_dimensions, func);
@@ -175,9 +162,6 @@ elementary_operator elementary_operator::momentum(int degree) {
         mat[{i, i + 1}] =
             -1. * (0.5j) * std::sqrt(static_cast<double>(i + 1)) + 0.0 * 'j';
       }
-      std::cout << "dumping the complex mat: \n";
-      std::cout << mat.dump();
-      std::cout << "\ndone\n\n";
       return mat;
     };
     op.define(op_id, op.expected_dimensions, func);
@@ -200,9 +184,6 @@ elementary_operator elementary_operator::number(int degree) {
       for (std::size_t i = 0; i < dimension; i++) {
         mat[{i, i}] = static_cast<double>(i) + 0.0j;
       }
-      std::cout << "dumping the complex mat: \n";
-      std::cout << mat.dump();
-      std::cout << "\ndone\n\n";
       return mat;
     };
     op.define(op_id, op.expected_dimensions, func);
@@ -225,9 +206,6 @@ elementary_operator elementary_operator::parity(int degree) {
       for (std::size_t i = 0; i < dimension; i++) {
         mat[{i, i}] = std::pow(-1., static_cast<double>(i)) + 0.0j;
       }
-      std::cout << "dumping the complex mat: \n";
-      std::cout << mat.dump();
-      std::cout << "\ndone\n\n";
       return mat;
     };
     op.define(op_id, op.expected_dimensions, func);
@@ -235,47 +213,61 @@ elementary_operator elementary_operator::parity(int degree) {
   return op;
 }
 
-elementary_operator
-elementary_operator::displace(int degree, std::complex<double> amplitude) {
+elementary_operator elementary_operator::displace(int degree) {
   std::string op_id = "displace";
   std::vector<int> degrees = {degree};
   auto op = elementary_operator(op_id, degrees);
   // A dimension of -1 indicates this operator can act on any dimension.
   op.expected_dimensions[degree] = -1;
-  // if (op.m_ops.find(op_id) == op.m_ops.end()) {
-  //   auto func = [&](std::map<int, int> dimensions,
-  //                   std::map<std::string, std::complex<double>> _none) {
-  //     auto degree = op.degrees[0];
-  //     std::size_t dimension = dimensions[degree];
-  //     auto temp_mat = matrix_2(dimension, dimension);
-  //     // // displace = exp[ (amplitude * create) - (conj(amplitude) *
-  //     annihilate) ]
-  //     // for (std::size_t i = 0; i + 1 < dimension; i++) {
-  //     //   temp_mat[{i + 1, i}] =
-  //     //       amplitude * std::sqrt(static_cast<double>(i + 1)) + 0.0 * 'j';
-  //     //   temp_mat[{i, i + 1}] =
-  //     //       -1. * std::conj(amplitude) * std::sqrt(static_cast<double>(i +
-  //     1)) +
-  //     //       0.0 * 'j';
-  //     // }
-  //     // Not ideal that our method of computing the matrix exponential
-  //     // requires copies here. Maybe we can just use eigen directly here
-  //     // to limit to one copy, but we can address that later.
-  //     auto mat = temp_mat.exp();
-  //     std::cout << "dumping the complex mat: \n";
-  //     mat.dump();
-  //     std::cout << "\ndone\n\n";
-  //     return mat;
-  //   };
-  //   op.define(op_id, op.expected_dimensions, func);
-  // }
-  throw std::runtime_error("currently have a bug in implementation.");
+  if (op.m_ops.find(op_id) == op.m_ops.end()) {
+    auto func = [&](std::map<int, int> dimensions,
+                    std::map<std::string, std::complex<double>> parameters) {
+      auto degree = op.degrees[0];
+      std::size_t dimension = dimensions[degree];
+      auto displacement_amplitude = parameters["displacement"];
+      auto create = matrix_2(dimension, dimension);
+      auto annihilate = matrix_2(dimension, dimension);
+      for (std::size_t i = 0; i + 1 < dimension; i++) {
+        create[{i + 1, i}] = std::sqrt(static_cast<double>(i + 1)) + 0.0 * 'j';
+        annihilate[{i, i + 1}] =
+            std::sqrt(static_cast<double>(i + 1)) + 0.0 * 'j';
+      }
+      auto term1 = displacement_amplitude * create;
+      auto term2 = std::conj(displacement_amplitude) * annihilate;
+      return (term1 - term2).exponential();
+    };
+    op.define(op_id, op.expected_dimensions, func);
+  }
   return op;
 }
 
-elementary_operator
-elementary_operator::squeeze(int degree, std::complex<double> amplitude) {
-  throw std::runtime_error("Not yet implemented.");
+elementary_operator elementary_operator::squeeze(int degree) {
+  std::string op_id = "squeeze";
+  std::vector<int> degrees = {degree};
+  auto op = elementary_operator(op_id, degrees);
+  // A dimension of -1 indicates this operator can act on any dimension.
+  op.expected_dimensions[degree] = -1;
+  if (op.m_ops.find(op_id) == op.m_ops.end()) {
+    auto func = [&](std::map<int, int> dimensions,
+                    std::map<std::string, std::complex<double>> parameters) {
+      auto degree = op.degrees[0];
+      std::size_t dimension = dimensions[degree];
+      auto squeezing = parameters["squeezing"];
+      auto create = matrix_2(dimension, dimension);
+      auto annihilate = matrix_2(dimension, dimension);
+      for (std::size_t i = 0; i + 1 < dimension; i++) {
+        create[{i + 1, i}] = std::sqrt(static_cast<double>(i + 1)) + 0.0 * 'j';
+        annihilate[{i, i + 1}] =
+            std::sqrt(static_cast<double>(i + 1)) + 0.0 * 'j';
+      }
+      auto term1 = std::conj(squeezing) * annihilate.power(2);
+      auto term2 = squeezing * create.power(2);
+      auto difference = 0.5 * (term1 - term2);
+      return difference.exponential();
+    };
+    op.define(op_id, op.expected_dimensions, func);
+  }
+  return op;
 }
 
 matrix_2 elementary_operator::to_matrix(
