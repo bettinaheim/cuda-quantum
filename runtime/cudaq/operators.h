@@ -68,8 +68,9 @@ public:
   ///                      degrees of freedom: `{0:2, 1:2}`.
   /// @arg `parameters` : A map of the paramter names to their concrete, complex
   /// values.
-  matrix_2 to_matrix(const std::map<int, int> &dimensions,
-                     const std::map<std::string, double> &params = {}) const;
+  matrix_2 to_matrix(
+      const std::map<int, int> &dimensions,
+      const std::map<std::string, std::complex<double>> &params = {}) const;
 
   // Arithmetic operators
   operator_sum operator+(const operator_sum &other) const;

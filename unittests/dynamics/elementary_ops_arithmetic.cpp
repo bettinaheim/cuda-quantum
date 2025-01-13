@@ -427,6 +427,7 @@ TEST(ExpressionTester, checkElementaryOpsAgainstOpSum) {
 
   /// Keeping this fixed throughout.
   int level_count = 3;
+  std::complex<double> value = 0.125 + 0.5j;
 
   /// `elementary_operator + operator_sum` and `operator_sum +
   /// elementary_operator`
@@ -499,7 +500,7 @@ TEST(ExpressionTester, checkElementaryOpsAgainstOpSum) {
   {
     auto self = cudaq::elementary_operator::annihilate(0);
     /// Creating an arbitrary operator sum to work against.
-    auto operator_sum = cudaq::elementary_operator::create(0) +
+    auto operator_sum = cudaq::elementary_operator::squeeze(0) +
                         cudaq::elementary_operator::identity(1);
 
     auto got = self * operator_sum;
@@ -513,15 +514,16 @@ TEST(ExpressionTester, checkElementaryOpsAgainstOpSum) {
 
     auto self_full = cudaq::kronecker(utils_0::id_matrix(level_count),
                                       utils_0::annihilate_matrix(level_count));
-    auto term_0_full = cudaq::kronecker(utils_0::id_matrix(level_count),
-                                        utils_0::create_matrix(level_count));
+    auto term_0_full =
+        cudaq::kronecker(utils_0::id_matrix(level_count),
+                         utils_0::squeeze_matrix(level_count, value));
     auto term_1_full = cudaq::kronecker(utils_0::id_matrix(level_count),
                                         utils_0::id_matrix(level_count));
     auto sum_full = term_0_full + term_1_full;
 
     // auto got_matrix = got.to_matrix({{0, level_count}, {1, level_count}},
-    // {}); auto got_reverse_matrix = reverse.to_matrix({{0, level_count}, {1,
-    // level_count}}, {});
+    // {{"squeezing", value}}); auto got_reverse_matrix = reverse.to_matrix({{0,
+    // level_count}, {1, level_count}}, {{"squeezing", value}});
     auto want_matrix = self_full * sum_full;
     auto want_reverse_matrix = sum_full * self_full;
     // utils_0::checkEqual(want_matrix, got_matrix);
@@ -532,22 +534,23 @@ TEST(ExpressionTester, checkElementaryOpsAgainstOpSum) {
   {
     auto operator_sum = cudaq::elementary_operator::create(0) +
                         cudaq::elementary_operator::identity(1);
-    operator_sum += cudaq::elementary_operator::annihilate(0);
+    operator_sum += cudaq::elementary_operator::displace(0);
 
     ASSERT_TRUE(operator_sum.term_count() == 3);
 
     /// Check the matrices.
     /// FIXME: Comment me back in when `to_matrix` is implemented.
 
-    auto self_full = cudaq::kronecker(utils_0::id_matrix(level_count),
-                                      utils_0::annihilate_matrix(level_count));
+    auto self_full =
+        cudaq::kronecker(utils_0::id_matrix(level_count),
+                         utils_0::displace_matrix(level_count, value));
     auto term_0_full = cudaq::kronecker(utils_0::id_matrix(level_count),
                                         utils_0::create_matrix(level_count));
     auto term_1_full = cudaq::kronecker(utils_0::id_matrix(level_count),
                                         utils_0::id_matrix(level_count));
 
     // auto got_matrix = operator_sum.to_matrix({{0, level_count}, {1,
-    // level_count}}, {});
+    // level_count}}, {{"displacement", value}});
     auto want_matrix = term_0_full + term_1_full + self_full;
     // utils_0::checkEqual(want_matrix, got_matrix);
   }
