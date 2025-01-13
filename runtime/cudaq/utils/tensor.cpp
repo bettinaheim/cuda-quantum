@@ -129,18 +129,19 @@ std::string cudaq::matrix_2::dump() const {
   return out.str();
 }
 
-double factorial(std::size_t value) {
+double _factorial(std::size_t value) {
   if (value <= 1)
     return 1;
   return value * std::tgamma(value);
 }
 
 // Calculate the power of a given matrix.
-cudaq::matrix_2 power(const cudaq::matrix_2 &right, int step) {
+cudaq::matrix_2 _power(const cudaq::matrix_2 &right, int step) {
   // Initialize as identity.
-  int size = right.get_size();
-  auto result = cudaq::matrix_2(right.get_rows(), right.get_columns());
-  for (std::size_t i = 0; i < size; i++) {
+  std::size_t rows = right.get_rows();
+  std::size_t columns = right.get_columns();
+  auto result = cudaq::matrix_2(rows, columns);
+  for (std::size_t i = 0; i < rows; i++) {
     result[{i, i}] = 1.0 + 0.0j;
   }
 
@@ -152,16 +153,19 @@ cudaq::matrix_2 power(const cudaq::matrix_2 &right, int step) {
 }
 
 // Calculate the Taylor approximation to the exponential of the given matrix.
-cudaq::matrix_2 exponential(const cudaq::matrix_2 &right) {
-  std::size_t size = right.get_size();
-  auto result = cudaq::matrix_2(right.get_rows(), right.get_columns());
-  // Taylor Series Approximation, fixed at 10 steps.
-  std::size_t taylor_steps = 10;
+cudaq::matrix_2 cudaq::matrix_2::exponential() {
+  std::size_t rows = get_rows();
+  std::size_t columns = get_columns();
+  if (rows != columns)
+    throw std::runtime_error("Matrix exponential expects a square matrix.");
+  auto result = cudaq::matrix_2(rows, columns);
+  // Taylor Series Approximation, fixed at 20 steps.
+  std::size_t taylor_steps = 20;
   for (std::size_t step = 0; step < taylor_steps; step++) {
-    auto term = power(right, step);
-    for (std::size_t i = 0; i < size; i++) {
-      for (std::size_t j = 0; j < size; j++) {
-        result[{i, j}] += term[{i, j}] / factorial(step);
+    auto term = _power(*this, step);
+    for (std::size_t i = 0; i < rows; i++) {
+      for (std::size_t j = 0; j < columns; j++) {
+        result[{i, j}] += term[{i, j}] / _factorial(step);
       }
     }
   }
