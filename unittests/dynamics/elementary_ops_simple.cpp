@@ -215,6 +215,10 @@ TEST(ExpressionTester, checkPreBuiltElementaryOps) {
   }
 }
 
-// TEST(ExpressionTester, checkCustomElementaryOps) {
-//   // pass
-// }
+TEST(ExpressionTester, checkCustomElementaryOps) {
+  // pass
+
+  // ex:
+  // operator acts upon {0,2}
+  // user gives us dimensions for {0,1,2}
+}
