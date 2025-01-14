@@ -1139,3 +1139,69 @@ TEST(ExpressionTester, checkProductOperatorAgainstOperatorSum) {
     // utils_1::checkEqual(want_matrix_reverse, got_matrix_reverse);
   }
 }
+
+std::vector<std::string> generate_all_states(std::vector<int> degrees,
+                                             std::map<int, int> dimensions) {
+  if (degrees.size() == 0)
+    return {};
+
+  std::vector<std::string> states;
+  int range = dimensions[degrees[0]];
+  for (auto state = 0; state < range; state++) {
+    states.push_back(std::to_string(state));
+  }
+
+  for (auto degree = degrees.begin() + 1; degree != degrees.end(); ++degree) {
+    std::string term;
+    std::vector<std::string> result;
+    for (auto current : states) {
+      for (auto state = 0; state < dimensions[degrees[*degree]]; state++) {
+        result.push_back(current + std::to_string(state));
+      }
+    }
+    states = result;
+  }
+
+  return states;
+}
+
+std::vector<int> _compute_permutation(std::vector<int> op_degrees,
+                                      std::vector<int> canon_degrees,
+                                      std::map<int, int> m_dimensions) {
+  auto states = generate_all_states(canon_degrees, m_dimensions);
+
+  std::vector<int> reordering;
+  for (auto degree : op_degrees)
+    reordering.push_back(canon_degrees[degree]);
+
+  std::vector<int> result;
+  for (auto state : states) {
+    int index;
+    std::string term;
+    for (auto i : reordering) {
+      term += state[i];
+    }
+    auto it = std::find(states.begin(), states.end(), term);
+    if (it != states.end())
+      index = std::distance(states.begin(), it);
+    result.push_back(index);
+  }
+
+  return result;
+}
+
+TEST(ExpressionTester, checkExperimental) {
+
+  {
+    std::vector<int> degrees = {0, 2, 1};
+    std::map<int, int> m_dimensions = {{0, 2}, {1, 3}, {2, 4}};
+
+    // I think??
+    std::vector<int> canon_degrees = {0, 2, 1};
+
+    auto states = generate_all_states(degrees, m_dimensions);
+
+    auto permutation =
+        _compute_permutation(degrees, canon_degrees, m_dimensions);
+  }
+}

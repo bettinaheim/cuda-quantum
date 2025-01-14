@@ -7,6 +7,7 @@
  ******************************************************************************/
 
 #include "cudaq/operators.h"
+#include "helpers.cpp"
 
 #include <algorithm>
 #include <iostream>
@@ -20,7 +21,22 @@ namespace cudaq {
 product_operator::product_operator(
     std::vector<std::variant<scalar_operator, elementary_operator>>
         atomic_operators)
-    : m_terms(atomic_operators) {}
+    : m_terms(atomic_operators) {
+  for (auto term : m_terms) {
+    if (std::holds_alternative<scalar_operator>(term)) {
+      auto cast_term = std::get<scalar_operator>(term);
+      m_scalar_ops.push_back(cast_term);
+    } else if (std::holds_alternative<elementary_operator>(term)) {
+      auto cast_term = std::get<elementary_operator>(term);
+      m_elementary_ops.push_back(cast_term);
+    }
+  }
+}
+
+product_operator::product_operator(
+    std::vector<scalar_operator> scalars,
+    std::vector<elementary_operator> atomic_operators)
+    : m_scalar_ops(scalars), m_elementary_ops(atomic_operators) {}
 
 // Degrees property
 std::vector<int> product_operator::degrees() const {
@@ -193,34 +209,65 @@ cudaq::matrix_2 product_operator::to_matrix(
     std::map<int, int> dimensions,
     std::map<std::string, std::complex<double>> parameters) {
 
-  // // the degrees of freedom this product operator acts upon
-  // auto degrees = this->degrees();
-
-  // // the degrees of freedom from the user
-  // auto keys = std::views::keys(dimensions);
-  // std::vector<int> provided_degrees{keys.begin(), keys.end()};
-
-  // auto accumulate_ops = [&](){
-  //   std::vector<elementary_operator> ops;
-  //   for (auto degree : provided_degrees) {
-  //     if (std::find(degrees.begin(), degrees.end(), degree) == degrees.end())
-  //     {
-  //       ops.push_back(elementary_operator::identity(degree))
-  //     }
-  //   }
-  // }
-
-  // // are there any extra degrees from the user ?
-
-  // // are there any degrees from the user missing here?
-
-  // // insert
-
-  // // Loop through the terms of the product operator and cast each
-  // // to the full Hilbert Space.
-  // for (auto &term : m_terms) {
-
-  // }
+  /// FIXME: implement me :-)
   return cudaq::matrix_2();
 }
+
+cudaq::matrix_2
+_padded_op(cudaq::MatrixArithmetics arithmetics,
+           std::variant<cudaq::scalar_operator, cudaq::elementary_operator> op,
+           std::vector<int> degrees) {
+  auto beginFunc = [](auto &&t) { return t.degrees.begin(); };
+  auto endFunc = [](auto &&t) { return t.degrees.end(); };
+  /// Creating the tensor product with op being last is most efficient.
+  auto accumulate_ops = [&]() {
+    std::vector<cudaq::matrix_2> result;
+    for (auto degree : degrees) {
+      if (std::find(std::visit(beginFunc, op), std::visit(endFunc, op),
+                    degree) == std::visit(endFunc, op),
+          degree) {
+        result.push_back(
+            arithmetics.evaluate(cudaq::elementary_operator::identity(degree))
+                .matrix());
+      }
+    }
+    return result;
+  };
+  auto padded = accumulate_ops();
+  /// FIXME: This directly uses cudaq::kronecker instead of the tensor method.
+  /// I need to double check to make sure this gives the equivalent behavior
+  /// to the method used in python.
+  auto result = cudaq::kronecker(padded.begin(), padded.end());
+  return result;
+}
+
+cudaq::matrix_2 product_operator::m_evaluate(MatrixArithmetics arithmetics,
+                                             bool pad_terms) {
+  if (pad_terms) {
+    // Sorting the degrees to avoid unnecessary permutations during the padding.
+    // auto degrees;
+    std::set<int> noncanon_set;
+    // for (auto op : m_terms) {
+    //   for (auto degree : op.degrees()) {
+    //     noncanon_set.insert(degree);
+    //   }
+    // }
+    // std::vector<int> noncanon_degrees(noncanon_set.begin(),
+    // noncanon_set.end()); auto degrees =
+    // _OperatorHelpers::canonicalize_degrees(noncanon_degrees); auto evaluated
+    // = _padded_op(arithmetics, m_terms[0], degrees);
+
+    // for (auto op_idx = m_terms.begin() + 1; op_idx != m_terms.end();
+    // ++op_idx) {
+    //   auto op = m_terms[*op_idx];
+    //   // auto op = std::visit(getTerm, m_terms, op_idx);
+    //   // if (op.degrees().size() != 1) {
+    //   //   //
+    //   // }
+    // }
+  }
+
+  return cudaq::matrix_2(2, 2);
+}
+
 } // namespace cudaq
