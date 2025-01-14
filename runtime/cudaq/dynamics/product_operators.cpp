@@ -216,13 +216,17 @@ cudaq::matrix_2 product_operator::to_matrix(
 cudaq::matrix_2
 _padded_op(cudaq::MatrixArithmetics arithmetics,
            std::variant<cudaq::scalar_operator, cudaq::elementary_operator> op,
-           std::vector<int> degrees) {
+           std::vector<int> degrees, std::map<int, int> dimensions,
+           std::map<std::string, std::complex<double>> parameters) {
   auto beginFunc = [](auto &&t) { return t.degrees.begin(); };
   auto endFunc = [](auto &&t) { return t.degrees.end(); };
+  auto getMatrix = [&](auto &&t) {
+    return t.to_matrix(dimensions, parameters);
+  };
   /// Creating the tensor product with op being last is most efficient.
   auto accumulate_ops = [&]() {
     std::vector<cudaq::matrix_2> result;
-    for (auto degree : degrees) {
+    for (const auto &degree : degrees) {
       if (std::find(std::visit(beginFunc, op), std::visit(endFunc, op),
                     degree) == std::visit(endFunc, op),
           degree) {
@@ -230,6 +234,8 @@ _padded_op(cudaq::MatrixArithmetics arithmetics,
             arithmetics.evaluate(cudaq::elementary_operator::identity(degree))
                 .matrix());
       }
+      matrix_2 mat = std::visit(getMatrix, op);
+      result.push_back(mat);
     }
     return result;
   };
@@ -241,33 +247,44 @@ _padded_op(cudaq::MatrixArithmetics arithmetics,
   return result;
 }
 
-cudaq::matrix_2 product_operator::m_evaluate(MatrixArithmetics arithmetics,
-                                             bool pad_terms) {
+cudaq::matrix_2 product_operator::m_evaluate(
+    MatrixArithmetics arithmetics, std::map<int, int> dimensions,
+    std::map<std::string, std::complex<double>> parameters, bool pad_terms) {
   if (pad_terms) {
     // Sorting the degrees to avoid unnecessary permutations during the padding.
-    // auto degrees;
     std::set<int> noncanon_set;
-    // for (auto op : m_terms) {
-    //   for (auto degree : op.degrees()) {
-    //     noncanon_set.insert(degree);
-    //   }
-    // }
-    // std::vector<int> noncanon_degrees(noncanon_set.begin(),
-    // noncanon_set.end()); auto degrees =
-    // _OperatorHelpers::canonicalize_degrees(noncanon_degrees); auto evaluated
-    // = _padded_op(arithmetics, m_terms[0], degrees);
+    for (auto op : m_elementary_ops) {
+      for (auto degree : op.degrees) {
+        noncanon_set.insert(degree);
+      }
+    }
+    std::vector<int> noncanon_degrees(noncanon_set.begin(), noncanon_set.end());
+    auto degrees = _OperatorHelpers::canonicalize_degrees(noncanon_degrees);
+    auto evaluated =
+        EvaluatedMatrix(degrees, _padded_op(arithmetics, m_elementary_ops[0],
+                                            degrees, dimensions, parameters));
 
-    // for (auto op_idx = m_terms.begin() + 1; op_idx != m_terms.end();
-    // ++op_idx) {
-    //   auto op = m_terms[*op_idx];
-    //   // auto op = std::visit(getTerm, m_terms, op_idx);
-    //   // if (op.degrees().size() != 1) {
-    //   //   //
-    //   // }
-    // }
+    for (auto op_idx = 1; op_idx <= m_elementary_ops.size(); ++op_idx) {
+      auto op = m_elementary_ops[op_idx];
+      if (op.degrees.size() != 1) {
+        auto padded_mat =
+            EvaluatedMatrix(degrees, _padded_op(arithmetics, op, degrees,
+                                                dimensions, parameters));
+        evaluated = arithmetics.mul(evaluated, padded_mat);
+      }
+    }
+    /// FIXME: Need to multiply through by the scalar operators!!!!!
+    return evaluated.matrix();
+  } else {
+    auto evaluated = arithmetics.evaluate(m_elementary_ops[0]);
+    for (auto op_idx = 1; op_idx <= m_elementary_ops.size(); ++op_idx) {
+      auto op = m_elementary_ops[op_idx];
+      auto mat = op.to_matrix(dimensions, parameters);
+      evaluated = arithmetics.mul(evaluated, EvaluatedMatrix(op.degrees, mat));
+    }
+    /// FIXME: Need to multiply through by the scalar operators!!!!!
+    return evaluated.matrix();
   }
-
-  return cudaq::matrix_2(2, 2);
 }
 
 } // namespace cudaq

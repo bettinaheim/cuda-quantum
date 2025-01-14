@@ -7,6 +7,7 @@
  ******************************************************************************/
 
 #include "cudaq/operators.h"
+#include "helpers.cpp"
 
 #include <iostream>
 #include <set>
@@ -16,7 +17,8 @@ namespace cudaq {
 /// Elementary Operator constructor.
 elementary_operator::elementary_operator(std::string operator_id,
                                          std::vector<int> degrees)
-    : id(operator_id), degrees(degrees) {}
+    : id(operator_id),
+      degrees(_OperatorHelpers::canonicalize_degrees(degrees)) {}
 elementary_operator::elementary_operator(const elementary_operator &other)
     : m_ops(other.m_ops), expected_dimensions(other.expected_dimensions),
       degrees(other.degrees), id(other.id) {}
@@ -273,6 +275,7 @@ elementary_operator elementary_operator::squeeze(int degree) {
 matrix_2 elementary_operator::to_matrix(
     std::map<int, int> dimensions,
     std::map<std::string, std::complex<double>> parameters) {
+  /// TODO: Do a dimension check on the passed in degrees for safety.
   return m_ops[id].generator(dimensions, parameters);
 }
 

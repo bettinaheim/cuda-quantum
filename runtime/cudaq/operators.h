@@ -153,8 +153,10 @@ private:
   std::vector<std::variant<scalar_operator, elementary_operator>> m_terms;
   std::vector<scalar_operator> m_scalar_ops;
   std::vector<elementary_operator> m_elementary_ops;
-  cudaq::matrix_2 m_evaluate(MatrixArithmetics arithmetics,
-                             bool pad_terms = true);
+  cudaq::matrix_2
+  m_evaluate(MatrixArithmetics arithmetics, std::map<int, int> dimensions,
+             std::map<std::string, std::complex<double>> parameters,
+             bool pad_terms = true);
 
 public:
   product_operator() = default;
