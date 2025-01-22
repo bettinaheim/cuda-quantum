@@ -54,6 +54,8 @@ public:
     _callback_func = other._callback_func;
   }
 
+  bool operator!() { return (!_callback_func); }
+
   matrix_2
   operator()(std::map<int, int> degrees,
              std::map<std::string, std::complex<double>> parameters) const {

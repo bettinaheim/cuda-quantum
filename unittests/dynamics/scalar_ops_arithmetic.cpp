@@ -63,6 +63,9 @@ TEST(ExpressionTester, checkScalarOpsArithmeticDoubles) {
     auto got_value_third = third_op.evaluate({{"value", value_1}});
     auto want_value = value_0 + value_1 + value_1 + value_0;
     EXPECT_NEAR(std::abs(got_value_third), std::abs(want_value), 1e-5);
+
+    /// TODO: Check the original scalar op values again
+    /// TODO: Check operator assignment
   }
 
   // - : Constant scalar operator.

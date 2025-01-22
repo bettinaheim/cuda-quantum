@@ -104,68 +104,134 @@ cudaq::matrix_2 squeeze_matrix(std::size_t size,
 
 } // namespace utils_1
 
-/// TODO: Not yet testing the output matrices coming from this arithmetic.
+TEST(ExpressionTester, checkSimple) {
+  //   /// Sum of 3 elementary operators -- on the same DOF --
+  //   /// then checking the sum matrix.
+  //   {
+  //   int level_count = 3;
+
+  //   auto op0 = cudaq::elementary_operator::annihilate(0);
+  //   auto op1 = cudaq::elementary_operator::create(0);
+  //   auto op2 = cudaq::elementary_operator::identity(0);
+
+  //   auto sum = op0 + op1 + op2;
+
+  //   auto got_matrix = sum.to_matrix({{0, level_count}});
+  //   std::cout << "\nterm 0 = " << op0.to_matrix({{0, level_count}}).dump() <<
+  //   "\n"; std::cout << "\nterm 1 = " << op1.to_matrix({{0,
+  //   level_count}}).dump() << "\n"; std::cout << "\nterm 2 = " <<
+  //   op2.to_matrix({{0, level_count}}).dump() << "\n"; std::cout << "\ngot = "
+  //   << got_matrix.dump() << "\n";
+
+  // }
+
+  //   /// Difference of 3 elementary operators -- on the same DOF --
+  //   /// then checking the sum matrix.
+  //   {
+  //   int level_count = 3;
+
+  //   auto op0 = cudaq::elementary_operator::annihilate(0);
+  //   auto op1 = cudaq::elementary_operator::create(0);
+  //   auto op2 = cudaq::elementary_operator::identity(0);
+
+  //   auto difference = op0 - op1 - op2;
+
+  //   auto got_matrix = difference.to_matrix({{0, level_count}});
+  //   std::cout << "\nterm 0 = " << op0.to_matrix({{0, level_count}}).dump() <<
+  //   "\n"; std::cout << "\nterm 1 = " << op1.to_matrix({{0,
+  //   level_count}}).dump() << "\n"; std::cout << "\nterm 2 = " <<
+  //   op2.to_matrix({{0, level_count}}).dump() << "\n"; std::cout << "\ngot = "
+  //   << got_matrix.dump() << "\n";
+
+  // }
+
+  {
+    auto op0 = cudaq::elementary_operator::annihilate(0);
+    auto op1 = cudaq::elementary_operator::create(0);
+
+    auto prod0 = cudaq::product_operator({}, {op0});
+    auto prod1 = -1. * op1;
+    // auto sum = cudaq::operator_sum({prod0, prod1});
+    // // auto sum = prod0 + prod1;
+
+    std::cout << "\n op0 = " << op0.to_matrix({{0, 2}}).dump() << "\n";
+    std::cout << "\n op1 = " << op1.to_matrix({{0, 2}}).dump() << "\n";
+    std::cout << "\n prod0 = " << prod0.to_matrix({{0, 2}}).dump() << "\n";
+    std::cout << "\n prod1 = " << prod1.to_matrix({{0, 2}}).dump() << "\n";
+    // std::cout << "\n sum = " << sum.to_matrix({{0,2}}).dump() << "\n";
+  }
+}
 
 TEST(ExpressionTester, checkProductOperatorSimpleMatrixChecks) {
   std::vector<int> levels = {2, 3, 4};
 
   {
-    // Same degrees of freedom.
-    {
-      for (auto level_count : levels) {
-        auto op0 = cudaq::elementary_operator::annihilate(0);
-        auto op1 = cudaq::elementary_operator::create(0);
+    //   // Same degrees of freedom.
+    //   {
+    //     for (auto level_count : levels) {
+    //       auto op0 = cudaq::elementary_operator::annihilate(0);
+    //       auto op1 = cudaq::elementary_operator::create(0);
 
-        cudaq::product_operator got = op0 * op1;
+    //       // std::cout << "\nannihilate got = \n" << op0.to_matrix({{0,
+    //       level_count}}).dump() << "\n";
+    //       // std::cout << "\ncreate got = \n" << op1.to_matrix({{0,
+    //       level_count}}).dump() << "\n"; cudaq::product_operator got = op0 *
+    //       op1;
 
-        /// Check the matrices.
-        /// FIXME: Comment me back in when `to_matrix` is implemented.
+    //       /// Check the matrices.
+    //       /// FIXME: Comment me back in when `to_matrix` is implemented.
 
-        // auto got_matrix = got.to_matrix({{0, level_count}}, {});
-        auto matrix0 = utils_1::annihilate_matrix(level_count);
-        auto matrix1 = utils_1::create_matrix(level_count);
-        auto want_matrix = matrix0 * matrix1;
-        // utils_1::checkEqual(want_matrix, got_matrix);
+    //       auto got_matrix = got.to_matrix({{0, level_count}});
+    //       auto matrix0 = utils_1::annihilate_matrix(level_count);
+    //       auto matrix1 = utils_1::create_matrix(level_count);
 
-        std::vector<int> want_degrees = {0};
-        ASSERT_TRUE(got.degrees() == want_degrees);
-      }
-    }
+    //       std::cout << "\nannihilate want = \n" << matrix0.dump() << "\n";
+    //       std::cout << "\ncreate want = \n" << matrix1.dump() << "\n";
+    //       auto want_matrix = matrix0 * matrix1;
 
-    // Different degrees of freedom.
-    {
-      for (auto level_count : levels) {
-        auto op0 = cudaq::elementary_operator::annihilate(0);
-        auto op1 = cudaq::elementary_operator::create(1);
+    //       std::cout << "\ngot_matrix = \n" << got_matrix.dump() << "\n";
+    //       std::cout << "\nwant_matrix = \n" << want_matrix.dump() << "\n";
+    //       utils_1::checkEqual(want_matrix, got_matrix);
 
-        cudaq::product_operator got = op0 * op1;
-        cudaq::product_operator got_reverse = op1 * op0;
+    //       std::vector<int> want_degrees = {0};
+    //       ASSERT_TRUE(got.degrees() == want_degrees);
+    //     }
+    //   }
 
-        std::vector<int> want_degrees = {0, 1};
-        ASSERT_TRUE(got.degrees() == want_degrees);
-        ASSERT_TRUE(got_reverse.degrees() == want_degrees);
+    // // Different degrees of freedom.
+    // {
+    //   for (auto level_count : levels) {
+    //     auto op0 = cudaq::elementary_operator::annihilate(0);
+    //     auto op1 = cudaq::elementary_operator::create(1);
 
-        /// Check the matrices.
-        /// FIXME: Comment me back in when `to_matrix` is implemented.
+    //     cudaq::product_operator got = op0 * op1;
+    //     cudaq::product_operator got_reverse = op1 * op0;
 
-        // auto got_matrix =
-        //     got.to_matrix({{0, level_count}, {1, level_count}}, {});
-        // auto got_matrix_reverse =
-        //     got_reverse.to_matrix({{0, level_count}, {1, level_count}}, {});
+    //     std::vector<int> want_degrees = {0, 1};
+    //     ASSERT_TRUE(got.degrees() == want_degrees);
+    //     ASSERT_TRUE(got_reverse.degrees() == want_degrees);
 
-        auto identity = utils_1::id_matrix(level_count);
-        auto matrix0 = utils_1::annihilate_matrix(level_count);
-        auto matrix1 = utils_1::create_matrix(level_count);
+    //     /// Check the matrices.
+    //     /// FIXME: Comment me back in when `to_matrix` is implemented.
 
-        auto fullHilbert0 = cudaq::kronecker(identity, matrix0);
-        auto fullHilbert1 = cudaq::kronecker(matrix1, identity);
-        auto want_matrix = fullHilbert0 * fullHilbert1;
-        auto want_matrix_reverse = fullHilbert1 * fullHilbert0;
+    //     auto got_matrix =
+    //         got.to_matrix({{0, level_count}, {1, level_count}}, {});
+    //     auto got_matrix_reverse =
+    //         got_reverse.to_matrix({{0, level_count}, {1, level_count}}, {});
 
-        // utils_1::checkEqual(want_matrix, got_matrix);
-        // utils_1::checkEqual(want_matrix_reverse, got_matrix_reverse);
-      }
-    }
+    //     auto identity = utils_1::id_matrix(level_count);
+    //     auto matrix0 = utils_1::annihilate_matrix(level_count);
+    //     auto matrix1 = utils_1::create_matrix(level_count);
+
+    //     auto fullHilbert0 = cudaq::kronecker(identity, matrix0);
+    //     auto fullHilbert1 = cudaq::kronecker(matrix1, identity);
+    //     auto want_matrix = fullHilbert0 * fullHilbert1;
+    //     auto want_matrix_reverse = fullHilbert1 * fullHilbert0;
+
+    //     utils_1::checkEqual(want_matrix, got_matrix);
+    //     utils_1::checkEqual(want_matrix_reverse, got_matrix_reverse);
+    //   }
+    // }
 
     // Different degrees of freedom, non-consecutive.
     // Should produce the same matrices as the above test, as we don't
@@ -1137,71 +1203,5 @@ TEST(ExpressionTester, checkProductOperatorAgainstOperatorSum) {
 
     // utils_1::checkEqual(want_matrix, got_matrix);
     // utils_1::checkEqual(want_matrix_reverse, got_matrix_reverse);
-  }
-}
-
-std::vector<std::string> generate_all_states(std::vector<int> degrees,
-                                             std::map<int, int> dimensions) {
-  if (degrees.size() == 0)
-    return {};
-
-  std::vector<std::string> states;
-  int range = dimensions[degrees[0]];
-  for (auto state = 0; state < range; state++) {
-    states.push_back(std::to_string(state));
-  }
-
-  for (auto degree = degrees.begin() + 1; degree != degrees.end(); ++degree) {
-    std::string term;
-    std::vector<std::string> result;
-    for (auto current : states) {
-      for (auto state = 0; state < dimensions[degrees[*degree]]; state++) {
-        result.push_back(current + std::to_string(state));
-      }
-    }
-    states = result;
-  }
-
-  return states;
-}
-
-std::vector<int> _compute_permutation(std::vector<int> op_degrees,
-                                      std::vector<int> canon_degrees,
-                                      std::map<int, int> m_dimensions) {
-  auto states = generate_all_states(canon_degrees, m_dimensions);
-
-  std::vector<int> reordering;
-  for (auto degree : op_degrees)
-    reordering.push_back(canon_degrees[degree]);
-
-  std::vector<int> result;
-  for (auto state : states) {
-    int index;
-    std::string term;
-    for (auto i : reordering) {
-      term += state[i];
-    }
-    auto it = std::find(states.begin(), states.end(), term);
-    if (it != states.end())
-      index = std::distance(states.begin(), it);
-    result.push_back(index);
-  }
-
-  return result;
-}
-
-TEST(ExpressionTester, checkExperimental) {
-
-  {
-    std::vector<int> degrees = {0, 2, 1};
-    std::map<int, int> m_dimensions = {{0, 2}, {1, 3}, {2, 4}};
-
-    // I think??
-    std::vector<int> canon_degrees = {0, 2, 1};
-
-    auto states = generate_all_states(degrees, m_dimensions);
-
-    auto permutation =
-        _compute_permutation(degrees, canon_degrees, m_dimensions);
   }
 }

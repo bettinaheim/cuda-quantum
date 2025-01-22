@@ -40,11 +40,16 @@ class operator_sum {
 private:
   std::vector<product_operator> m_terms;
 
-  std::vector<std::tuple<scalar_operator, elementary_operator>>
-  canonicalize_product(product_operator &prod) const;
+  std::tuple<std::vector<scalar_operator>, std::vector<elementary_operator>>
+  m_canonicalize_product(product_operator &prod) const;
 
-  std::vector<std::tuple<scalar_operator, elementary_operator>>
-  _canonical_terms() const;
+  std::tuple<std::vector<scalar_operator>, std::vector<elementary_operator>>
+  m_canonical_terms() const;
+
+  cudaq::matrix_2
+  m_evaluate(MatrixArithmetics arithmetics, std::map<int, int> dimensions,
+             std::map<std::string, std::complex<double>> parameters,
+             bool pad_terms = true);
 
 public:
   /// @brief Empty constructor that a user can aggregate terms into.
@@ -75,9 +80,9 @@ public:
   ///                      degrees of freedom: `{0:2, 1:2}`.
   /// @arg `parameters` : A map of the paramter names to their concrete, complex
   /// values.
-  matrix_2 to_matrix(
-      const std::map<int, int> &dimensions,
-      const std::map<std::string, std::complex<double>> &params = {}) const;
+  matrix_2
+  to_matrix(const std::map<int, int> &dimensions,
+            const std::map<std::string, std::complex<double>> &parameters = {});
 
   // Arithmetic operators
   operator_sum operator+(const operator_sum &other) const;
@@ -146,11 +151,11 @@ public:
 /// quantum kernels, but they provide methods to convert them to data types
 /// that can.
 class product_operator : public operator_sum {
+  friend class operator_sum;
   friend class scalar_operator;
   friend class elementary_operator;
 
 private:
-  std::vector<std::variant<scalar_operator, elementary_operator>> m_terms;
   std::vector<scalar_operator> m_scalar_ops;
   std::vector<elementary_operator> m_elementary_ops;
   cudaq::matrix_2
@@ -168,10 +173,6 @@ public:
   //                         evaluating the operator expression.
   product_operator(std::vector<scalar_operator> scalars,
                    std::vector<elementary_operator> atomic_operators);
-
-  product_operator(
-      std::vector<std::variant<scalar_operator, elementary_operator>>
-          atomic_operators);
 
   // Arithmetic overloads against all other operator types.
   operator_sum operator+(std::complex<double> other);
@@ -229,8 +230,9 @@ public:
   ///                      degrees of freedom: `{0:2, 1:2}`.
   /// @arg `parameters` : A map of the paramter names to their concrete, complex
   /// values.
-  matrix_2 to_matrix(std::map<int, int> dimensions,
-                     std::map<std::string, std::complex<double>> parameters);
+  matrix_2
+  to_matrix(std::map<int, int> dimensions,
+            std::map<std::string, std::complex<double>> parameters = {});
 
   /// @brief Creates a representation of the operator as a `cudaq::pauli_word`
   /// that can be passed as an argument to quantum kernels.
@@ -242,7 +244,7 @@ public:
 
   /// @brief Return the number of operator terms that make up this product
   /// operator.
-  int term_count() const { return m_terms.size(); }
+  int term_count() const { return m_elementary_ops.size() + m_scalar_ops.size(); }
 };
 
 class elementary_operator : public product_operator {
@@ -307,8 +309,9 @@ public:
   ///                      that is, the dimension of each degree of freedom
   ///                      that the operator acts on. Example for two, 2-level
   ///                      degrees of freedom: `{0 : 2, 1 : 2}`.
-  matrix_2 to_matrix(std::map<int, int> dimensions,
-                     std::map<std::string, std::complex<double>> parameters);
+  matrix_2
+  to_matrix(std::map<int, int> dimensions,
+            std::map<std::string, std::complex<double>> parameters = {});
 
   // Predefined operators.
   static elementary_operator identity(int degree);
@@ -380,10 +383,6 @@ public:
 
 class scalar_operator : public product_operator {
 private:
-  // If someone gave us a constant value, we will just return that
-  // directly to them when they call `evaluate`.
-  std::complex<double> m_constant_value;
-
   // Only populated when we've performed arithmetic between various
   // scalar operators.
   std::vector<scalar_operator> m_operators_to_compose;
@@ -393,11 +392,14 @@ private:
   /// and returns a number.
   ScalarCallbackFunction m_generator;
 
+  bool m_generator_defined = false;
+
 public:
   /// @brief Constructor that just takes a callback function with no
   /// arguments.
   scalar_operator(ScalarCallbackFunction &&create) {
     m_generator = ScalarCallbackFunction(create);
+    m_generator_defined = true;
   }
 
   /// @brief Constructor that just takes and returns a complex double value.
@@ -457,12 +459,13 @@ public:
 
   /// @brief Return the scalar operator as a concrete complex value.
   std::complex<double>
-  evaluate(std::map<std::string, std::complex<double>> parameters);
+  evaluate(std::map<std::string, std::complex<double>> parameters = {});
 
   // Return the scalar operator as a 1x1 matrix. This is needed for
   // compatability with the other inherited classes.
-  matrix_2 to_matrix(std::map<int, int> dimensions,
-                     std::map<std::string, std::complex<double>> parameters);
+  matrix_2
+  to_matrix(std::map<int, int> dimensions,
+            std::map<std::string, std::complex<double>> parameters = {});
 
   // /// @brief Returns true if other is a scalar operator with the same
   // /// generator.

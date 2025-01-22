@@ -173,3 +173,10 @@ cudaq::matrix_2 cudaq::matrix_2::exponential() {
   }
   return result;
 }
+
+cudaq::matrix_2 cudaq::matrix_2::identity(const std::size_t rows) {
+  auto result = cudaq::matrix_2(rows, rows);
+  for (std::size_t i = 0; i < rows; i++)
+    result[{i, i}] = 1. + 0.0j;
+  return result;
+}
