@@ -280,38 +280,26 @@ matrix_2 elementary_operator::to_matrix(
 
 /// Elementary Operator Arithmetic.
 
-operator_sum elementary_operator::operator+(scalar_operator other) {
+operator_sum elementary_operator::operator+(scalar_operator &other) {
   // Operator sum is composed of product operators, so we must convert
   // both underlying types to `product_operators` to perform the arithmetic.
   return operator_sum({product_operator({}, {*this}), product_operator({other}, {})});
 }
 
-operator_sum elementary_operator::operator-(scalar_operator other) {
+/// FIXME:
+operator_sum elementary_operator::operator-(scalar_operator &other) {
   std::cout << "\n in elementary - scalar \n";
   // Operator sum is composed of product operators, so we must convert
   // both underlying types to `product_operators` to perform the arithmetic.
-  std::vector<elementary_operator> _this = {*this};
-  // std::vector<std::variant<scalar_operator, elementary_operator>> _other = {
-  //     -1. * other};
-  scalar_operator negateOp = -1.0 * other;
-  std::vector<scalar_operator> _other = {negateOp};
-
-  auto seg_fault_test = negateOp.to_matrix({{0,3}});
-  std::cout << "\nseg fault test = \n" << seg_fault_test.dump() << "\n";
-
-  // auto prod0 = product_operator(_this);
-  // auto prod1 = product_operator(_other);
-  // std::cout << "\nprod0 = \n" << prod0.to_matrix({{0, 3}}).dump() << "\n";
-  // std::cout << "\nprod1 = \n" << prod1.to_matrix({{0, 3}}).dump() << "\n";
-  // auto result = prod0 - prod1;
-  // std::cout << "\nresult = \n" << result.to_matrix({{0,3}}).dump() << "\n";
-  // // return operator_sum({prod0, prod1});
-
-  return operator_sum({product_operator({}, _this), product_operator(_other, {})});
-  // return operator_sum({product_operator(_this), product_operator({},{})});
+  auto result = operator_sum({product_operator({}, {*this}), product_operator({-1.0 * other}, {})});
+  std::cout << "\n first term prod = \n" << product_operator({}, {*this}).to_matrix({{0,3}}).dump() << "\n";
+  std::cout << "\n second term prod = \n" << product_operator({-1.0 * other}, {}).to_matrix({{0,3}}).dump() << "\n";
+  std::cout << "\n result matrix = \n" << result.to_matrix({{0,3}}).dump() << "\n";
+  return result;
+  // return operator_sum({product_operator({}, {*this}), product_operator({-1.0 * other}, {})});
 }
 
-product_operator elementary_operator::operator*(scalar_operator other) {
+product_operator elementary_operator::operator*(scalar_operator &other) {
   return product_operator({other}, {*this});
 }
 
@@ -353,41 +341,41 @@ product_operator elementary_operator::operator*(double other) {
   return *this * value;
 }
 
-operator_sum operator+(std::complex<double> other, elementary_operator self) {
+operator_sum operator+(std::complex<double> other, elementary_operator &self) {
   auto other_scalar = scalar_operator(other);
   std::vector<elementary_operator> _self = {self};
   std::vector<scalar_operator> _other = {other_scalar};
   return operator_sum({product_operator(_other, {}), product_operator({}, _self)});
 }
 
-operator_sum operator-(std::complex<double> other, elementary_operator self) {
+operator_sum operator-(std::complex<double> other, elementary_operator &self) {
   auto other_scalar = scalar_operator(other);
   std::vector<scalar_operator> _other = {other_scalar};
   return operator_sum({product_operator(_other, {}), (-1. * self)});
 }
 
 product_operator operator*(std::complex<double> other,
-                           elementary_operator self) {
+                           elementary_operator &self) {
   auto other_scalar = scalar_operator(other);
   std::vector<elementary_operator> _self = {self};
   std::vector<scalar_operator> _other = {other_scalar};
   return product_operator(_other, _self);
 }
 
-operator_sum operator+(double other, elementary_operator self) {
+operator_sum operator+(double other, elementary_operator &self) {
   auto other_scalar = scalar_operator(other);
   std::vector<elementary_operator> _self = {self};
   std::vector<scalar_operator> _other = {other_scalar};
   return operator_sum({product_operator({_other, {}}), product_operator({}, _self)});
 }
 
-operator_sum operator-(double other, elementary_operator self) {
+operator_sum operator-(double other, elementary_operator &self) {
   auto other_scalar = scalar_operator(other);
   std::vector<scalar_operator> _other = {other_scalar};
   return operator_sum({product_operator(_other, {}), (-1. * self)});
 }
 
-product_operator operator*(double other, elementary_operator self) {
+product_operator operator*(double other, elementary_operator &self) {
   auto other_scalar = scalar_operator(other);
   std::vector<elementary_operator> _self = {self};
   std::vector<scalar_operator> _other = {other_scalar};
@@ -410,33 +398,35 @@ operator_sum elementary_operator::operator-(elementary_operator other) {
   return operator_sum({product_operator({}, _this), (-1. * other)});
 }
 
-operator_sum elementary_operator::operator+(operator_sum other) {
+operator_sum elementary_operator::operator+(operator_sum &other) {
   std::vector<product_operator> _prods = {product_operator({}, {*this})};
   auto selfOpSum = operator_sum(_prods);
   return selfOpSum + other;
 }
 
-operator_sum elementary_operator::operator-(operator_sum other) {
+operator_sum elementary_operator::operator-(operator_sum &other) {
   std::vector<product_operator> _prods = {product_operator({}, {*this})};
   auto selfOpSum = operator_sum(_prods);
   return selfOpSum - other;
 }
 
-operator_sum elementary_operator::operator*(operator_sum other) {
+operator_sum elementary_operator::operator*(operator_sum &other) {
   std::vector<product_operator> _prods = {product_operator({}, {*this})};
   auto selfOpSum = operator_sum(_prods);
   return selfOpSum * other;
 }
 
-operator_sum elementary_operator::operator+(product_operator other) {
+operator_sum elementary_operator::operator+(product_operator &other) {
   return operator_sum({product_operator({}, {*this}), other});
 }
 
-operator_sum elementary_operator::operator-(product_operator other) {
-  return *this + (-1. * other);
+operator_sum elementary_operator::operator-(product_operator &other) {
+  product_operator negative_other(other);
+  negative_other *= -1.0;
+  return *this + negative_other;
 }
 
-product_operator elementary_operator::operator*(product_operator other) {
+product_operator elementary_operator::operator*(product_operator &other) {
   std::vector<elementary_operator> other_elementary_ops = other.m_elementary_ops;
   /// Insert this elementary operator to the front of the terms list.
   other_elementary_ops.insert(other_elementary_ops.begin(), *this);

@@ -102,6 +102,7 @@ cudaq::matrix_2 squeeze_matrix(std::size_t size,
 
 } // namespace utils_2
 
+
 TEST(ExpressionTester, checkOperatorSumAgainstScalarOperator) {
   int level_count = 3;
   std::complex<double> value = 0.2 + 0.2j;

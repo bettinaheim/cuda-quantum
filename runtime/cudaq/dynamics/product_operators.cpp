@@ -17,37 +17,17 @@
 
 namespace cudaq {
 
-// /// Product Operator constructors.
-// product_operator::product_operator(
-//     std::vector<std::variant<scalar_operator, elementary_operator>>
-//         atomic_operators)
-//     : m_terms(atomic_operators) {
-//   for (auto term : m_terms) {
-//     if (std::holds_alternative<scalar_operator>(term)) {
-//       auto cast_term = std::get<scalar_operator>(term);
-//       m_scalar_ops.push_back(cast_term);
-//     } else if (std::holds_alternative<elementary_operator>(term)) {
-//       auto cast_term = std::get<elementary_operator>(term);
-//       m_elementary_ops.push_back(cast_term);
-//     }
-//   }
-// }
-
 product_operator::product_operator(
     std::vector<scalar_operator> scalars,
     std::vector<elementary_operator> atomic_operators)
     : m_scalar_ops(scalars), m_elementary_ops(atomic_operators) {}
 
+product_operator::product_operator(product_operator &other) : m_scalar_ops(other.m_scalar_ops), m_elementary_ops(other.m_elementary_ops) {}
+product_operator::product_operator(const product_operator &other) : m_scalar_ops(other.m_scalar_ops), m_elementary_ops(other.m_elementary_ops) {}
+
 // Degrees property
 std::vector<int> product_operator::degrees() const {
   std::set<int> unique_degrees;
-  // // The variant type makes it difficult
-  // auto beginFunc = [](auto &&t) { return t.degrees.begin(); };
-  // auto endFunc = [](auto &&t) { return t.degrees.end(); };
-  // for (const auto &term : m_terms) {
-  //   unique_degrees.insert(std::visit(beginFunc, term),
-  //                         std::visit(endFunc, term));
-  // }
   for (const auto &term : m_elementary_ops)
     unique_degrees.insert(term.degrees.begin(), term.degrees.end());
 
@@ -59,42 +39,47 @@ std::vector<int> product_operator::degrees() const {
   return std::vector<int>(unique_degrees.begin(), unique_degrees.end());
 }
 
-operator_sum product_operator::operator+(scalar_operator other) {
-  std::vector<scalar_operator> _other = {other};
-  return operator_sum({*this, product_operator(_other, {})});
+operator_sum product_operator::operator+(scalar_operator &other) {
+  return operator_sum({*this, product_operator({other}, {})});
 }
 
-operator_sum product_operator::operator-(scalar_operator other) {
-  std::vector<scalar_operator> _other = {other};
-  return operator_sum({*this, -1. * product_operator(_other, {})});
+operator_sum product_operator::operator-(scalar_operator &other) {
+  return operator_sum({*this, -1. * product_operator({other}, {})});
 }
 
-product_operator product_operator::operator*(scalar_operator other) {
+product_operator product_operator::operator*(scalar_operator &other) {
   std::vector<scalar_operator> combined_scalars = m_scalar_ops;
   combined_scalars.push_back(other);  
   return product_operator(combined_scalars, m_elementary_ops);
 }
 
-product_operator product_operator::operator*=(scalar_operator other) {
-  *this = *this * other;
-  return *this;
+void product_operator::operator*=(scalar_operator other) {
+  m_scalar_ops.push_back(other);
 }
 
 operator_sum product_operator::operator+(std::complex<double> other) {
-  return *this + scalar_operator(other);
+  return operator_sum({*this, product_operator({scalar_operator(other)}, {})});
 }
 
 operator_sum product_operator::operator-(std::complex<double> other) {
-  return *this - scalar_operator(other);
+  return operator_sum({*this, product_operator({scalar_operator(-1.0), scalar_operator(other)}, {})});
 }
 
 product_operator product_operator::operator*(std::complex<double> other) {
-  return *this * scalar_operator(other);
+  std::vector<scalar_operator> combined_scalars = m_scalar_ops;
+  std::cout << "\n scalars size = " << m_scalar_ops.size() << "\n";
+  std::cout << "\n elementary size = " << m_elementary_ops.size() << "\n";
+  auto op = scalar_operator(other);
+  combined_scalars.push_back(op);  
+  std::cout << "\n combined scalars size = " << combined_scalars.size() << "\n";
+  auto result = product_operator(combined_scalars, m_elementary_ops);
+  std::cout << "\n result elementary size = " << result.m_elementary_ops.size() << "\n";
+  std::cout << "\n result scalar size = " << result.m_scalar_ops.size() << "\n";
+  return result;
 }
 
-product_operator product_operator::operator*=(std::complex<double> other) {
-  *this = *this * scalar_operator(other);
-  return *this;
+void product_operator::operator*=(std::complex<double> other) {
+  m_scalar_ops.push_back(scalar_operator(other));
 }
 
 operator_sum operator+(std::complex<double> other, product_operator self) {
@@ -110,20 +95,21 @@ product_operator operator*(std::complex<double> other, product_operator self) {
 }
 
 operator_sum product_operator::operator+(double other) {
-  return *this + scalar_operator(other);
+  return operator_sum({*this, product_operator({scalar_operator(other)}, {})});
 }
 
 operator_sum product_operator::operator-(double other) {
-  return *this - scalar_operator(other);
+  return operator_sum({*this, product_operator({scalar_operator(-1.0), scalar_operator(other)}, {})});
 }
 
 product_operator product_operator::operator*(double other) {
-  return *this * scalar_operator(other);
+  std::vector<scalar_operator> combined_scalars = m_scalar_ops;
+  combined_scalars.push_back(scalar_operator(other));  
+  return product_operator(combined_scalars, m_elementary_ops);
 }
 
-product_operator product_operator::operator*=(double other) {
-  *this = *this * scalar_operator(other);
-  return *this;
+void product_operator::operator*=(double other) {
+  m_scalar_ops.push_back(scalar_operator(other));
 }
 
 operator_sum operator+(double other, product_operator self) {
@@ -138,18 +124,18 @@ product_operator operator*(double other, product_operator self) {
   return scalar_operator(other) * self;
 }
 
-operator_sum product_operator::operator+(product_operator other) {
+operator_sum product_operator::operator+(product_operator &other) {
   std::cout << "\n line 142, product + product \n";
   return operator_sum({*this, other});
 }
 
 /// FIXME: Need to confirm I've fixed a previous bug here.
-operator_sum product_operator::operator-(product_operator other) {
+operator_sum product_operator::operator-(product_operator &other) {
   std::cout << "\n line 148, product + product \n";
   return operator_sum({*this, (-1. * other)});
 }
 
-product_operator product_operator::operator*(product_operator other) {
+product_operator product_operator::operator*(product_operator &other) {
   std::vector<elementary_operator> combined_elementary = m_elementary_ops;
   std::vector<scalar_operator> combined_scalars = m_scalar_ops;
   combined_elementary.insert(combined_elementary.end(),
@@ -162,46 +148,45 @@ product_operator product_operator::operator*(product_operator other) {
   return product_operator(combined_scalars, combined_elementary);
 }
 
-product_operator product_operator::operator*=(product_operator other) {
+product_operator product_operator::operator*=(product_operator &other) {
   *this = *this * other;
   return *this;
 }
 
-operator_sum product_operator::operator+(elementary_operator other) {
+operator_sum product_operator::operator+(elementary_operator &other) {
   std::vector<elementary_operator> _other = {other};
   return operator_sum({*this, product_operator({}, _other)});
 }
 
-operator_sum product_operator::operator-(elementary_operator other) {
+operator_sum product_operator::operator-(elementary_operator &other) {
   std::vector<elementary_operator> _other = {other};
   return operator_sum({*this, product_operator({scalar_operator(-1.0)}, _other)});
 }
 
-product_operator product_operator::operator*(elementary_operator other) {
+product_operator product_operator::operator*(elementary_operator &other) {
   std::vector<elementary_operator> combined_elementary = m_elementary_ops;
   combined_elementary.push_back(other);  
   return product_operator(m_scalar_ops, combined_elementary);
 }
 
-product_operator product_operator::operator*=(elementary_operator other) {
-  *this = *this * other;
-  return *this;
+void product_operator::operator*=(elementary_operator other) {
+  m_elementary_ops.push_back(other);
 }
 
-operator_sum product_operator::operator+(operator_sum other) {
+operator_sum product_operator::operator+(operator_sum &other) {
   std::vector<product_operator> other_terms = other.m_terms;
   other_terms.insert(other_terms.begin(), *this);
   return operator_sum(other_terms);
 }
 
-operator_sum product_operator::operator-(operator_sum other) {
+operator_sum product_operator::operator-(operator_sum &other) {
   auto negative_other = (-1. * other);
   std::vector<product_operator> other_terms = negative_other.m_terms;
   other_terms.insert(other_terms.begin(), *this);
   return operator_sum(other_terms);
 }
 
-operator_sum product_operator::operator*(operator_sum other) {
+operator_sum product_operator::operator*(operator_sum &other) {
   std::vector<product_operator> other_terms = other.m_terms;
   for (auto &term : other_terms) {
     term = *this * term;
@@ -304,10 +289,13 @@ cudaq::matrix_2 product_operator::m_evaluate(
   // We will merge all of the scalar values stored in `m_scalar_ops`
   // into a single scalar value.
   std::cout << "\n merging the scalars in `product_operator::m_evaluate` \n";
-  auto merged_scalar = scalar_operator(1.0);
-  for (auto scalar : m_scalar_ops)
-    merged_scalar *= scalar;
-  return merged_scalar.evaluate(parameters) * result;
+  std::complex<double> merged_scalar = 1.0+0.0j;
+  std::cout << "\n number of scalar ops to merge = " << m_scalar_ops.size() << "\n";
+  for (auto &scalar : m_scalar_ops) {
+    std::cout << "\n merging in " << scalar.m_name << "\n";
+    merged_scalar *= scalar.evaluate(parameters);
+  }
+  return merged_scalar * result;
 }
 
 } // namespace cudaq

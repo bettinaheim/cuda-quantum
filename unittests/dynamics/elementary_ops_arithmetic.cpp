@@ -102,8 +102,6 @@ cudaq::matrix_2 squeeze_matrix(std::size_t size,
 
 } // namespace utils_0
 
-
-
 /// We get an error in the test body when evaluating
 /// the return of this function, since the `-1.0` value
 /// is going out of scope somewhere down the line in its
@@ -111,20 +109,6 @@ cudaq::matrix_2 squeeze_matrix(std::size_t size,
 cudaq::scalar_operator negate(cudaq::scalar_operator op) {
   return -1.0 * op;
 }
-
-TEST(ExpressionTester, checkRemoveMeReproduction) {
-  {
-    auto scalar = cudaq::scalar_operator(1.0);
-    auto negative = negate(scalar);
-    auto positive_again = -1.0 * negative;
-
-    EXPECT_EQ(-1.0 * scalar.evaluate(), negative.evaluate());
-    EXPECT_EQ(scalar.evaluate(), positive_again.evaluate());
-  }
-}
-
-
-
 
 TEST(ExpressionTester, checkElementaryAgainstDouble) {
   std::complex<double> value = 0.125 + 0.125j;
@@ -184,6 +168,17 @@ TEST(ExpressionTester, checkElementaryAgainstDouble) {
 
     utils_0::checkEqual(want_matrix, got_matrix);
     utils_0::checkEqual(want_matrix_reverse, got_matrix_reverse);
+  }
+}
+
+TEST(ExpressionTester, checkIsolated) {
+  {  
+  auto self = cudaq::elementary_operator::number(0);
+  auto other = cudaq::scalar_operator(-1.0);
+  auto difference = self - other;
+
+  // auto matrix = difference.to_matrix({{0,3}});
+  // std::cout << "\ngot = \n" << matrix.dump() << "\n";
   }
 }
 

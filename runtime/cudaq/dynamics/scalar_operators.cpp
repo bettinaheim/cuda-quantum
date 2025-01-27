@@ -40,8 +40,10 @@ scalar_operator::scalar_operator(double value) {
 
 std::complex<double> scalar_operator::evaluate(
     std::map<std::string, std::complex<double>> parameters) {
-  std::cout << "\n in `scalar_operator::evaluate` \n";
+  std::cout << "\n in `scalar_operator::evaluate` for term " << m_name << "\n";
   if (!m_generator_defined)
+    throw std::runtime_error("\n generator bool is false. \n");
+  if (!m_generator)
     throw std::runtime_error("\n generator not defined. \n");
   return m_generator(parameters);
 }
@@ -58,7 +60,7 @@ matrix_2 scalar_operator::to_matrix(
 
 #define ARITHMETIC_OPERATIONS_COMPLEX_DOUBLES(op)                              \
   scalar_operator operator op(std::complex<double> other,                      \
-                              scalar_operator self) {                          \
+                              scalar_operator &self) {                          \
     std::cout << "\n in complex<double> op scalar\n"; \
     /* Create an operator for the complex double value. */                     \
     auto otherOperator = scalar_operator(other);                               \
@@ -82,7 +84,7 @@ matrix_2 scalar_operator::to_matrix(
   }
 
 #define ARITHMETIC_OPERATIONS_COMPLEX_DOUBLES_REVERSE(op)                      \
-  scalar_operator operator op(scalar_operator self,                            \
+  scalar_operator operator op(scalar_operator &self,                            \
                               std::complex<double> other) {                    \
     std::cout << "\n in scalar op complex<double>\n"; \
     /* Create an operator for the complex double value. */                     \
@@ -135,13 +137,13 @@ matrix_2 scalar_operator::to_matrix(
   }
 
 #define ARITHMETIC_OPERATIONS_DOUBLES(op)                                      \
-  scalar_operator operator op(double other, scalar_operator self) {            \
+  scalar_operator operator op(double other, scalar_operator &self) {            \
     std::complex<double> value(other, 0.0);                                    \
     return self op value;                                                      \
   }
 
 #define ARITHMETIC_OPERATIONS_DOUBLES_REVERSE(op)                              \
-  scalar_operator operator op(scalar_operator self, double other) {            \
+  scalar_operator operator op(scalar_operator &self, double other) {            \
     std::complex<double> value(other, 0.0);                                    \
     return value op self;                                                      \
   }
@@ -178,7 +180,7 @@ ARITHMETIC_OPERATIONS_DOUBLES_ASSIGNMENT(*=);
 ARITHMETIC_OPERATIONS_DOUBLES_ASSIGNMENT(/=);
 
 #define ARITHMETIC_OPERATIONS_SCALAR_OPS(op)                                   \
-  scalar_operator scalar_operator::operator op(scalar_operator other) {        \
+  scalar_operator scalar_operator::operator op(scalar_operator &other) {        \
     /* Create an operator that we will store the result in and return to the   \
      * user. */                                                                \
     scalar_operator returnOperator(other);                                            \
@@ -199,7 +201,7 @@ ARITHMETIC_OPERATIONS_DOUBLES_ASSIGNMENT(/=);
   }
 
 #define ARITHMETIC_OPERATIONS_SCALAR_OPS_ASSIGNMENT(op)                        \
-  void operator op(scalar_operator &self, scalar_operator other) {             \
+  void operator op(scalar_operator &self, scalar_operator &other) {             \
     /* Need to move the existing generating function to a new operator so      \
      * that we can modify the generator in `self` in-place. */                 \
     scalar_operator selfCopy(self);                                            \
@@ -228,51 +230,51 @@ ARITHMETIC_OPERATIONS_SCALAR_OPS_ASSIGNMENT(/=);
 
 /// FIXME: The operator sum i'm creating here SEGFAULTS later on.
 /// The segfaults are actually coming from the product operators, however.
-operator_sum scalar_operator::operator+(elementary_operator other) {
+operator_sum scalar_operator::operator+(elementary_operator &other) {
   // Operator sum is composed of product operators, so we must convert
   // both underlying types to `product_operators` to perform the arithmetic.
   return operator_sum({product_operator({*this}, {}), product_operator({}, {other})});
 }
 
-operator_sum scalar_operator::operator-(elementary_operator other) {
+operator_sum scalar_operator::operator-(elementary_operator &other) {
   // Operator sum is composed of product operators, so we must convert
   // both underlying types to `product_operators` to perform the arithmetic.
   return operator_sum({product_operator({*this}, {}), (-1. * other)});
 }
 
-product_operator scalar_operator::operator*(elementary_operator other) {
+product_operator scalar_operator::operator*(elementary_operator &other) {
   return product_operator({*this}, {other});
 }
 
-operator_sum scalar_operator::operator+(product_operator other) {
+operator_sum scalar_operator::operator+(product_operator &other) {
   return operator_sum({product_operator({*this}, {}), other});
 }
 
-operator_sum scalar_operator::operator-(product_operator other) {
+operator_sum scalar_operator::operator-(product_operator& other) {
   return operator_sum({product_operator({*this}, {}), (-1. * other)});
 }
 
-product_operator scalar_operator::operator*(product_operator other) {
+product_operator scalar_operator::operator*(product_operator &other) {
   std::vector<scalar_operator> other_scalars = other.m_scalar_ops;
   /// Insert this scalar operator to the front of the terms list.
   other_scalars.insert(other_scalars.begin(), *this);
   return product_operator(other_scalars, {});
 }
 
-operator_sum scalar_operator::operator+(operator_sum other) {
+operator_sum scalar_operator::operator+(operator_sum &other) {
   std::vector<product_operator> other_terms = other.m_terms;
   other_terms.insert(other_terms.begin(), *this);
   return operator_sum(other_terms);
 }
 
-operator_sum scalar_operator::operator-(operator_sum other) {
+operator_sum scalar_operator::operator-(operator_sum &other) {
   auto negative_other = (-1. * other);
   std::vector<product_operator> other_terms = negative_other.m_terms;
   other_terms.insert(other_terms.begin(), *this);
   return operator_sum(other_terms);
 }
 
-operator_sum scalar_operator::operator*(operator_sum other) {
+operator_sum scalar_operator::operator*(operator_sum &other) {
   std::vector<product_operator> other_terms = other.m_terms;
   for (auto &term : other_terms)
     term = *this * term;

@@ -535,6 +535,9 @@ TEST(ExpressionTester, checkProductOperatorAgainstScalars) {
     auto product = value_0 * product_op;
     auto reverse = product_op * value_0;
 
+    std::cout << "\nproduct_op.term_count() = " << product_op.term_count() << "\n";
+    std::cout << "\nproduct.term_count() = " << product.term_count() << "\n";
+
     ASSERT_TRUE(product.term_count() == 3);
     ASSERT_TRUE(reverse.term_count() == 3);
 

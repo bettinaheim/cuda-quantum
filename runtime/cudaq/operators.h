@@ -60,6 +60,9 @@ public:
   /// This operator expression represents a sum of terms, where each term
   /// is a product of elementary and scalar operators.
   operator_sum(const std::vector<product_operator> &terms);
+  /// @brief Copy constructors.
+  operator_sum(operator_sum &other);
+  operator_sum(const operator_sum &other);
 
   operator_sum canonicalize() const;
 
@@ -87,40 +90,40 @@ public:
   // Arithmetic operators
   operator_sum operator+(const operator_sum &other) const;
   operator_sum operator-(const operator_sum &other) const;
-  operator_sum operator*(operator_sum &other) const;
-  operator_sum operator*=(operator_sum &other);
-  operator_sum operator+=(const operator_sum &other);
-  operator_sum operator-=(const operator_sum &other);
-  operator_sum operator*(const scalar_operator &other) const;
-  operator_sum operator+(const scalar_operator &other) const;
-  operator_sum operator-(const scalar_operator &other) const;
-  operator_sum operator*=(const scalar_operator &other);
-  operator_sum operator+=(const scalar_operator &other);
-  operator_sum operator-=(const scalar_operator &other);
+  operator_sum operator*(const operator_sum &other) const;
+  void operator*=(operator_sum other);
+  void operator+=(operator_sum other);
+  void operator-=(operator_sum other);
+  operator_sum operator*(scalar_operator &other) const;
+  operator_sum operator+(scalar_operator &other) const;
+  operator_sum operator-(scalar_operator &other) const;
+  void operator*=(scalar_operator other);
+  void operator+=(scalar_operator other);
+  void operator-=(scalar_operator other);
   operator_sum operator*(std::complex<double> other) const;
   operator_sum operator+(std::complex<double> other) const;
   operator_sum operator-(std::complex<double> other) const;
-  operator_sum operator*=(std::complex<double> other);
-  operator_sum operator+=(std::complex<double> other);
-  operator_sum operator-=(std::complex<double> other);
+  void operator*=(std::complex<double> other);
+  void operator+=(std::complex<double> other);
+  void operator-=(std::complex<double> other);
   operator_sum operator*(double other) const;
   operator_sum operator+(double other) const;
   operator_sum operator-(double other) const;
-  operator_sum operator*=(double other);
-  operator_sum operator+=(double other);
-  operator_sum operator-=(double other);
-  operator_sum operator*(const product_operator &other) const;
-  operator_sum operator+(const product_operator &other) const;
-  operator_sum operator-(const product_operator &other) const;
-  operator_sum operator*=(const product_operator &other);
-  operator_sum operator+=(const product_operator &other);
-  operator_sum operator-=(const product_operator &other);
-  operator_sum operator+(const elementary_operator &other) const;
-  operator_sum operator-(const elementary_operator &other) const;
-  operator_sum operator*(const elementary_operator &other) const;
-  operator_sum operator*=(const elementary_operator &other);
-  operator_sum operator+=(const elementary_operator &other);
-  operator_sum operator-=(const elementary_operator &other);
+  void operator*=(double other);
+  void operator+=(double other);
+  void operator-=(double other);
+  operator_sum operator*(product_operator &other) const;
+  operator_sum operator+(product_operator &other) const;
+  operator_sum operator-(product_operator &other) const;
+  void operator*=(product_operator other);
+  void operator+=(product_operator other);
+  void operator-=(product_operator other);
+  operator_sum operator+(elementary_operator &other) const;
+  operator_sum operator-(elementary_operator &other) const;
+  operator_sum operator*(elementary_operator &other) const;
+  void operator*=(elementary_operator other);
+  void operator+=(elementary_operator other);
+  void operator-=(elementary_operator other);
   friend operator_sum operator*(std::complex<double> other, operator_sum self);
   friend operator_sum operator+(std::complex<double> other, operator_sum self);
   friend operator_sum operator-(std::complex<double> other, operator_sum self);
@@ -167,6 +170,10 @@ public:
   product_operator() = default;
   ~product_operator() = default;
 
+  /// @brief Copy constructors.
+  product_operator(product_operator &other);
+  product_operator(const product_operator &other);
+
   // Constructor for an operator expression that represents a product
   // of scalar and elementary operators.
   // arg atomic_operators : The operators of which to compute the product when
@@ -178,26 +185,26 @@ public:
   operator_sum operator+(std::complex<double> other);
   operator_sum operator-(std::complex<double> other);
   product_operator operator*(std::complex<double> other);
-  product_operator operator*=(std::complex<double> other);
+  void operator*=(std::complex<double> other);
   operator_sum operator+(double other);
   operator_sum operator-(double other);
   product_operator operator*(double other);
-  product_operator operator*=(double other);
-  operator_sum operator+(scalar_operator other);
-  operator_sum operator-(scalar_operator other);
-  product_operator operator*(scalar_operator other);
-  product_operator operator*=(scalar_operator other);
-  operator_sum operator+(product_operator other);
-  operator_sum operator-(product_operator other);
-  product_operator operator*(product_operator other);
-  product_operator operator*=(product_operator other);
-  operator_sum operator+(elementary_operator other);
-  operator_sum operator-(elementary_operator other);
-  product_operator operator*(elementary_operator other);
-  product_operator operator*=(elementary_operator other);
-  operator_sum operator+(operator_sum other);
-  operator_sum operator-(operator_sum other);
-  operator_sum operator*(operator_sum other);
+  void operator*=(double other);
+  operator_sum operator+(scalar_operator &other);
+  operator_sum operator-(scalar_operator &other);
+  product_operator operator*(scalar_operator &other);
+  void operator*=(scalar_operator other);
+  operator_sum operator+(product_operator &other);
+  operator_sum operator-(product_operator &other);
+  product_operator operator*(product_operator &other);
+  product_operator operator*=(product_operator &other);
+  operator_sum operator+(elementary_operator &other);
+  operator_sum operator-(elementary_operator &other);
+  product_operator operator*(elementary_operator &other);
+  void operator*=(elementary_operator other);
+  operator_sum operator+(operator_sum &other);
+  operator_sum operator-(operator_sum &other);
+  operator_sum operator*(operator_sum &other);
 
   friend operator_sum operator+(std::complex<double> other,
                                 product_operator self);
@@ -218,7 +225,7 @@ public:
   ///  evaluate to False, even if two operators in reality are the same.
   ///  If the equality evaluates to True, on the other hand, the operators
   ///  are guaranteed to represent the same transformation for all arguments.
-  bool operator==(product_operator other);
+  bool operator==(product_operator &other);
 
   /// @brief Return the `product_operator` as a string.
   std::string to_string() const;
@@ -271,35 +278,35 @@ public:
   operator_sum operator+(double other);
   operator_sum operator-(double other);
   product_operator operator*(double other);
-  operator_sum operator+(scalar_operator other);
-  operator_sum operator-(scalar_operator other);
-  product_operator operator*(scalar_operator other);
+  operator_sum operator+(scalar_operator &other);
+  operator_sum operator-(scalar_operator &other);
+  product_operator operator*(scalar_operator &other);
   operator_sum operator+(elementary_operator other);
   operator_sum operator-(elementary_operator other);
-  product_operator operator*(elementary_operator other);
-  operator_sum operator+(product_operator other);
-  operator_sum operator-(product_operator other);
-  product_operator operator*(product_operator other);
-  operator_sum operator+(operator_sum other);
-  operator_sum operator-(operator_sum other);
-  operator_sum operator+=(operator_sum other);
-  operator_sum operator-=(operator_sum other);
-  operator_sum operator*(operator_sum other);
+  product_operator operator*(elementary_operator ther);
+  operator_sum operator+(product_operator &other);
+  operator_sum operator-(product_operator &other);
+  product_operator operator*(product_operator &other);
+  operator_sum operator+(operator_sum &other);
+  operator_sum operator-(operator_sum &other);
+  operator_sum operator+=(operator_sum &other);
+  operator_sum operator-=(operator_sum &other);
+  operator_sum operator*(operator_sum &other);
 
   // Reverse order arithmetic for elementary operators against pure scalars.
   friend operator_sum operator+(std::complex<double> other,
-                                elementary_operator self);
+                                elementary_operator &self);
   friend operator_sum operator-(std::complex<double> other,
-                                elementary_operator self);
+                                elementary_operator &self);
   friend product_operator operator*(std::complex<double> other,
-                                    elementary_operator self);
-  friend operator_sum operator+(double other, elementary_operator self);
-  friend operator_sum operator-(double other, elementary_operator self);
-  friend product_operator operator*(double other, elementary_operator self);
+                                    elementary_operator &self);
+  friend operator_sum operator+(double other, elementary_operator &self);
+  friend operator_sum operator-(double other, elementary_operator &self);
+  friend product_operator operator*(double other, elementary_operator &self);
 
   /// @brief True, if the other value is an elementary operator with the same id
   /// acting on the same degrees of freedom, and False otherwise.
-  bool operator==(elementary_operator other);
+  bool operator==(elementary_operator &other);
 
   /// @brief Return the `elementary_operator` as a string.
   std::string to_string() const;
@@ -382,6 +389,7 @@ public:
 };
 
 class scalar_operator : public product_operator {
+friend class product_operator;
 private:
   // Only populated when we've performed arithmetic between various
   // scalar operators.
@@ -393,6 +401,19 @@ private:
   ScalarCallbackFunction m_generator;
 
   bool m_generator_defined = false;
+
+  std::string m_name = m_generate_name(8);
+
+  std::string m_generate_name(const int size) {
+      static const char values[] = "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ";
+      std::string result;
+      result.reserve(size);
+      for (auto i = 0; i < size; ++i) {
+          result += values[rand() % (sizeof(values) - 1)];
+      }
+      std::cout << "\n generated name = " << result << "\n";
+      return result;
+  }
 
 public:
   /// @brief Constructor that just takes a callback function with no
@@ -409,53 +430,53 @@ public:
   scalar_operator(double value);
 
   // Arithmetic overloads against other operator types.
-  scalar_operator operator+(scalar_operator other);
-  scalar_operator operator-(scalar_operator other);
-  scalar_operator operator*(scalar_operator other);
-  scalar_operator operator/(scalar_operator other);
+  scalar_operator operator+(scalar_operator &other);
+  scalar_operator operator-(scalar_operator &other);
+  scalar_operator operator*(scalar_operator &other);
+  scalar_operator operator/(scalar_operator &other);
   /// TODO: implement and test pow
-  scalar_operator pow(scalar_operator other);
-  operator_sum operator+(elementary_operator other);
-  operator_sum operator-(elementary_operator other);
-  product_operator operator*(elementary_operator other);
-  operator_sum operator+(product_operator other);
-  operator_sum operator-(product_operator other);
-  product_operator operator*(product_operator other);
-  operator_sum operator+(operator_sum other);
-  operator_sum operator-(operator_sum other);
-  operator_sum operator*(operator_sum other);
-  friend scalar_operator operator+(scalar_operator self,
+  scalar_operator pow(scalar_operator &other);
+  operator_sum operator+(elementary_operator &other);
+  operator_sum operator-(elementary_operator &other);
+  product_operator operator*(elementary_operator &other);
+  operator_sum operator+(product_operator &other);
+  operator_sum operator-(product_operator &other);
+  product_operator operator*(product_operator &other);
+  operator_sum operator+(operator_sum &other);
+  operator_sum operator-(operator_sum &other);
+  operator_sum operator*(operator_sum &other);
+  friend scalar_operator operator+(scalar_operator &self,
                                    std::complex<double> other);
-  friend scalar_operator operator-(scalar_operator self,
+  friend scalar_operator operator-(scalar_operator &self,
                                    std::complex<double> other);
-  friend scalar_operator operator*(scalar_operator self,
+  friend scalar_operator operator*(scalar_operator &self,
                                    std::complex<double> other);
-  friend scalar_operator operator/(scalar_operator self,
+  friend scalar_operator operator/(scalar_operator &self,
                                    std::complex<double> other);
   friend scalar_operator operator+(std::complex<double> other,
-                                   scalar_operator self);
+                                   scalar_operator &self);
   friend scalar_operator operator-(std::complex<double> other,
-                                   scalar_operator self);
+                                   scalar_operator &self);
   friend scalar_operator operator*(std::complex<double> other,
-                                   scalar_operator self);
+                                   scalar_operator &self);
   friend scalar_operator operator/(std::complex<double> other,
-                                   scalar_operator self);
-  friend scalar_operator operator+(scalar_operator self, double other);
-  friend scalar_operator operator-(scalar_operator self, double other);
-  friend scalar_operator operator*(scalar_operator self, double other);
-  friend scalar_operator operator/(scalar_operator self, double other);
-  friend scalar_operator operator+(double other, scalar_operator self);
-  friend scalar_operator operator-(double other, scalar_operator self);
-  friend scalar_operator operator*(double other, scalar_operator self);
-  friend scalar_operator operator/(double other, scalar_operator self);
+                                   scalar_operator &self);
+  friend scalar_operator operator+(scalar_operator &self, double other);
+  friend scalar_operator operator-(scalar_operator &self, double other);
+  friend scalar_operator operator*(scalar_operator &self, double other);
+  friend scalar_operator operator/(scalar_operator &self, double other);
+  friend scalar_operator operator+(double other, scalar_operator &self);
+  friend scalar_operator operator-(double other, scalar_operator &self);
+  friend scalar_operator operator*(double other, scalar_operator &self);
+  friend scalar_operator operator/(double other, scalar_operator &self);
   friend void operator+=(scalar_operator &self, std::complex<double> other);
   friend void operator-=(scalar_operator &self, std::complex<double> other);
   friend void operator*=(scalar_operator &self, std::complex<double> other);
   friend void operator/=(scalar_operator &self, std::complex<double> other);
-  friend void operator+=(scalar_operator &self, scalar_operator other);
-  friend void operator-=(scalar_operator &self, scalar_operator other);
-  friend void operator*=(scalar_operator &self, scalar_operator other);
-  friend void operator/=(scalar_operator &self, scalar_operator other);
+  friend void operator+=(scalar_operator &self, scalar_operator &other);
+  friend void operator-=(scalar_operator &self, scalar_operator &other);
+  friend void operator*=(scalar_operator &self, scalar_operator &other);
+  friend void operator/=(scalar_operator &self, scalar_operator &other);
 
   /// @brief Return the scalar operator as a concrete complex value.
   std::complex<double>
@@ -488,7 +509,7 @@ class OperatorArithmetics {
 public:
   /// @brief Accesses the relevant data to evaluate an operator expression
   /// in the leaf nodes, that is in elementary and scalar operators.
-  TEval evaluate(std::variant<scalar_operator, elementary_operator> op);
+  TEval evaluate(std::variant<scalar_operator, elementary_operator> &op);
 
   /// @brief Adds two operators that act on the same degrees of freedom.
   TEval add(TEval val1, TEval val2);

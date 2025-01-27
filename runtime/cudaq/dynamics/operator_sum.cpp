@@ -17,6 +17,9 @@ namespace cudaq {
 operator_sum::operator_sum(const std::vector<product_operator> &terms)
     : m_terms(terms) {}
 
+operator_sum::operator_sum(operator_sum &other) : m_terms(other.m_terms) {}
+operator_sum::operator_sum(const operator_sum &other) : m_terms(other.m_terms) {}
+
 std::tuple<std::vector<scalar_operator>, std::vector<elementary_operator>>
 operator_sum::m_canonicalize_product(product_operator &prod) const {
   std::vector<int> all_degrees;
@@ -116,20 +119,12 @@ operator_sum operator_sum::operator+(const operator_sum &other) const {
 }
 
 operator_sum operator_sum::operator-(const operator_sum &other) const {
-  return *this + (-1 * other);
+  operator_sum negative_other(other);
+  negative_other *= -1.0;
+  return *this + negative_other;
 }
 
-operator_sum operator_sum::operator-=(const operator_sum &other) {
-  *this = *this - other;
-  return *this;
-}
-
-operator_sum operator_sum::operator+=(const operator_sum &other) {
-  *this = *this + other;
-  return *this;
-}
-
-operator_sum operator_sum::operator*(operator_sum &other) const {
+operator_sum operator_sum::operator*(const operator_sum &other) const {
   auto self_terms = m_terms;
   std::vector<product_operator> product_terms;
   auto other_terms = other.m_terms;
@@ -141,12 +136,19 @@ operator_sum operator_sum::operator*(operator_sum &other) const {
   return operator_sum(product_terms);
 }
 
-operator_sum operator_sum::operator*=(operator_sum &other) {
-  *this = *this * other;
-  return *this;
+void operator_sum::operator-=(operator_sum other) {
+  *this = *this - other;
 }
 
-operator_sum operator_sum::operator*(const scalar_operator &other) const {
+void operator_sum::operator+=(operator_sum other) {
+  *this = *this + other;
+}
+
+void operator_sum::operator*=(operator_sum other) {
+  *this = *this * other;
+}
+
+operator_sum operator_sum::operator*(scalar_operator &other) const {
   std::vector<product_operator> combined_terms = m_terms;
   for (auto &term : combined_terms) {
     term *= other;
@@ -154,29 +156,26 @@ operator_sum operator_sum::operator*(const scalar_operator &other) const {
   return operator_sum(combined_terms);
 }
 
-operator_sum operator_sum::operator+(const scalar_operator &other) const {
+operator_sum operator_sum::operator+(scalar_operator &other) const {
   std::vector<product_operator> combined_terms = m_terms;
   combined_terms.push_back(product_operator({other}, {}));
   return operator_sum(combined_terms);
 }
 
-operator_sum operator_sum::operator-(const scalar_operator &other) const {
+operator_sum operator_sum::operator-(scalar_operator &other) const {
   return *this + (-1.0 * other);
 }
 
-operator_sum operator_sum::operator*=(const scalar_operator &other) {
+void operator_sum::operator*=(scalar_operator other) {
   *this = *this * other;
-  return *this;
 }
 
-operator_sum operator_sum::operator+=(const scalar_operator &other) {
+void operator_sum::operator+=(scalar_operator other) {
   *this = *this + other;
-  return *this;
 }
 
-operator_sum operator_sum::operator-=(const scalar_operator &other) {
+void operator_sum::operator-=(scalar_operator other) {
   *this = *this - other;
-  return *this;
 }
 
 operator_sum operator_sum::operator*(std::complex<double> other) const {
@@ -191,19 +190,16 @@ operator_sum operator_sum::operator-(std::complex<double> other) const {
   return *this - scalar_operator(other);
 }
 
-operator_sum operator_sum::operator*=(std::complex<double> other) {
+void operator_sum::operator*=(std::complex<double> other) {
   *this *= scalar_operator(other);
-  return *this;
 }
 
-operator_sum operator_sum::operator+=(std::complex<double> other) {
+void operator_sum::operator+=(std::complex<double> other) {
   *this += scalar_operator(other);
-  return *this;
 }
 
-operator_sum operator_sum::operator-=(std::complex<double> other) {
+void operator_sum::operator-=(std::complex<double> other) {
   *this -= scalar_operator(other);
-  return *this;
 }
 
 operator_sum operator_sum::operator*(double other) const {
@@ -218,19 +214,16 @@ operator_sum operator_sum::operator-(double other) const {
   return *this - scalar_operator(other);
 }
 
-operator_sum operator_sum::operator*=(double other) {
+void operator_sum::operator*=(double other) {
   *this *= scalar_operator(other);
-  return *this;
 }
 
-operator_sum operator_sum::operator+=(double other) {
+void operator_sum::operator+=(double other) {
   *this += scalar_operator(other);
-  return *this;
 }
 
-operator_sum operator_sum::operator-=(double other) {
+void operator_sum::operator-=(double other) {
   *this -= scalar_operator(other);
-  return *this;
 }
 
 operator_sum operator*(std::complex<double> other, operator_sum self) {
@@ -257,27 +250,25 @@ operator_sum operator-(double other, operator_sum self) {
   return scalar_operator(other) - self;
 }
 
-operator_sum operator_sum::operator+(const product_operator &other) const {
+operator_sum operator_sum::operator+(product_operator &other) const {
   std::vector<product_operator> combined_terms = m_terms;
   combined_terms.push_back(other);
   return operator_sum(combined_terms);
 }
 
-operator_sum operator_sum::operator+=(const product_operator &other) {
+void operator_sum::operator+=(product_operator other) {
   *this = *this + other;
-  return *this;
 }
 
-operator_sum operator_sum::operator-(const product_operator &other) const {
+operator_sum operator_sum::operator-(product_operator &other) const {
   return *this + (-1. * other);
 }
 
-operator_sum operator_sum::operator-=(const product_operator &other) {
+void operator_sum::operator-=(product_operator other) {
   *this = *this - other;
-  return *this;
 }
 
-operator_sum operator_sum::operator*(const product_operator &other) const {
+operator_sum operator_sum::operator*(product_operator &other) const {
   std::vector<product_operator> combined_terms = m_terms;
   for (auto &term : combined_terms) {
     term *= other;
@@ -285,24 +276,23 @@ operator_sum operator_sum::operator*(const product_operator &other) const {
   return operator_sum(combined_terms);
 }
 
-operator_sum operator_sum::operator*=(const product_operator &other) {
+void operator_sum::operator*=(product_operator other) {
   *this = *this * other;
-  return *this;
 }
 
-operator_sum operator_sum::operator+(const elementary_operator &other) const {
+operator_sum operator_sum::operator+(elementary_operator &other) const {
   std::vector<product_operator> combined_terms = m_terms;
   combined_terms.push_back(product_operator({}, {other}));
   return operator_sum(combined_terms);
 }
 
-operator_sum operator_sum::operator-(const elementary_operator &other) const {
+operator_sum operator_sum::operator-(elementary_operator &other) const {
   std::vector<product_operator> combined_terms = m_terms;
   combined_terms.push_back((-1. * other));
   return operator_sum(combined_terms);
 }
 
-operator_sum operator_sum::operator*(const elementary_operator &other) const {
+operator_sum operator_sum::operator*(elementary_operator &other) const {
   std::vector<product_operator> combined_terms = m_terms;
   for (auto &term : combined_terms) {
     term *= other;
@@ -310,24 +300,24 @@ operator_sum operator_sum::operator*(const elementary_operator &other) const {
   return operator_sum(combined_terms);
 }
 
-operator_sum operator_sum::operator+=(const elementary_operator &other) {
-  *this = *this + product_operator({}, {other});
-  return *this;
+void operator_sum::operator+=(elementary_operator other) {
+  m_terms.push_back(product_operator({}, {other}));
 }
 
-operator_sum operator_sum::operator-=(const elementary_operator &other) {
- *this = *this - product_operator({}, {other});
-  return *this;
+void operator_sum::operator-=(elementary_operator other) {
+  m_terms.push_back(product_operator({scalar_operator(-1.0)}, {other}));
 }
 
-operator_sum operator_sum::operator*=(const elementary_operator &other) {
+void operator_sum::operator*=(elementary_operator other) {
   *this = *this * other;
-  return *this;
 }
 
 cudaq::matrix_2 operator_sum::m_evaluate(
     MatrixArithmetics arithmetics, std::map<int, int> dimensions,
     std::map<std::string, std::complex<double>> parameters, bool pad_terms) {
+
+  std::cout << "\n evaluating operator sum \n";
+
   std::set<int> degrees_set;
   for (auto op : m_terms) {
     for (auto degree : op.degrees()) {
@@ -336,6 +326,8 @@ cudaq::matrix_2 operator_sum::m_evaluate(
     }
   }
   std::vector<int> degrees(degrees_set.begin(), degrees_set.end());
+
+  std::cout << "\n operator sum line 343 \n";
 
   // We need to make sure all matrices are of the same size to sum them up.
   auto paddedTerm = [&](product_operator term) {
@@ -346,24 +338,37 @@ cudaq::matrix_2 operator_sum::m_evaluate(
     }
     for (auto degree : degrees) {
       auto it = std::find(op_degrees.begin(), op_degrees.end(), degree);
-      if (it == op_degrees.end())
+      if (it == op_degrees.end()) {
+        std::cout << "\n term count before \n" << term.term_count() << "\n";
         term *= elementary_operator::identity(degree);
+        std::cout << "\n term count after \n" << term.term_count() << "\n";
+      }
     }
+    std::cout << "\n just checking \n" << term.to_matrix({{0,3}}).dump() << "\n";
     return term;
   };
 
+  std::cout << "\n operator sum line 360 \n";
+
   auto sum = EvaluatedMatrix();
   if (pad_terms) {
-    sum = EvaluatedMatrix(degrees, paddedTerm(m_terms[0])
-                                       .m_evaluate(arithmetics, dimensions,
-                                                   parameters, pad_terms));
+ 
+    std::cout << "\n operator sum line 368 \n";
+    sum = EvaluatedMatrix(degrees, paddedTerm(m_terms[0]).m_evaluate(arithmetics, dimensions,
+                                              parameters, pad_terms));
+    std::cout << "\n operator sum line 371 \n";
     for (auto term_idx = 1; term_idx < m_terms.size(); ++term_idx) {
       auto term = m_terms[term_idx];
+
       auto eval = paddedTerm(term).m_evaluate(arithmetics, dimensions,
                                               parameters, pad_terms);
+      std::cout << "\n operator sum line 373 \n";
       sum = arithmetics.add(sum, EvaluatedMatrix(degrees, eval));
+      std::cout << "\n operator sum line 375 \n";
     }
+    std::cout << "\n operator sum line 377 \n";
   } else {
+    std::cout << "\n operator sum line 379 \n";
     sum =
         EvaluatedMatrix(degrees, m_terms[0].m_evaluate(arithmetics, dimensions,
                                                        parameters, pad_terms));
@@ -373,6 +378,7 @@ cudaq::matrix_2 operator_sum::m_evaluate(
           term.m_evaluate(arithmetics, dimensions, parameters, pad_terms);
       sum = arithmetics.add(sum, EvaluatedMatrix(degrees, eval));
     }
+    std::cout << "\n operator sum line 389 \n";
   }
   return sum.matrix();
 }
