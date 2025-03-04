@@ -244,31 +244,15 @@ public:
 
   // Helper to prepare term-by-term data from a spin op
   static std::tuple<std::vector<std::string>,
-                    std::vector<cudaq::spin_op::spin_op_term>,
-                    std::vector<std::complex<double>>>
+                    std::vector<cudaq::product_operator<cudaq::spin_operator>>>
   prepareSpinOpTermData(const cudaq::spin_op &ham) {
     std::vector<std::string> termStrs;
-    std::vector<cudaq::spin_op::spin_op_term> terms;
-    std::vector<std::complex<double>> coeffs;
     termStrs.reserve(ham.num_terms());
-    terms.reserve(ham.num_terms());
-    coeffs.reserve(ham.num_terms());
 
-    // Note: as the spin_op terms are stored as an unordered map, we need to
-    // iterate in one loop to collect all the data (string, symplectic data, and
-    // coefficient).
-    ham.for_each_term([&](cudaq::spin_op &term) {
-      termStrs.emplace_back(term.to_string(false));
-      auto [symplecticRep, coeff] = term.get_raw_data();
-      if (symplecticRep.size() != 1 || coeff.size() != 1)
-        throw std::runtime_error(fmt::format(
-            "Unexpected data encountered when iterating spin operator terms: "
-            "expecting a single term, got {} terms.",
-            symplecticRep.size()));
-      terms.emplace_back(symplecticRep[0]);
-      coeffs.emplace_back(coeff[0]);
-    });
-    return std::make_tuple(termStrs, terms, coeffs);
+    auto prods = ham.get_terms();
+    for (const auto &term : prods)
+      termStrs.emplace_back(cudaq::operator_sum<cudaq::spin_operator>(term).to_string(false));
+    return std::make_tuple(termStrs, prods);
   }
 
   cudaq::observe_result observe(const cudaq::spin_op &ham) override {
@@ -284,7 +268,7 @@ public:
             ? this->executionContext->numberTrajectories.value()
             : TensorNetState::g_numberTrajectoriesForObserve;
 
-    auto [termStrs, terms, coeffs] = prepareSpinOpTermData(ham);
+    auto [termStrs, terms] = prepareSpinOpTermData(ham);
     std::vector<std::complex<double>> termExpVals(terms.size(), 0.0);
 
     for (std::size_t i = 0; i < numObserveTrajectories; ++i) {
@@ -306,7 +290,6 @@ public:
     results.reserve(terms.size());
 
     for (std::size_t i = 0; i < terms.size(); ++i) {
-      expVal += (coeffs[i] * termExpVals[i]);
       results.emplace_back(
           cudaq::ExecutionResult({}, termStrs[i], termExpVals[i].real()));
     }

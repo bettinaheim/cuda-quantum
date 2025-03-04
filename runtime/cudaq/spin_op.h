@@ -9,6 +9,7 @@
 #pragma once
 
 #include "matrix.h"
+#include "operators.h"
 #include "utils/cudaq_utils.h"
 #include <complex>
 #include <functional>
@@ -80,10 +81,6 @@
   }
 
 namespace cudaq {
-class spin_op;
-
-/// @brief Utility enum representing Paulis.
-enum class pauli { I, X, Y, Z };
 
 namespace spin {
 
@@ -100,6 +97,7 @@ spin_op y(const std::size_t idx);
 spin_op z(const std::size_t idx);
 } // namespace spin
 
+namespace details {
 /// @brief The spin_op represents a general sum of Pauli tensor products.
 /// It exposes the typical algebraic operations that allow programmers to
 /// define primitive Pauli operators and use them to compose larger, more
@@ -175,13 +173,6 @@ public:
   };
 
 private:
-  /// We want these creation functions to have access to
-  /// spin_op constructors that programmers don't need
-  friend spin_op spin::i(const std::size_t);
-  friend spin_op spin::x(const std::size_t);
-  friend spin_op spin::y(const std::size_t);
-  friend spin_op spin::z(const std::size_t);
-
   /// @brief The spin_op representation. The spin_op is equivalent
   /// to a mapping of unique terms to their term coefficient.
   std::unordered_map<spin_op_term, std::complex<double>> terms;
@@ -380,6 +371,8 @@ spin_op operator-(double coeff, spin_op op);
 
 /// @brief Subtract a spin_op and a double
 spin_op operator-(spin_op op, double coeff);
+
+} // namespace details
 
 class spin_op_reader {
 public:

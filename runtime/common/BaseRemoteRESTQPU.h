@@ -31,7 +31,7 @@
 #include "cudaq/Support/TargetConfig.h"
 #include "cudaq/platform/qpu.h"
 #include "cudaq/platform/quantum_platform.h"
-#include "cudaq/spin_op.h"
+#include "cudaq/operators.h"
 #include "nvqpp_config.h"
 #include "llvm/Bitcode/BitcodeReader.h"
 #include "llvm/Bitcode/BitcodeWriter.h"
@@ -518,8 +518,9 @@ public:
       mapping_reorder_idx.clear();
       runPassPipeline("canonicalize,cse", moduleOp);
       cudaq::spin_op &spin = *executionContext->spin.value();
-      for (const auto &term : spin) {
-        if (term.is_identity())
+      for (const auto &term : spin.get_terms()) {
+        auto term_as_sum = cudaq::operator_sum<cudaq::spin_operator>(term);
+        if (term_as_sum.is_identity())
           continue;
 
         // Get the ansatz
@@ -532,7 +533,7 @@ public:
         auto tmpModuleOp = moduleOp.clone();
 
         // Extract the binary symplectic encoding
-        auto [binarySymplecticForm, coeffs] = term.get_raw_data();
+        auto [binarySymplecticForm, coeffs] = term_as_sum.get_raw_data();
 
         // Create the pass manager, add the quake observe ansatz pass and run it
         // followed by the canonicalizer
@@ -555,7 +556,7 @@ public:
             runPassPipeline(pass, tmpModuleOp);
         if (!emulate && combineMeasurements)
           runPassPipeline("func.func(combine-measurements)", tmpModuleOp);
-        modules.emplace_back(term.to_string(false), tmpModuleOp);
+        modules.emplace_back(term_as_sum.to_string(false), tmpModuleOp);
       }
     } else
       modules.emplace_back(kernelName, moduleOp);

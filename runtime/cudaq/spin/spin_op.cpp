@@ -25,6 +25,7 @@
 #include <set>
 #include <utility>
 #include <vector>
+#include "cudaq/operators.h"
 
 namespace cudaq {
 
@@ -108,7 +109,6 @@ mult(const std::vector<bool> &p1, const std::vector<bool> &p2,
 
   return {result, resultCoeff};
 }
-} // namespace details
 
 spin_op::spin_op() {
   std::vector<bool> init(2);
@@ -667,13 +667,6 @@ spin_op operator-(spin_op op, double coeff) {
   return op - spin_op(op.num_qubits()) * coeff;
 }
 
-namespace spin {
-spin_op i(const std::size_t idx) { return spin_op(pauli::I, idx); }
-spin_op x(const std::size_t idx) { return spin_op(pauli::X, idx); }
-spin_op y(const std::size_t idx) { return spin_op(pauli::Y, idx); }
-spin_op z(const std::size_t idx) { return spin_op(pauli::Z, idx); }
-} // namespace spin
-
 std::vector<double> spin_op::getDataRepresentation() const {
   std::vector<double> dataVec;
   for (auto &[term, coeff] : terms) {
@@ -696,6 +689,23 @@ std::vector<double> spin_op::getDataRepresentation() const {
   return dataVec;
 }
 
+} // namespace details
+
+namespace spin {
+spin_op i(const std::size_t idx) { 
+  auto i = cudaq::spin_operator::i(idx);
+  return operator_sum<spin_operator>(i); }
+spin_op x(const std::size_t idx) { 
+  auto x = cudaq::spin_operator::x(idx);
+  return operator_sum<spin_operator>(x); }
+spin_op y(const std::size_t idx) { 
+  auto y = cudaq::spin_operator::y(idx);
+  return operator_sum<spin_operator>(y); }
+spin_op z(const std::size_t idx) { 
+  auto z = cudaq::spin_operator::z(idx);
+  return operator_sum<spin_operator>(z); }
+} // namespace spin
+
 spin_op binary_spin_op_reader::read(const std::string &data_filename) {
   std::ifstream input(data_filename, std::ios::binary);
   if (input.fail())
@@ -708,7 +718,24 @@ spin_op binary_spin_op_reader::read(const std::string &data_filename) {
   input.read((char *)&input_vec[0], size);
   auto n_terms = (int)input_vec.back();
   auto nQubits = (input_vec.size() - 1 - 2 * n_terms) / n_terms;
-  spin_op s(input_vec, nQubits);
-  return s;
+  
+  details::spin_op s(input_vec, nQubits);
+  spin_op sum = cudaq::spin_operator::empty();
+  for (auto term : s) {
+    auto prod = cudaq::product_operator<spin_operator> (s.get_coefficient());
+    s.for_each_pauli([&prod](pauli p, std::size_t i) {
+      if (p == pauli::X)
+        prod *= cudaq::spin_operator::x(i);
+      else if (p == pauli::Y)
+        prod *= cudaq::spin_operator::y(i);
+      else if (p == pauli::Z)
+      prod *= cudaq::spin_operator::z(i);
+      else {
+        prod *= cudaq::spin_operator::i(i);
+      }
+    });
+    sum += prod;
+  }
+  return sum;
 }
 } // namespace cudaq

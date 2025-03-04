@@ -23,6 +23,7 @@ target_link_libraries(test_quake_synth
   PRIVATE 
   cudaq
   cudaq-spin
+  cudaq-operator
   cudaq-mlir-runtime
   cudaq-builder
   cudaq-common

@@ -9,7 +9,7 @@
 #define __NVQIR_QPP_TOGGLE_CREATE
 #include "qpp/QppCircuitSimulator.cpp"
 #undef __NVQIR_QPP_TOGGLE_CREATE
-#include "cudaq/spin_op.h"
+#include "cudaq/operators.h"
 
 namespace cudaq {
 
@@ -32,10 +32,11 @@ public:
     // Want to loop over all terms in op and
     // compute E_i = coeff_i * < psi | Term | psi >
     // = coeff_i * sum_k <psi | Pauli_k psi>
-    for (const auto &term : op) {
+    for (const auto &term : op.get_terms()) {
+      cudaq::operator_sum<cudaq::spin_operator> term_as_sum = term;
       if (!term.is_identity()) {
         ::qpp::ket cached = state;
-        auto [bsf, coeffs] = term.get_raw_data();
+        auto [bsf, coeffs] = term_as_sum.get_raw_data();
         for (std::size_t i = 0; i < nQ; i++) {
           if (bsf[0][i] && bsf[0][i + nQ])
             cached = ::qpp::apply(cached, Y, {convertQubitIndex(i)});
@@ -47,7 +48,7 @@ public:
 
         sum += coeffs[0].real() * state.transpose().dot(cached).real();
       } else {
-        sum += term.get_coefficient().real();
+        sum += term_as_sum.get_coefficient().real();
       }
     }
 

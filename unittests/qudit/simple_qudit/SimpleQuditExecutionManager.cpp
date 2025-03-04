@@ -11,7 +11,7 @@
 
 #include "cudaq/qis/managers/BasicExecutionManager.h"
 #include "cudaq/qis/qudit.h"
-#include "cudaq/spin_op.h"
+#include "cudaq/operators.h"
 #include "cudaq/utils/cudaq_utils.h"
 #include "qpp.h"
 #include <complex>

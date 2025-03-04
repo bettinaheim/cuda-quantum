@@ -188,6 +188,12 @@ public:
   constexpr commutation_relations(const commutation_relations &other)
       : id(other.id) {}
 
+  commutation_relations& operator=(const commutation_relations &other) {
+    if (this != &other)
+      this->id = other.id;
+    return *this;
+  }
+
   std::complex<double> commutation_factor() const;
 
   bool operator==(const commutation_relations &other) const;

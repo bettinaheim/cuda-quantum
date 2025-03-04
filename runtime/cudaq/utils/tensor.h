@@ -15,6 +15,8 @@
 #include <optional>
 #include <vector>
 
+#include "cudaq/matrix.h"
+
 namespace cudaq {
 
 class matrix_2;
@@ -126,6 +128,11 @@ public:
   std::size_t get_columns() const { return dimensions.second; }
   std::size_t get_size() const { return get_size(dimensions); }
 
+  /// Does *not* copy the data - data is still owned by the original matrix_2 object.
+  complex_matrix as_complex_matrix() {
+    return complex_matrix(this->data, this->get_rows(), this->get_columns());
+  }
+  
 private:
   matrix_2(const std::complex<double> *v, const Dimensions &dim = {2, 2})
       : dimensions{dim}, data{new std::complex<double>[get_size(dim)]} {

@@ -13,7 +13,6 @@
 #include <utility>
 
 #include "cudaq/operators.h"
-#include "cudaq/spin_op.h"
 #include "evaluation.h"
 #include "helpers.h"
 
@@ -177,7 +176,7 @@ operator_sum<HandlerTy>::degrees(bool application_order) const {
 }
 
 template <typename HandlerTy>
-int operator_sum<HandlerTy>::num_terms() const {
+std::size_t operator_sum<HandlerTy>::num_terms() const {
   return this->terms.size();
 }
 
@@ -198,7 +197,7 @@ operator_sum<HandlerTy>::get_terms() const {
   template std::vector<int> operator_sum<HandlerTy>::degrees(                  \
       bool application_order) const;                                           \
                                                                                \
-  template int operator_sum<HandlerTy>::num_terms() const;                     \
+  template std::size_t operator_sum<HandlerTy>::num_terms() const;             \
                                                                                \
   template std::vector<product_operator<HandlerTy>>                            \
   operator_sum<HandlerTy>::get_terms() const;
@@ -1259,6 +1258,97 @@ template operator_sum<matrix_operator> operator_handler::empty();
 template operator_sum<spin_operator> operator_handler::empty();
 template operator_sum<boson_operator> operator_handler::empty();
 template operator_sum<fermion_operator> operator_handler::empty();
+
+// functions for backwards compatibility
+
+template <typename HandlerTy>
+template <typename T, std::enable_if_t<
+                        std::is_same<HandlerTy, spin_operator>::value &&
+                        std::is_same<HandlerTy, T>::value, bool>>
+operator_sum<HandlerTy> operator_sum<HandlerTy>::from_word(const std::string &word) {
+  auto prod = operator_handler::identity<HandlerTy>();
+  for (std::size_t i = 0; i < word.length(); i++) {
+    auto letter = word[i];
+    if (letter == 'Y')
+      prod *= spin_operator::y(i);
+    else if (letter == 'X')
+      prod *= spin_operator::x(i);
+    else if (letter == 'Z')
+      prod *= spin_operator::z(i);
+    else if (letter == 'I')
+      prod *= spin_operator::i(i);
+    else
+      throw std::runtime_error(
+        "Invalid Pauli for spin_op::from_word, must be X, Y, Z, or I.");
+  }
+  return std::move(prod);
+}
+
+template <typename HandlerTy>
+template <typename T, std::enable_if_t<
+                        std::is_same<HandlerTy, spin_operator>::value &&
+                        std::is_same<HandlerTy, T>::value, bool>>
+operator_sum<HandlerTy> operator_sum<HandlerTy>::random(std::size_t nQubits, std::size_t nTerms, unsigned int seed) {
+  std::mt19937 gen(seed);
+  auto sum = spin_operator::empty();
+  for (std::size_t i = 0; i < nTerms; i++) {
+    std::vector<bool> termData(2 * nQubits);
+    std::fill_n(termData.begin(), nQubits, true);
+    std::shuffle(termData.begin(), termData.end(), gen);
+    // duplicates are fine - they will just increase the coefficient
+    auto prod = spin_operator::identity();
+    for (int qubit_idx = 0; qubit_idx < nQubits; ++qubit_idx) {
+      // FIXME: check order here to maintain reproducibility
+      auto op_code = (termData[qubit_idx << 1] << 1) | termData[(qubit_idx << 1) + 1];
+      spin_operator spin_op(qubit_idx, op_code);
+      prod *= std::move(spin_op);
+    }
+    sum += std::move(prod);
+  }
+  return std::move(sum);
+}
+
+template <typename HandlerTy>
+template <typename T, std::enable_if_t<
+                        std::is_same<HandlerTy, spin_operator>::value &&
+                        std::is_same<HandlerTy, T>::value, bool>>
+operator_sum<HandlerTy>::operator_sum(const std::vector<double> &input_vec, std::size_t nQubits) {
+  auto n_terms = (int)input_vec.back();
+  if (nQubits != (((input_vec.size() - 1) - 2 * n_terms) / n_terms))
+    throw std::runtime_error("Invalid data representation for construction "
+                              "spin_op. Number of data elements is incorrect.");
+
+  for (std::size_t i = 0; i < input_vec.size() - 1; i += nQubits + 2) {
+    auto el_real = input_vec[i + nQubits];
+    auto el_imag = input_vec[i + nQubits + 1];
+    auto prod = product_operator<spin_operator>(std::complex<double>{el_real, el_imag});
+    for (std::size_t j = 0; j < nQubits; j++) {
+      double intPart;
+      if (std::modf(input_vec[j + i], &intPart) != 0.0)
+        throw std::runtime_error(
+            "Invalid pauli data element, must be integer value.");
+
+      int val = (int)input_vec[j + i];
+      // FIXME: align op codes with old impl
+      int op_code = 0;
+      if (val == 1) // X
+        op_code = 2;
+      else if (val == 2) // Z
+        op_code = 1;
+      else if (val == 3) // Y
+        op_code = 3;
+      prod *= spin_operator(j, op_code);
+    }
+    *this += std::move(prod);
+  }
+}
+
+
+#if !defined(__clang__)
+template operator_sum<spin_operator> operator_sum<spin_operator>::from_word(const std::string &word);
+template operator_sum<spin_operator> operator_sum<spin_operator>::random(std::size_t nQubits, std::size_t nTerms, unsigned int seed);
+template operator_sum<spin_operator>::operator_sum(const std::vector<double> &input_vec, std::size_t nQubits);
+#endif
 
 #if defined(CUDAQ_INSTANTIATE_TEMPLATES)
 template class operator_sum<matrix_operator>;

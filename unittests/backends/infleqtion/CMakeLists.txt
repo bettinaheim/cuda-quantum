@@ -20,6 +20,7 @@ target_link_libraries(test_infleqtion
   cudaq-mlir-runtime
   cudaq-rest-qpu
   cudaq-spin 
+  cudaq-operator
   cudaq-platform-default 
   gtest_main)
 

@@ -657,16 +657,13 @@ TensorNetState::factorizeMPS(int64_t maxExtent, double absCutoff,
 }
 
 std::vector<std::complex<double>> TensorNetState::computeExpVals(
-    const std::vector<std::vector<bool>> &symplecticRepr,
+    const std::vector<cudaq::product_operator<cudaq::spin_operator>> &product_terms,
     const std::optional<std::size_t> &numberTrajectories) {
   LOG_API_TIME();
-  if (symplecticRepr.empty())
+  if (product_terms.empty())
     return {};
 
   const std::size_t numQubits = getNumQubits();
-  const auto numSpinOps = symplecticRepr[0].size() / 2;
-  std::vector<std::complex<double>> allExpVals;
-  allExpVals.reserve(symplecticRepr.size());
 
   constexpr int ALIGNMENT_BYTES = 256;
   const int placeHolderArraySize = ALIGNMENT_BYTES * numQubits;
@@ -766,7 +763,12 @@ std::vector<std::complex<double>> TensorNetState::computeExpVals(
       return numberTrajectories.value();
     return g_numberTrajectoriesForObserve;
   }();
-  for (const auto &term : symplecticRepr) {
+
+  std::vector<std::complex<double>> allExpVals;
+  allExpVals.reserve(product_terms.size());
+  auto ops = product_terms[0].get_terms();
+  const auto numSpinOps = ops.size();
+  for (const auto &prod : product_terms) {
     bool allIdOps = true;
     for (std::size_t i = 0; i < numQubits; ++i) {
       // Memory address of this Pauli term in the placeholder array.
@@ -776,15 +778,17 @@ std::vector<std::complex<double>> TensorNetState::computeExpVals(
       // Default is the Identity matrix.
       const std::complex<double> *pauliMatrixPtr = PauliI_h;
       if (i < numSpinOps) {
-        if (term[i] && term[i + numSpinOps]) {
+        auto op_str = ops[i].to_string(false);
+        assert(ops[i].degrees()[0] == i);
+        if (op_str == "Y") {
           // Y
           allIdOps = false;
           pauliMatrixPtr = PauliY_h;
-        } else if (term[i]) {
+        } else if (op_str == "X") {
           // X
           allIdOps = false;
           pauliMatrixPtr = PauliX_h;
-        } else if (term[i + numSpinOps]) {
+        } else if (op_str == "Z") {
           // Z
           allIdOps = false;
           pauliMatrixPtr = PauliZ_h;
@@ -795,7 +799,7 @@ std::vector<std::complex<double>> TensorNetState::computeExpVals(
       std::memcpy(address, pauliMatrixPtr, PAULI_ARRAY_SIZE_BYTES);
     }
     if (allIdOps) {
-      allExpVals.emplace_back(1.0);
+      allExpVals.emplace_back(prod.get_coefficient().evaluate()); // fixme: fails if we have parameters
     } else {
       HANDLE_CUDA_ERROR(cudaMemcpy(pauliMats_d, pauliMats_h,
                                    placeHolderArraySize,
@@ -809,7 +813,7 @@ std::vector<std::complex<double>> TensorNetState::computeExpVals(
             /*cudaStream*/ 0));
         expVal += (result / static_cast<double>(numObserveTrajectories));
       }
-      allExpVals.emplace_back(expVal);
+      allExpVals.emplace_back(expVal * prod.get_coefficient().evaluate()); // fixme: fails if we have parameters
     }
   }
 

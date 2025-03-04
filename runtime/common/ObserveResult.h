@@ -9,7 +9,7 @@
 #pragma once
 
 #include "MeasureCounts.h"
-#include "cudaq/spin_op.h"
+#include "cudaq/operators.h"
 
 #include <cassert>
 
@@ -31,7 +31,8 @@ protected:
   sample_result data;
 
 public:
-  observe_result() = default;
+  observe_result() 
+  : spinOp(cudaq::spin_operator::empty()){}
 
   /// @brief Constructor, takes the precomputed expectation value for
   /// <psi(x) | H | psi(x)> for the given spin_op.
@@ -124,7 +125,8 @@ public:
   /// @brief Return the coefficient of the identity term.
   /// @return
   double id_coefficient() {
-    for (const auto &term : spinOp)
+    auto terms = spinOp.get_terms();
+    for (spin_op term : terms)
       if (term.is_identity())
         return term.get_coefficient().real();
     return 0.0;

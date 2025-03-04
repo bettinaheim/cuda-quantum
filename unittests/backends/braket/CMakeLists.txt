@@ -20,6 +20,7 @@ target_link_libraries(test_braket
   cudaq-mlir-runtime
   cudaq-rest-qpu
   cudaq-spin 
+  cudaq-operator
   nvqir nvqir-qpp
   cudaq-platform-default 
   gtest_main)

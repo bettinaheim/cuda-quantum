@@ -21,6 +21,8 @@ namespace cudaq {
 class spin_operator : public operator_handler {
   template <typename T>
   friend class product_operator;
+  template <typename T>
+  friend class operator_sum;
 
 private:
   // I = 0, Z = 1, X = 2, Y = 3
@@ -32,16 +34,16 @@ private:
   // private helpers
 
   std::string op_code_to_string() const;
-  std::string op_code_to_string(std::unordered_map<int, int> &dimensions) const;
+  virtual std::string op_code_to_string(std::unordered_map<int, int> &dimensions) const override;
 
   std::complex<double> inplace_mult(const spin_operator &other);
 
 public:
   // read-only properties
 
-  virtual std::string unique_id() const;
+  virtual std::string unique_id() const override;
 
-  virtual std::vector<int> degrees() const;
+  virtual std::vector<int> degrees() const override;
 
   // constructors and destructors
 
@@ -65,9 +67,9 @@ public:
   virtual matrix_2
   to_matrix(std::unordered_map<int, int> &dimensions,
             const std::unordered_map<std::string, std::complex<double>>
-                &parameters = {}) const;
+                &parameters = {}) const override;
 
-  virtual std::string to_string(bool include_degrees) const;
+  virtual std::string to_string(bool include_degrees) const override;
 
   // comparisons
 

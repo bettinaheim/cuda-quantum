@@ -6,6 +6,9 @@
  * the terms of the Apache License 2.0 which accompanies this distribution.    *
  ******************************************************************************/
 
+#pragma nv_diag_suppress = unrecognized_gcc_pragma
+#pragma nv_diag_suppress 186
+
 #include "CUDAQTestUtils.h"
 #include <cudaq/algorithm.h>
 #include <cudaq/optimizers.h>

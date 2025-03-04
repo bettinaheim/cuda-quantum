@@ -26,9 +26,12 @@ TensorNetworkSpinOp::TensorNetworkSpinOp(const cudaq::spin_op &spinOp,
   // <psi| H |psi> in one go rather than summing over term-by-term contractions.
   constexpr std::size_t NUM_QUBITS_THRESHOLD_DIRECT_OBS = 10;
   if (spinOp.num_qubits() < NUM_QUBITS_THRESHOLD_DIRECT_OBS) {
-    const auto hamMat = spinOp.to_matrix();
-    std::vector<std::complex<double>> opMat(
-        hamMat.data(), hamMat.data() + hamMat.rows() * hamMat.cols());
+    const auto spinMat = spinOp.to_matrix();
+    std::vector<std::complex<double>> opMat;
+    for (size_t i = 0; i < spinMat.get_rows(); ++i) {
+      for (size_t j = 0; j < spinMat.get_columns(); ++j)
+        opMat.push_back(spinMat[{i, j}]);
+    }
     void *opMat_d{nullptr};
     HANDLE_CUDA_ERROR(
         cudaMalloc(&opMat_d, opMat.size() * sizeof(std::complex<double>)));

@@ -8,6 +8,7 @@
 
 #include "common/ExecutionContext.h"
 #include "common/Logger.h"
+#include "cudaq/operators.h"
 #include "cudaq/qis/execution_manager.h"
 
 #include <complex>
@@ -178,7 +179,7 @@ public:
   void apply(const std::string_view gateName, const std::vector<double> &params,
              const std::vector<cudaq::QuditInfo> &controls,
              const std::vector<cudaq::QuditInfo> &targets,
-             bool isAdjoint = false, spin_op op = spin_op()) override {
+             bool isAdjoint = false, spin_op op = cudaq::spin_operator::empty()) override {
 
     // Make a copy of the name that we can mutate if necessary
     std::string mutable_name(gateName);

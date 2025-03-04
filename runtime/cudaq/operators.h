@@ -16,9 +16,15 @@
 #include "dynamics/evaluation.h"
 #include "dynamics/operator_leafs.h"
 #include "dynamics/templates.h"
+#include "utils/cudaq_utils.h"
 #include "utils/tensor.h"
+#include "common/FmtCore.h"
 
 namespace cudaq {
+
+// fixme: here backward compatibility only
+enum class pauli { I, X, Y, Z };
+class spin_operator;
 
 /// @brief Represents an operator expression consisting of a sum of terms, where
 /// each term is a product of elementary and scalar operators. Operator
@@ -66,7 +72,7 @@ public:
   std::vector<int> degrees(bool application_order = true) const;
 
   /// @brief Return the number of operator terms that make up this operator sum.
-  int num_terms() const;
+  std::size_t num_terms() const;
 
   /// FIXME: GET RID OF THIS (MAKE ITERABLE INSTEAD)
   std::vector<product_operator<HandlerTy>> get_terms() const;
@@ -270,6 +276,200 @@ public:
 
   template <typename T>
   friend operator_sum<T> operator_handler::empty();
+
+  // utility functions for backward compatibility
+
+  template <typename T = HandlerTy, std::enable_if_t<
+                                      std::is_same<HandlerTy, spin_operator>::value &&
+                                      std::is_same<HandlerTy, T>::value, bool> = true>
+  size_t num_qubits() const {
+    return this->degrees().size();
+  }
+
+  template <typename T = HandlerTy, std::enable_if_t<
+                                      std::is_same<HandlerTy, spin_operator>::value &&
+                                      std::is_same<HandlerTy, T>::value, bool> = true>
+  void for_each_pauli(std::function<void(pauli, std::size_t)> &&functor) const {
+    if (this->terms.size() != 1)
+      throw std::runtime_error(
+        "spin_op::for_each_pauli on valid for spin_op with n_terms == 1.");
+    // FIXME: check order
+    for (std::size_t i = 0; i < this->terms[0].size(); ++i) {
+      auto str = this->terms[0][i].to_string(false);
+      if (str == "Y")
+        functor(pauli::Y, i);
+      else if (str == "X")
+        functor(pauli::X, i);
+      else if (str == "Z")
+        functor(pauli::Z, i);
+      else {
+        assert(str == "I");
+        functor(pauli::I, i);
+      }
+    }
+  }
+
+  template <typename T = HandlerTy, std::enable_if_t<
+                                      std::is_same<HandlerTy, spin_operator>::value &&
+                                      std::is_same<HandlerTy, T>::value, bool> = true>
+  void for_each_term(std::function<void(operator_sum<HandlerTy> &)> &&functor) const {
+    auto prods = this->get_terms();
+    for (operator_sum<HandlerTy> term : prods)
+      functor(term); // FIXME: functor could modify the term??
+  }
+
+  template <typename T = HandlerTy, std::enable_if_t<
+                                      std::is_same<HandlerTy, spin_operator>::value &&
+                                      std::is_same<HandlerTy, T>::value, bool> = true>
+  bool is_identity() const {
+    // ignores the coefficients (according to the old behavior)
+    for (const auto &term : this->terms) {
+      for (const auto &op : term)
+        if (op.to_string(false) != "I") return false;
+    }
+    return true;
+  }
+
+  template <typename T = HandlerTy, std::enable_if_t<
+                                      std::is_same<HandlerTy, spin_operator>::value &&
+                                      std::is_same<HandlerTy, T>::value, bool> = true>
+  std::complex<double> get_coefficient() const {
+    if (this->terms.size() != 1)
+      throw std::runtime_error(
+        "spin_op::get_coefficient called on spin_op with > 1 terms.");
+    return this->coefficients[0].evaluate(); // fails if we have parameters
+  }
+
+  template <typename T = HandlerTy, std::enable_if_t<
+                                      std::is_same<HandlerTy, spin_operator>::value &&
+                                      std::is_same<HandlerTy, T>::value, bool> = true>
+  std::string to_string(bool printCoeffs) const {
+    std::unordered_map<int, int> dims;
+    auto terms = std::move(
+      this->evaluate(
+              operator_arithmetics<operator_handler::canonical_evaluation>(
+                  dims, {})) // fails if operator is parameterized
+          .terms);
+    std::stringstream ss;
+    if (!printCoeffs) {
+      std::vector<std::string> printOut;
+      printOut.reserve(terms.size());
+      for (auto &[coeff, term_str] : terms)
+        printOut.emplace_back(term_str);
+      std::sort(printOut.begin(), printOut.end());
+      ss << fmt::format("{}", fmt::join(printOut, "")); // fixme: why is there no separator between terms??
+    } else {
+      for (auto &[coeff, term_str] : terms) {
+        ss << fmt::format("[{}{}{}j]", coeff.real(),
+                          coeff.imag() < 0.0 ? "-" : "+", std::fabs(coeff.imag()))
+           << " ";
+        ss << term_str;
+        ss << "\n";
+      }
+    }
+    return ss.str();
+  }
+
+  template <typename T = HandlerTy, std::enable_if_t<
+                                      std::is_same<HandlerTy, spin_operator>::value &&
+                                      std::is_same<HandlerTy, T>::value, bool> = true>
+  static operator_sum<HandlerTy> from_word(const std::string &word);
+
+  template <typename T = HandlerTy, std::enable_if_t<
+                                      std::is_same<HandlerTy, spin_operator>::value &&
+                                      std::is_same<HandlerTy, T>::value, bool> = true>
+  std::vector<operator_sum<HandlerTy>> distribute_terms(std::size_t numChunks) const {
+    // Calculate how many terms we can equally divide amongst the chunks
+    auto nTermsPerChunk = num_terms() / numChunks;
+    auto leftover = num_terms() % numChunks;
+
+    // Slice the given spin_op into subsets for each chunk
+    std::vector<operator_sum<HandlerTy>> chunks;
+    for (auto it = this->term_map.cbegin(); it != this->term_map.cend();) {
+      operator_sum<HandlerTy> chunk;
+      // Evenly distribute any leftovers across the early chunks
+      for (auto count = nTermsPerChunk + (chunks.size() < leftover ? 1 : 0); count > 0; --count, ++it)
+        chunk += product_operator<HandlerTy>(this->coefficients[it->second], this->terms[it->second]);
+      chunks.push_back(chunk);
+    }
+    return std::move(chunks);
+  }
+
+  template <typename T = HandlerTy, std::enable_if_t<
+                                      std::is_same<HandlerTy, spin_operator>::value &&
+                                      std::is_same<HandlerTy, T>::value, bool> = true>
+  static operator_sum<HandlerTy> random(std::size_t nQubits, std::size_t nTerms, unsigned int seed);
+
+  template <typename T = HandlerTy, std::enable_if_t<
+                                      std::is_same<HandlerTy, spin_operator>::value &&
+                                      std::is_same<HandlerTy, T>::value, bool> = true>
+  operator_sum(const std::vector<double> &input_vec, std::size_t nQubits);
+
+  template <typename T = HandlerTy, std::enable_if_t<
+                                      std::is_same<HandlerTy, spin_operator>::value &&
+                                      std::is_same<HandlerTy, T>::value, bool> = true>
+  std::pair<std::vector<std::vector<bool>>, std::vector<std::complex<double>>> get_raw_data() const {
+    // fixme: I think we want to start from 0 here, even if the operator 
+    // does not contain consecutive degrees starting from 0....
+    // fixme: the above can be taken care of by writing a dedicated transformation into bsf directly
+    std::unordered_map<int, int> dims;
+    auto degrees = this->degrees(false); // degrees in canonical order
+    auto term_size = operator_handler::canonical_order(1, 0) ? degrees[0] + 1 : degrees.back() + 1;
+    auto evaluated =
+      this->evaluate(operator_arithmetics<operator_handler::canonical_evaluation>(
+          dims, {})); // fails if we have parameters
+
+    std::vector<std::vector<bool>> bsf_terms;
+    std::vector<std::complex<double>> coeffs;
+    bsf_terms.reserve(evaluated.terms.size());
+    coeffs.reserve(evaluated.terms.size());
+
+    for (const auto &term : evaluated.terms) {
+      std::vector<bool> bsf(term_size << 1, 0);
+      for (std::size_t i = 0; i < degrees.size(); ++i) {
+        if (term.second[i] == 'X')
+          bsf[degrees[i]] = 1;
+        else if (term.second[i] == 'Z')
+          bsf[degrees[i] + term_size] = 1;
+        else if (term.second[i] == 'Y') {
+          bsf[degrees[i]] = 1;
+          bsf[degrees[i] + term_size] = 1;
+        }
+      }
+      bsf_terms.push_back(std::move(bsf));
+      coeffs.push_back(term.first);
+    }
+
+    return std::pair<std::vector<std::vector<bool>>, std::vector<std::complex<double>>>(
+      std::move(bsf_terms), std::move(coeffs));
+  }
+
+  template <typename T = HandlerTy, std::enable_if_t<
+                                      std::is_same<HandlerTy, spin_operator>::value &&
+                                      std::is_same<HandlerTy, T>::value, bool> = true>
+  std::vector<double> getDataRepresentation() const {
+    // FIXME: this is an imperfect representation because it does not capture targets accurately
+    std::vector<double> dataVec;
+    for(std::size_t i = 0; i < this->terms.size(); ++i) {
+      for(std::size_t j = 0; j < this->terms[i].size(); ++j) {
+        auto op_str = this->terms[i][j].to_string(false);
+        // FIXME: align numbering with op codes
+        if (op_str == "X")
+          dataVec.push_back(1.);
+        else if (op_str == "Z")
+          dataVec.push_back(2.);
+        else if (op_str == "Y")
+          dataVec.push_back(3.);
+        else
+          dataVec.push_back(0.);
+      }
+      auto coeff = this->coefficients[i].evaluate(); // fails if we have params
+      dataVec.push_back(coeff.real());
+      dataVec.push_back(coeff.imag());
+    }
+    dataVec.push_back(this->terms.size());
+    return dataVec;
+  }
 };
 
 /// @brief Represents an operator expression consisting of a product of
@@ -356,7 +556,7 @@ public:
 
   /// @brief Return the number of operator terms that make up this product
   /// operator.
-  int num_terms() const;
+  std::size_t num_terms() const;
 
   /// FIXME: GET RID OF THIS (MAKE ITERABLE INSTEAD)
   const std::vector<HandlerTy> &get_terms() const;
@@ -366,6 +566,8 @@ public:
   // constructors and destructors
 
   product_operator(double coefficient);
+
+  product_operator(std::complex<double> coefficient);
 
   product_operator(HandlerTy &&atomic);
 
@@ -587,11 +789,25 @@ public:
   friend product_operator<T> operator_handler::identity();
   template <typename T>
   friend product_operator<T> operator_handler::identity(int target);
+
+  // utility functions for backward compatibility
+  
+  template <typename T = HandlerTy, std::enable_if_t<
+                                      std::is_same<HandlerTy, spin_operator>::value &&
+                                      std::is_same<HandlerTy, T>::value, bool> = true>
+  bool is_identity() const {
+    // ignores the coefficients (according to the old behavior)
+    for (const auto &op : this->operators)
+      if (op.to_string(false) != "I") return false;
+    return true;
+  }
+
 };
 
 // type aliases for convenience
 typedef std::unordered_map<std::string, std::complex<double>> parameter_map;
 typedef std::unordered_map<int, int> dimension_map;
+typedef operator_sum<spin_operator> spin_op;
 
 #ifndef CUDAQ_INSTANTIATE_TEMPLATES
 extern template class product_operator<matrix_operator>;

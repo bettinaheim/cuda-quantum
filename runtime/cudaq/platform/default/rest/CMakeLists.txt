@@ -29,6 +29,7 @@ endif()
 target_link_libraries(cudaq-rest-qpu 
   PUBLIC 
     cudaq-spin 
+    cudaq-operator
     cudaq-common 
   PRIVATE 
     cudaq-mlir-runtime 

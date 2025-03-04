@@ -329,10 +329,11 @@ public:
 
     // Get the matrix as an Eigen matrix
     auto matrix = op.to_matrix();
+    auto cmat_wrapper = matrix.as_complex_matrix();
     qpp::cmat asEigen =
         Eigen::Map<Eigen::Matrix<std::complex<double>, Eigen::Dynamic,
                                  Eigen::Dynamic, Eigen::RowMajor>>(
-            matrix.data(), matrix.rows(), matrix.cols());
+            cmat_wrapper.data(), cmat_wrapper.rows(), cmat_wrapper.cols());
 
     // Compute the expected value
     double ee = 0.0;

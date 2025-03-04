@@ -14,7 +14,6 @@
 #include <utility>
 
 #include "cudaq/operators.h"
-#include "cudaq/spin_op.h"
 #include "evaluation.h"
 #include "helpers.h"
 
@@ -353,7 +352,7 @@ product_operator<HandlerTy>::degrees(bool application_order) const {
 }
 
 template <typename HandlerTy>
-int product_operator<HandlerTy>::num_terms() const {
+std::size_t product_operator<HandlerTy>::num_terms() const {
   return this->operators.size();
 }
 
@@ -372,7 +371,7 @@ scalar_operator product_operator<HandlerTy>::get_coefficient() const {
   template std::vector<int> product_operator<HandlerTy>::degrees(              \
       bool application_order) const;                                           \
                                                                                \
-  template int product_operator<HandlerTy>::num_terms() const;                 \
+  template std::size_t product_operator<HandlerTy>::num_terms() const;         \
                                                                                \
   template const std::vector<HandlerTy> &                                      \
   product_operator<HandlerTy>::get_terms() const;                              \
@@ -390,6 +389,10 @@ INSTANTIATE_PRODUCT_PROPERTIES(fermion_operator);
 
 template <typename HandlerTy>
 product_operator<HandlerTy>::product_operator(double coefficient)
+    : coefficient(coefficient) {}
+
+template <typename HandlerTy>
+product_operator<HandlerTy>::product_operator(std::complex<double> coefficient)
     : coefficient(coefficient) {}
 
 template <typename HandlerTy>
@@ -497,6 +500,9 @@ product_operator<HandlerTy>::product_operator(
 #define INSTANTIATE_PRODUCT_CONSTRUCTORS(HandlerTy)                            \
                                                                                \
   template product_operator<HandlerTy>::product_operator(double coefficient);  \
+                                                                               \
+  template product_operator<HandlerTy>::product_operator(                      \
+    std::complex<double> coefficient);                                         \
                                                                                \
   template product_operator<HandlerTy>::product_operator(                      \
       scalar_operator coefficient);                                            \

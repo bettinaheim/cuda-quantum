@@ -14,7 +14,7 @@
 #include "cudaq/algorithms/broadcast.h"
 #include "cudaq/concepts.h"
 #include "cudaq/host_config.h"
-#include "cudaq/spin_op.h"
+#include "cudaq/operators.h"
 #include <functional>
 #if CUDAQ_USE_STD20
 #include <ranges>
@@ -260,11 +260,9 @@ std::vector<observe_result> observe(QuantumKernel &&kernel,
   auto kernelName = cudaq::getKernelName(kernel);
 
   // Convert all spin_ops to a single summed spin_op
-  cudaq::spin_op op;
+  auto op = cudaq::spin_operator::empty();
   for (auto &o : termList)
     op += o;
-  // the constructor for spin_op starts the op as the identity, remove that
-  op -= spin_op();
 
   // Run the observation
   auto result = details::runObservation(
