@@ -19,7 +19,6 @@ target_link_libraries(test_braket
   cudaq-builder
   cudaq-mlir-runtime
   cudaq-rest-qpu
-  cudaq-spin 
   cudaq-operator
   nvqir nvqir-qpp
   cudaq-platform-default 

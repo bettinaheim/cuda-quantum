@@ -26,7 +26,6 @@ target_link_libraries(${LIBRARY_NAME}
   PUBLIC 
     cudaq-em-default 
     cudaq-operator
-    cudaq-spin 
     cudaq-common 
   PRIVATE 
     cudaq

@@ -8,9 +8,9 @@
 
 #include <gtest/gtest.h>
 
+/*
 #include "cudaq/spin_op.h"
 
-/*
 enum Pauli : int8_t { I = 0, X, Y, Z };
 constexpr Pauli paulis[4] = {Pauli::I, Pauli::X, Pauli::Y, Pauli::Z};
 

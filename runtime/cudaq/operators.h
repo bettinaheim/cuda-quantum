@@ -279,16 +279,17 @@ public:
 
   // utility functions for backward compatibility
 
-  template <typename T = HandlerTy, std::enable_if_t<
-                                      std::is_same<HandlerTy, spin_operator>::value &&
+#define SPIN_OPS_BACKWARD_COMPATIBILITY                                                   \
+  template <typename T = HandlerTy, std::enable_if_t<                                     \
+                                      std::is_same<HandlerTy, spin_operator>::value &&    \
                                       std::is_same<HandlerTy, T>::value, bool> = true>
+
+  SPIN_OPS_BACKWARD_COMPATIBILITY
   size_t num_qubits() const {
     return this->degrees().size();
   }
 
-  template <typename T = HandlerTy, std::enable_if_t<
-                                      std::is_same<HandlerTy, spin_operator>::value &&
-                                      std::is_same<HandlerTy, T>::value, bool> = true>
+  SPIN_OPS_BACKWARD_COMPATIBILITY
   void for_each_pauli(std::function<void(pauli, std::size_t)> &&functor) const {
     if (this->terms.size() != 1)
       throw std::runtime_error(
@@ -309,18 +310,14 @@ public:
     }
   }
 
-  template <typename T = HandlerTy, std::enable_if_t<
-                                      std::is_same<HandlerTy, spin_operator>::value &&
-                                      std::is_same<HandlerTy, T>::value, bool> = true>
+  SPIN_OPS_BACKWARD_COMPATIBILITY
   void for_each_term(std::function<void(operator_sum<HandlerTy> &)> &&functor) const {
     auto prods = this->get_terms();
     for (operator_sum<HandlerTy> term : prods)
       functor(term); // FIXME: functor could modify the term??
   }
 
-  template <typename T = HandlerTy, std::enable_if_t<
-                                      std::is_same<HandlerTy, spin_operator>::value &&
-                                      std::is_same<HandlerTy, T>::value, bool> = true>
+  SPIN_OPS_BACKWARD_COMPATIBILITY
   bool is_identity() const {
     // ignores the coefficients (according to the old behavior)
     for (const auto &term : this->terms) {
@@ -330,9 +327,7 @@ public:
     return true;
   }
 
-  template <typename T = HandlerTy, std::enable_if_t<
-                                      std::is_same<HandlerTy, spin_operator>::value &&
-                                      std::is_same<HandlerTy, T>::value, bool> = true>
+  SPIN_OPS_BACKWARD_COMPATIBILITY
   std::complex<double> get_coefficient() const {
     if (this->terms.size() != 1)
       throw std::runtime_error(
@@ -340,9 +335,7 @@ public:
     return this->coefficients[0].evaluate(); // fails if we have parameters
   }
 
-  template <typename T = HandlerTy, std::enable_if_t<
-                                      std::is_same<HandlerTy, spin_operator>::value &&
-                                      std::is_same<HandlerTy, T>::value, bool> = true>
+  SPIN_OPS_BACKWARD_COMPATIBILITY
   std::string to_string(bool printCoeffs) const {
     std::unordered_map<int, int> dims;
     auto terms = std::move(
@@ -370,14 +363,10 @@ public:
     return ss.str();
   }
 
-  template <typename T = HandlerTy, std::enable_if_t<
-                                      std::is_same<HandlerTy, spin_operator>::value &&
-                                      std::is_same<HandlerTy, T>::value, bool> = true>
+  SPIN_OPS_BACKWARD_COMPATIBILITY
   static operator_sum<HandlerTy> from_word(const std::string &word);
 
-  template <typename T = HandlerTy, std::enable_if_t<
-                                      std::is_same<HandlerTy, spin_operator>::value &&
-                                      std::is_same<HandlerTy, T>::value, bool> = true>
+  SPIN_OPS_BACKWARD_COMPATIBILITY
   std::vector<operator_sum<HandlerTy>> distribute_terms(std::size_t numChunks) const {
     // Calculate how many terms we can equally divide amongst the chunks
     auto nTermsPerChunk = num_terms() / numChunks;
@@ -395,19 +384,13 @@ public:
     return std::move(chunks);
   }
 
-  template <typename T = HandlerTy, std::enable_if_t<
-                                      std::is_same<HandlerTy, spin_operator>::value &&
-                                      std::is_same<HandlerTy, T>::value, bool> = true>
+  SPIN_OPS_BACKWARD_COMPATIBILITY
   static operator_sum<HandlerTy> random(std::size_t nQubits, std::size_t nTerms, unsigned int seed);
 
-  template <typename T = HandlerTy, std::enable_if_t<
-                                      std::is_same<HandlerTy, spin_operator>::value &&
-                                      std::is_same<HandlerTy, T>::value, bool> = true>
+  SPIN_OPS_BACKWARD_COMPATIBILITY
   operator_sum(const std::vector<double> &input_vec, std::size_t nQubits);
 
-  template <typename T = HandlerTy, std::enable_if_t<
-                                      std::is_same<HandlerTy, spin_operator>::value &&
-                                      std::is_same<HandlerTy, T>::value, bool> = true>
+  SPIN_OPS_BACKWARD_COMPATIBILITY
   std::pair<std::vector<std::vector<bool>>, std::vector<std::complex<double>>> get_raw_data() const {
     // fixme: I think we want to start from 0 here, even if the operator 
     // does not contain consecutive degrees starting from 0....
@@ -444,9 +427,7 @@ public:
       std::move(bsf_terms), std::move(coeffs));
   }
 
-  template <typename T = HandlerTy, std::enable_if_t<
-                                      std::is_same<HandlerTy, spin_operator>::value &&
-                                      std::is_same<HandlerTy, T>::value, bool> = true>
+  SPIN_OPS_BACKWARD_COMPATIBILITY
   std::vector<double> getDataRepresentation() const {
     // FIXME: this is an imperfect representation because it does not capture targets accurately
     std::vector<double> dataVec;
@@ -792,9 +773,7 @@ public:
 
   // utility functions for backward compatibility
   
-  template <typename T = HandlerTy, std::enable_if_t<
-                                      std::is_same<HandlerTy, spin_operator>::value &&
-                                      std::is_same<HandlerTy, T>::value, bool> = true>
+  SPIN_OPS_BACKWARD_COMPATIBILITY
   bool is_identity() const {
     // ignores the coefficients (according to the old behavior)
     for (const auto &op : this->operators)

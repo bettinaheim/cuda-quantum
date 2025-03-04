@@ -8,7 +8,7 @@
 
 add_library(nvqir-qpp-observe-test SHARED QPPObserveBackend.cpp)
 set (QPP_TEST_DEPENDENCIES "")
-list(APPEND QPP_TEST_DEPENDENCIES fmt::fmt-header-only cudaq-common cudaq-spin cudaq-operator)
+list(APPEND QPP_TEST_DEPENDENCIES fmt::fmt-header-only cudaq-common cudaq-operator)
 add_openmp_configurations(nvqir-qpp-observe-test QPP_TEST_DEPENDENCIES)
 
 target_include_directories(nvqir-qpp-observe-test
@@ -34,7 +34,6 @@ target_link_libraries(test_observe_backend
   cudaq
   nvqir 
   nvqir-qpp-observe-test
-  cudaq-spin 
   cudaq-operator
   cudaq-platform-default 
   cudaq-em-default

@@ -262,7 +262,6 @@ set(CUDAQ_SPIN_TEST_SOURCES
 add_executable(test_spin main.cpp ${CUDAQ_SPIN_TEST_SOURCES})
 target_link_libraries(test_spin
   PRIVATE 
-  cudaq-spin
   fmt::fmt-header-only
   cudaq-operator
   gtest_main)
@@ -286,7 +285,6 @@ if (CMAKE_CXX_COMPILER_ID STREQUAL "GNU" AND NOT APPLE)
 endif()
 target_link_libraries(test_operators
   PRIVATE
-  cudaq-spin
   cudaq-operator
   fmt::fmt-header-only
   cudaq
@@ -397,7 +395,6 @@ if (CUDAQ_ENABLE_PYTHON)
     cudaq
     cudaq-platform-default
     nvqir nvqir-qpp
-    cudaq-spin
     cudaq-operator
     cudaq-chemistry
     cudaq-pyscf

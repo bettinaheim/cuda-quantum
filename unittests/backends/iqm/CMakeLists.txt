@@ -19,7 +19,6 @@ target_link_libraries(test_iqm
   cudaq-builder
   cudaq-mlir-runtime
   cudaq-rest-qpu
-  cudaq-spin
   cudaq-operator
   cudaq-platform-default
   gmock_main

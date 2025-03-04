@@ -22,6 +22,7 @@ set(CUDAQ_OPS_SRC
   handler.cpp
   schedule.cpp
   helpers.cpp
+  matrix.cpp
 )
 
 add_library(${LIBRARY_NAME} SHARED ${CUDAQ_OPS_SRC})

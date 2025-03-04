@@ -28,13 +28,12 @@ endif()
 
 target_link_libraries(cudaq-rest-qpu 
   PUBLIC 
-    cudaq-spin 
+    fmt::fmt-header-only 
     cudaq-operator
     cudaq-common 
   PRIVATE 
     cudaq-mlir-runtime 
     MLIRTranslateLib
-    fmt::fmt-header-only 
     cudaq 
     cudaq-platform-default
     ${AWSSDK_LINK_LIBRARIES})

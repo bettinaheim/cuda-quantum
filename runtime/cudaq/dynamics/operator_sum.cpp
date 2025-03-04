@@ -1261,10 +1261,13 @@ template operator_sum<fermion_operator> operator_handler::empty();
 
 // functions for backwards compatibility
 
+#define SPIN_OPS_BACKWARD_COMPATIBILITY_DEFINITION                                        \
+  template <typename T, std::enable_if_t<                                                 \
+                                      std::is_same<HandlerTy, spin_operator>::value &&    \
+                                      std::is_same<HandlerTy, T>::value, bool>>
+
 template <typename HandlerTy>
-template <typename T, std::enable_if_t<
-                        std::is_same<HandlerTy, spin_operator>::value &&
-                        std::is_same<HandlerTy, T>::value, bool>>
+SPIN_OPS_BACKWARD_COMPATIBILITY_DEFINITION
 operator_sum<HandlerTy> operator_sum<HandlerTy>::from_word(const std::string &word) {
   auto prod = operator_handler::identity<HandlerTy>();
   for (std::size_t i = 0; i < word.length(); i++) {
@@ -1285,9 +1288,7 @@ operator_sum<HandlerTy> operator_sum<HandlerTy>::from_word(const std::string &wo
 }
 
 template <typename HandlerTy>
-template <typename T, std::enable_if_t<
-                        std::is_same<HandlerTy, spin_operator>::value &&
-                        std::is_same<HandlerTy, T>::value, bool>>
+SPIN_OPS_BACKWARD_COMPATIBILITY_DEFINITION
 operator_sum<HandlerTy> operator_sum<HandlerTy>::random(std::size_t nQubits, std::size_t nTerms, unsigned int seed) {
   std::mt19937 gen(seed);
   auto sum = spin_operator::empty();
@@ -1309,9 +1310,7 @@ operator_sum<HandlerTy> operator_sum<HandlerTy>::random(std::size_t nQubits, std
 }
 
 template <typename HandlerTy>
-template <typename T, std::enable_if_t<
-                        std::is_same<HandlerTy, spin_operator>::value &&
-                        std::is_same<HandlerTy, T>::value, bool>>
+SPIN_OPS_BACKWARD_COMPATIBILITY_DEFINITION
 operator_sum<HandlerTy>::operator_sum(const std::vector<double> &input_vec, std::size_t nQubits) {
   auto n_terms = (int)input_vec.back();
   if (nQubits != (((input_vec.size() - 1) - 2 * n_terms) / n_terms))
@@ -1330,19 +1329,16 @@ operator_sum<HandlerTy>::operator_sum(const std::vector<double> &input_vec, std:
 
       int val = (int)input_vec[j + i];
       // FIXME: align op codes with old impl
-      int op_code = 0;
       if (val == 1) // X
-        op_code = 2;
+        prod *= spin_operator::x(j);
       else if (val == 2) // Z
-        op_code = 1;
+        prod *= spin_operator::z(j);
       else if (val == 3) // Y
-        op_code = 3;
-      prod *= spin_operator(j, op_code);
+        prod *= spin_operator::y(j);
     }
     *this += std::move(prod);
   }
 }
-
 
 #if !defined(__clang__)
 template operator_sum<spin_operator> operator_sum<spin_operator>::from_word(const std::string &word);
