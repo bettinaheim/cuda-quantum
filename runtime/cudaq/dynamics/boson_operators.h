@@ -13,7 +13,7 @@
 #include <vector>
 
 #include "cudaq/operators.h"
-#include "cudaq/utils/tensor.h"
+#include "cudaq/utils/matrix.h"
 
 namespace cudaq {
 
@@ -61,7 +61,7 @@ public:
   /// of the number operator.
   /// @arg  `dimensions` : A map specifying the dimension, that is the number of
   /// eigenstates, for each degree of freedom.
-  virtual matrix_2
+  virtual complex_matrix
   to_matrix(std::unordered_map<int, int> &dimensions,
             const std::unordered_map<std::string, std::complex<double>>
                 &parameters = {}) const override;

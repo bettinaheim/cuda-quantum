@@ -130,8 +130,8 @@ CUDAQ_TEST(KernelsTester, checkFromState) {
     cudaq::from_state(kernel, qubits, state);
     std::cout << kernel << "\n";
 
-    auto H = 5.907 - 2.1433 * cudaq::spin_operator::x(0) * cudaq::spin_operator::x(1) - 2.1433 * cudaq::spin_operator::y(0) * cudaq::spin_operator::y(1) +
-             .21829 * cudaq::spin_operator::z(0) - 6.125 * cudaq::spin_operator::z(1);
+    auto H = 5.907 - 2.1433 * cudaq::spin_op::x(0) * cudaq::spin_op::x(1) - 2.1433 * cudaq::spin_op::y(0) * cudaq::spin_op::y(1) +
+             .21829 * cudaq::spin_op::z(0) - 6.125 * cudaq::spin_op::z(1);
     auto energy = cudaq::observe(kernel, H).expectation();
     EXPECT_NEAR(-1.748, energy, 1e-3);
 
@@ -151,7 +151,6 @@ CUDAQ_TEST(KernelsTester, checkFromState) {
     counts.dump();
   }
 
-  /* FIXME: REENABLE
   {
     // Random unitary state
     const std::size_t numQubits = 2;
@@ -179,7 +178,6 @@ CUDAQ_TEST(KernelsTester, checkFromState) {
     for (std::size_t i = 0; i < (1u << numQubits); i++)
       EXPECT_NEAR(std::abs(globalPhase * ss[i] - expectedData[i]), 0.0, 1e-6);
   }
-  */
 }
 
 #endif

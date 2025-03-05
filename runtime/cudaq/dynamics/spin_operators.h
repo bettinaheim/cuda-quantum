@@ -13,7 +13,7 @@
 #include <vector>
 
 #include "cudaq/operators.h"
-#include "cudaq/utils/tensor.h"
+#include "cudaq/utils/matrix.h"
 
 namespace cudaq {
 
@@ -22,7 +22,7 @@ class spin_operator : public operator_handler {
   template <typename T>
   friend class product_operator;
   template <typename T>
-  friend class operator_sum;
+  friend class operator_sum; // fixme: only used for random right now...
 
 private:
   // I = 0, Z = 1, X = 2, Y = 3
@@ -56,7 +56,7 @@ public:
   /// @brief Computes the matrix representation of a Pauli string.
   /// By default, the ordering of the matrix matches the ordering of the Pauli
   /// string,
-  static matrix_2 to_matrix(std::string pauli, std::complex<double> coeff = 1.,
+  static complex_matrix to_matrix(std::string pauli, std::complex<double> coeff = 1.,
                             bool invert_order = false);
 
   /// @brief Return the `matrix_operator` as a matrix.
@@ -64,7 +64,7 @@ public:
   ///                      that is, the dimension of each degree of freedom
   ///                      that the operator acts on. Example for two, 2-level
   ///                      degrees of freedom: `{0 : 2, 1 : 2}`.
-  virtual matrix_2
+  virtual complex_matrix
   to_matrix(std::unordered_map<int, int> &dimensions,
             const std::unordered_map<std::string, std::complex<double>>
                 &parameters = {}) const override;

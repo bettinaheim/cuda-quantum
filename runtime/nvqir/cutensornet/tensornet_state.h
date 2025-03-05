@@ -184,7 +184,7 @@ public:
   /// @param symplecticRepr The symplectic representation of the observable
   /// @return
   std::vector<std::complex<double>>
-  computeExpVals(const std::vector<cudaq::product_operator<cudaq::spin_operator>> &product_terms,
+  computeExpVals(const std::vector<cudaq::spin_op_term> &product_terms,
                  const std::optional<std::size_t> &numberTrajectories);
 
   /// @brief Evaluate the expectation value of a given

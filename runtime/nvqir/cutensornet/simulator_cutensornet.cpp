@@ -333,9 +333,9 @@ SimulatorTensorNetBase::sample(const std::vector<std::size_t> &measuredBits,
   LOG_API_TIME();
   std::vector<int32_t> measuredBitIds(measuredBits.begin(), measuredBits.end());
   if (shots < 1) {
-    auto allZ = cudaq::spin_operator::identity();
+    auto allZ = cudaq::spin_op_term::identity();
     for (std::size_t t = 0; t < m_state->getNumQubits(); ++t)
-      allZ *= cudaq::spin_operator::z(t);
+      allZ *= cudaq::spin_op::z(t);
     // Just compute the expected value on <Z...Z>
     return cudaq::ExecutionResult({}, observe(allZ).expectation());
   }
@@ -401,14 +401,14 @@ SimulatorTensorNetBase::observe(const cudaq::spin_op &ham) {
     expVal += spinOp.getIdentityTermOffset();
     return cudaq::observe_result(expVal.real(), ham,
                                  cudaq::sample_result(cudaq::ExecutionResult(
-                                     {}, ham.to_string(false), expVal.real())));
+                                     {}, ham.to_string(), expVal.real())));
   }
 
   std::vector<std::string> termStrs;
   termStrs.reserve(ham.num_terms());
   auto prods = ham.get_terms();
   for (const auto &term : prods)
-    termStrs.emplace_back(cudaq::operator_sum<cudaq::spin_operator>(term).to_string(false));
+    termStrs.emplace_back(term.to_string(false));
 
   // Compute the expectation value for all terms
   const auto termExpVals = m_state->computeExpVals(

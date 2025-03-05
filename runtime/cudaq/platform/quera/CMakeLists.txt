@@ -18,13 +18,13 @@ target_include_directories(${LIBRARY_NAME} PRIVATE .
 
 target_link_libraries(${LIBRARY_NAME}
   PUBLIC
-    fmt::fmt-header-only
     cudaq-serverhelper-braket 
     cudaq-operator
     cudaq-common 
   PRIVATE
     pthread
     cudaq-mlir-runtime 
+    fmt::fmt-header-only
     cudaq 
     cudaq-platform-default)
 

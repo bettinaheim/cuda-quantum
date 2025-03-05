@@ -358,6 +358,8 @@ std::size_t product_operator<HandlerTy>::num_terms() const {
 
 template <typename HandlerTy>
 const std::vector<HandlerTy> &product_operator<HandlerTy>::get_terms() const {
+  // FIXME: WE NEED TO RETURN THESE IN USER FACING ORDER BY DEFAULT!!
+  // SAME IN FOR_EACH_PAULI!
   return this->operators;
 }
 
@@ -633,14 +635,16 @@ INSTANTIATE_PRODUCT_ASSIGNMENTS(fermion_operator);
 
 template <typename HandlerTy>
 std::string product_operator<HandlerTy>::to_string() const {
-  auto str = "(" + this->coefficient.to_string() + ") * ";
+  std::stringstream str;
+  str << this->coefficient.to_string();
+  if (this->operators.size() > 0) str << " * ";
   for (const auto &op : this->operators)
-    str += op.to_string(true);
-  return std::move(str);
+    str << op.to_string(true);
+  return str.str();
 }
 
 template <typename HandlerTy>
-matrix_2 product_operator<HandlerTy>::to_matrix(
+complex_matrix product_operator<HandlerTy>::to_matrix(
     std::unordered_map<int, int> dimensions,
     const std::unordered_map<std::string, std::complex<double>> &parameters,
     bool application_order) const {
@@ -662,7 +666,7 @@ matrix_2 product_operator<HandlerTy>::to_matrix(
 }
 
 template <>
-matrix_2 product_operator<spin_operator>::to_matrix(
+complex_matrix product_operator<spin_operator>::to_matrix(
     std::unordered_map<int, int> dimensions,
     const std::unordered_map<std::string, std::complex<double>> &parameters,
     bool application_order) const {
@@ -684,7 +688,7 @@ matrix_2 product_operator<spin_operator>::to_matrix(
                                                                                \
   template std::string product_operator<HandlerTy>::to_string() const;         \
                                                                                \
-  template matrix_2 product_operator<HandlerTy>::to_matrix(                    \
+  template complex_matrix product_operator<HandlerTy>::to_matrix(                    \
       std::unordered_map<int, int> dimensions,                                 \
       const std::unordered_map<std::string, std::complex<double>> &parameters, \
       bool application_order) const;
@@ -1247,11 +1251,13 @@ INSTANTIATE_PRODUCT_CONVERSION_OPS(-, operator_sum);
 
 // common operators
 
+// FIXME: remove
 template <typename HandlerTy>
 product_operator<HandlerTy> operator_handler::identity() {
   return product_operator<HandlerTy>(1.0);
 }
 
+// FIXME: remove
 template <typename HandlerTy>
 product_operator<HandlerTy> operator_handler::identity(int target) {
   static_assert(
@@ -1273,6 +1279,74 @@ template product_operator<boson_operator>
 operator_handler::identity(int target);
 template product_operator<fermion_operator>
 operator_handler::identity(int target);
+
+// handler specific operators
+
+#define HANDLER_SPECIFIC_TEMPLATE_DEFINITION(ConcreteTy)                                  \
+  template <typename HandlerTy>                                                           \
+  template <typename T, std::enable_if_t<                                                 \
+                                      std::is_same<HandlerTy, ConcreteTy>::value &&       \
+                                      std::is_same<HandlerTy, T>::value, bool>>
+
+HANDLER_SPECIFIC_TEMPLATE_DEFINITION(spin_operator)
+product_operator<HandlerTy> product_operator<HandlerTy>::identity() {
+  return product_operator<HandlerTy>(1.0);
+}
+
+HANDLER_SPECIFIC_TEMPLATE_DEFINITION(spin_operator)
+product_operator<HandlerTy> product_operator<HandlerTy>::identity(int target) {
+  static_assert(
+      std::is_constructible_v<HandlerTy, int>,
+      "operator handlers must have a constructor that take a single degree of "
+      "freedom and returns the identity operator on that degree.");
+  return product_operator<HandlerTy>(1.0, HandlerTy(target));
+}
+
+#if !defined(__clang__)
+template product_operator<spin_operator> product_operator<spin_operator>::identity();
+template product_operator<spin_operator> product_operator<spin_operator>::identity(int target);
+#endif
+
+// functions for backwards compatibility
+
+#define SPIN_OPS_BACKWARD_COMPATIBILITY_DEFINITION                                        \
+  template <typename HandlerTy>                                                           \
+  template <typename T, std::enable_if_t<                                                 \
+                                      std::is_same<HandlerTy, spin_operator>::value &&    \
+                                      std::is_same<HandlerTy, T>::value, bool>>
+
+SPIN_OPS_BACKWARD_COMPATIBILITY_DEFINITION
+std::vector<bool> product_operator<HandlerTy>::get_binary_symplectic_form() const {
+  // fixme: I think we want to start from 0 here, even if the operator 
+  // does not contain consecutive degrees starting from 0....
+  // fixme: the above can be taken care of by writing a dedicated transformation into bsf directly
+  std::unordered_map<int, int> dims;
+  auto degrees = this->degrees(false); // degrees in canonical order
+  auto term_size = operator_handler::canonical_order(1, 0) ? degrees[0] + 1 : degrees.back() + 1;
+  auto evaluated =
+    this->evaluate(operator_arithmetics<operator_handler::canonical_evaluation>(
+        dims, {})); // fails if we have parameters
+
+  auto pauli_str = std::move(evaluated.terms[0].second);
+  std::vector<bool> bsf(term_size << 1, 0);
+  for (std::size_t i = 0; i < degrees.size(); ++i) {
+    if (pauli_str[i] == 'X')
+      bsf[degrees[i]] = 1;
+    else if (pauli_str[i] == 'Z')
+      bsf[degrees[i] + term_size] = 1;
+    else if (pauli_str[i] == 'Y') {
+      bsf[degrees[i]] = 1;
+      bsf[degrees[i] + term_size] = 1;
+    }
+  }
+
+  return std::move(bsf);
+}
+
+#if !defined(__clang__)
+template std::vector<bool> product_operator<spin_operator>::get_binary_symplectic_form() const;
+#endif
+
 
 #if defined(CUDAQ_INSTANTIATE_TEMPLATES)
 template class product_operator<matrix_operator>;

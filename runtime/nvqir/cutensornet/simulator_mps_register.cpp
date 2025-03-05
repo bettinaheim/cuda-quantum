@@ -108,10 +108,12 @@ public:
             exp_itheta2,       0., 0., 0., 0., exp_minus_itheta2};
   };
 
+  // FIXME: EXP_PAULI SHOULD JUST TAKE A PAULI WORD -
+  // WE DON'T DEAL WITH COEFFICIENTS
   virtual void applyExpPauli(double theta,
                              const std::vector<std::size_t> &controls,
                              const std::vector<std::size_t> &qubitIds,
-                             const cudaq::spin_op &op) override {
+                             const cudaq::spin_op_term &op) override {
     if (this->isInTracerMode()) {
       nvqir::CircuitSimulator::applyExpPauli(theta, controls, qubitIds, op);
       return;
@@ -124,8 +126,9 @@ public:
     // are commonly-used gates and apply the operation directly (the base
     // decomposition will result in 2 CNOT gates).
     const auto shouldHandlePauliOp =
-        [](const cudaq::spin_op &opToCheck) -> bool {
+        [](const cudaq::spin_op_term &opToCheck) -> bool {
       const std::string opStr = opToCheck.to_string(false);
+      // FIXME: COMPLETELY IGNORES COEFFICIENTS - SAME PROBABLY IN THE GENERAL IMPLEMENTATION IN SimulatorTensorNetBase
       return opStr == "XX" || opStr == "YY" || opStr == "ZZ";
     };
     if (controls.empty() && qubitIds.size() == 2 && shouldHandlePauliOp(op)) {
@@ -244,14 +247,14 @@ public:
 
   // Helper to prepare term-by-term data from a spin op
   static std::tuple<std::vector<std::string>,
-                    std::vector<cudaq::product_operator<cudaq::spin_operator>>>
+                    std::vector<cudaq::spin_op_term>>
   prepareSpinOpTermData(const cudaq::spin_op &ham) {
     std::vector<std::string> termStrs;
     termStrs.reserve(ham.num_terms());
 
     auto prods = ham.get_terms();
     for (const auto &term : prods)
-      termStrs.emplace_back(cudaq::operator_sum<cudaq::spin_operator>(term).to_string(false));
+      termStrs.emplace_back(term.to_string(false));
     return std::make_tuple(termStrs, prods);
   }
 

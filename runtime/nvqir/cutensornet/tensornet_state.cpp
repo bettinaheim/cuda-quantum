@@ -657,7 +657,7 @@ TensorNetState::factorizeMPS(int64_t maxExtent, double absCutoff,
 }
 
 std::vector<std::complex<double>> TensorNetState::computeExpVals(
-    const std::vector<cudaq::product_operator<cudaq::spin_operator>> &product_terms,
+    const std::vector<cudaq::spin_op_term> &product_terms,
     const std::optional<std::size_t> &numberTrajectories) {
   LOG_API_TIME();
   if (product_terms.empty())
@@ -799,7 +799,7 @@ std::vector<std::complex<double>> TensorNetState::computeExpVals(
       std::memcpy(address, pauliMatrixPtr, PAULI_ARRAY_SIZE_BYTES);
     }
     if (allIdOps) {
-      allExpVals.emplace_back(prod.get_coefficient().evaluate()); // fixme: fails if we have parameters
+      allExpVals.emplace_back(prod.get_coefficient().evaluate()); // fails if we have parameters
     } else {
       HANDLE_CUDA_ERROR(cudaMemcpy(pauliMats_d, pauliMats_h,
                                    placeHolderArraySize,
@@ -813,7 +813,7 @@ std::vector<std::complex<double>> TensorNetState::computeExpVals(
             /*cudaStream*/ 0));
         expVal += (result / static_cast<double>(numObserveTrajectories));
       }
-      allExpVals.emplace_back(expVal * prod.get_coefficient().evaluate()); // fixme: fails if we have parameters
+      allExpVals.emplace_back(expVal * prod.get_coefficient().evaluate()); // fails if we have parameters
     }
   }
 

@@ -131,7 +131,7 @@ public:
                      const std::vector<double> &params,
                      const std::vector<QuditInfo> &controls,
                      const std::vector<QuditInfo> &targets,
-                     bool isAdjoint = false, const spin_op op = cudaq::spin_operator::empty()) = 0;
+                     bool isAdjoint = false, const spin_op_term op = cudaq::spin_op_term::identity()) = 0;
 
   /// @brief Apply a fine-grain noise operation within a kernel.
   virtual void applyNoise(const kraus_channel &channelName,
@@ -159,7 +159,7 @@ public:
 
   /// Measure the current state in the given Pauli basis, return the expectation
   /// value <term>.
-  virtual SpinMeasureResult measure(cudaq::spin_op &op) = 0;
+  virtual SpinMeasureResult measure(const cudaq::spin_op &op) = 0;
 
   /// Synchronize - run all queue-ed instructions
   virtual void synchronize() = 0;

@@ -122,14 +122,14 @@ runObservation(KernelFunctor &&k, cudaq::spin_op &h, quantum_platform &platform,
   else {
     // If not, we have everything we need to compute it.
     double sum = 0.0;
-    h.for_each_term([&](spin_op &term) {
+    auto terms = h.get_terms();
+    for (const auto &term : terms) {
       if (term.is_identity())
-        sum += term.get_coefficient().real();
+        sum += term.get_coefficient().evaluate().real();
       else
         sum += data.expectation(term.to_string(false)) *
-               term.get_coefficient().real();
-    });
-
+               term.get_coefficient().evaluate().real();
+    }
     expectationValue = sum;
   }
 
@@ -251,6 +251,7 @@ template <typename QuantumKernel, typename SpinOpContainer, typename... Args,
           typename = std::enable_if_t<
               std::is_invocable_r_v<void, QuantumKernel, Args...>>>
 #endif
+// FIXME: MAKE THIS A BETTER ERROR MESSAGE WHEN SPIN OP CONTAINER IS NOT AN ITERABLE OF SPINOPTERMS
 std::vector<observe_result> observe(QuantumKernel &&kernel,
                                     const SpinOpContainer &termList,
                                     Args &&...args) {
@@ -260,7 +261,7 @@ std::vector<observe_result> observe(QuantumKernel &&kernel,
   auto kernelName = cudaq::getKernelName(kernel);
 
   // Convert all spin_ops to a single summed spin_op
-  auto op = cudaq::spin_operator::empty();
+  auto op = cudaq::spin_op::empty();
   for (auto &o : termList)
     op += o;
 

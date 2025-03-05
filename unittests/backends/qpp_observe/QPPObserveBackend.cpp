@@ -33,28 +33,27 @@ public:
     // compute E_i = coeff_i * < psi | Term | psi >
     // = coeff_i * sum_k <psi | Pauli_k psi>
     for (const auto &term : op.get_terms()) {
-      cudaq::operator_sum<cudaq::spin_operator> term_as_sum = term;
       if (!term.is_identity()) {
         ::qpp::ket cached = state;
-        auto [bsf, coeffs] = term_as_sum.get_raw_data();
+        auto bsf = term.get_binary_symplectic_form(); // we don't really need bsf for this....
         for (std::size_t i = 0; i < nQ; i++) {
-          if (bsf[0][i] && bsf[0][i + nQ])
+          if (bsf[i] && bsf[i + nQ])
             cached = ::qpp::apply(cached, Y, {convertQubitIndex(i)});
-          else if (bsf[0][i])
+          else if (bsf[i])
             cached = ::qpp::apply(cached, X, {convertQubitIndex(i)});
-          else if (bsf[0][i + nQ])
+          else if (bsf[i + nQ])
             cached = ::qpp::apply(cached, Z, {convertQubitIndex(i)});
         }
 
-        sum += coeffs[0].real() * state.transpose().dot(cached).real();
+        sum += term.get_coefficient().evaluate().real() * state.transpose().dot(cached).real();
       } else {
-        sum += term_as_sum.get_coefficient().real();
+        sum += term.get_coefficient().evaluate().real();
       }
     }
 
     return cudaq::observe_result(sum, op,
                                  cudaq::sample_result(cudaq::ExecutionResult(
-                                     {}, op.to_string(false), sum)));
+                                     {}, op.to_string(), sum)));
   }
 
   std::string name() const override { return "qpp-test"; }

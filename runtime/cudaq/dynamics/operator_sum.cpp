@@ -490,7 +490,7 @@ std::string operator_sum<HandlerTy>::to_string() const {
 }
 
 template <typename HandlerTy>
-matrix_2 operator_sum<HandlerTy>::to_matrix(
+complex_matrix operator_sum<HandlerTy>::to_matrix(
     std::unordered_map<int, int> dimensions,
     const std::unordered_map<std::string, std::complex<double>> &parameters,
     bool application_order) const {
@@ -511,7 +511,7 @@ matrix_2 operator_sum<HandlerTy>::to_matrix(
 }
 
 template <>
-matrix_2 operator_sum<spin_operator>::to_matrix(
+complex_matrix operator_sum<spin_operator>::to_matrix(
     std::unordered_map<int, int> dimensions,
     const std::unordered_map<std::string, std::complex<double>> &parameters,
     bool application_order) const {
@@ -519,7 +519,7 @@ matrix_2 operator_sum<spin_operator>::to_matrix(
       operator_arithmetics<operator_handler::canonical_evaluation>(dimensions,
                                                                    parameters));
   if (evaluated.terms.size() == 0)
-    return cudaq::matrix_2(0, 0);
+    return cudaq::complex_matrix(0, 0);
 
   bool invert_order =
       application_order && operator_handler::canonical_order(1, 0) !=
@@ -536,7 +536,7 @@ matrix_2 operator_sum<spin_operator>::to_matrix(
                                                                                \
   template std::string operator_sum<HandlerTy>::to_string() const;             \
                                                                                \
-  template matrix_2 operator_sum<HandlerTy>::to_matrix(                        \
+  template complex_matrix operator_sum<HandlerTy>::to_matrix(                        \
       std::unordered_map<int, int> dimensions,                                 \
       const std::unordered_map<std::string, std::complex<double>> &params,     \
       bool application_order) const;
@@ -1249,6 +1249,7 @@ INSTANTIATE_SUM_CONVERSION_OPS(-);
 
 // common operators
 
+// FIXME: remove
 template <typename HandlerTy>
 operator_sum<HandlerTy> operator_handler::empty() {
   return operator_sum<HandlerTy>();
@@ -1259,16 +1260,57 @@ template operator_sum<spin_operator> operator_handler::empty();
 template operator_sum<boson_operator> operator_handler::empty();
 template operator_sum<fermion_operator> operator_handler::empty();
 
+// handler specific operators
+
+#define HANDLER_SPECIFIC_TEMPLATE_DEFINITION(ConcreteTy)                                  \
+  template <typename HandlerTy>                                                           \
+  template <typename T, std::enable_if_t<                                                 \
+                                      std::is_same<HandlerTy, ConcreteTy>::value &&       \
+                                      std::is_same<HandlerTy, T>::value, bool>>
+
+HANDLER_SPECIFIC_TEMPLATE_DEFINITION(spin_operator)
+operator_sum<HandlerTy> operator_sum<HandlerTy>::empty() {
+  return operator_sum<HandlerTy>();
+}
+
+HANDLER_SPECIFIC_TEMPLATE_DEFINITION(spin_operator)
+product_operator<HandlerTy> operator_sum<HandlerTy>::i(int target) {
+  return spin_operator::i(target);
+}
+
+HANDLER_SPECIFIC_TEMPLATE_DEFINITION(spin_operator)
+product_operator<HandlerTy> operator_sum<HandlerTy>::x(int target) {
+  return spin_operator::x(target);
+}
+
+HANDLER_SPECIFIC_TEMPLATE_DEFINITION(spin_operator)
+product_operator<HandlerTy> operator_sum<HandlerTy>::y(int target) {
+  return spin_operator::y(target);
+}
+
+HANDLER_SPECIFIC_TEMPLATE_DEFINITION(spin_operator)
+product_operator<HandlerTy> operator_sum<HandlerTy>::z(int target) {
+  return spin_operator::z(target);
+}
+
+#if !defined(__clang__)
+template operator_sum<spin_operator> operator_sum<spin_operator>::empty();
+template product_operator<spin_operator> operator_sum<spin_operator>::i(int target);
+template product_operator<spin_operator> operator_sum<spin_operator>::x(int target);
+template product_operator<spin_operator> operator_sum<spin_operator>::y(int target);
+template product_operator<spin_operator> operator_sum<spin_operator>::z(int target);
+#endif
+
 // functions for backwards compatibility
 
 #define SPIN_OPS_BACKWARD_COMPATIBILITY_DEFINITION                                        \
+  template <typename HandlerTy>                                                           \
   template <typename T, std::enable_if_t<                                                 \
                                       std::is_same<HandlerTy, spin_operator>::value &&    \
                                       std::is_same<HandlerTy, T>::value, bool>>
 
-template <typename HandlerTy>
 SPIN_OPS_BACKWARD_COMPATIBILITY_DEFINITION
-operator_sum<HandlerTy> operator_sum<HandlerTy>::from_word(const std::string &word) {
+product_operator<HandlerTy> operator_sum<HandlerTy>::from_word(const std::string &word) {
   auto prod = operator_handler::identity<HandlerTy>();
   for (std::size_t i = 0; i < word.length(); i++) {
     auto letter = word[i];
@@ -1287,11 +1329,10 @@ operator_sum<HandlerTy> operator_sum<HandlerTy>::from_word(const std::string &wo
   return std::move(prod);
 }
 
-template <typename HandlerTy>
 SPIN_OPS_BACKWARD_COMPATIBILITY_DEFINITION
 operator_sum<HandlerTy> operator_sum<HandlerTy>::random(std::size_t nQubits, std::size_t nTerms, unsigned int seed) {
   std::mt19937 gen(seed);
-  auto sum = spin_operator::empty();
+  auto sum = spin_op::empty();
   for (std::size_t i = 0; i < nTerms; i++) {
     std::vector<bool> termData(2 * nQubits);
     std::fill_n(termData.begin(), nQubits, true);
@@ -1309,7 +1350,6 @@ operator_sum<HandlerTy> operator_sum<HandlerTy>::random(std::size_t nQubits, std
   return std::move(sum);
 }
 
-template <typename HandlerTy>
 SPIN_OPS_BACKWARD_COMPATIBILITY_DEFINITION
 operator_sum<HandlerTy>::operator_sum(const std::vector<double> &input_vec, std::size_t nQubits) {
   auto n_terms = (int)input_vec.back();
@@ -1341,7 +1381,7 @@ operator_sum<HandlerTy>::operator_sum(const std::vector<double> &input_vec, std:
 }
 
 #if !defined(__clang__)
-template operator_sum<spin_operator> operator_sum<spin_operator>::from_word(const std::string &word);
+template product_operator<spin_operator> operator_sum<spin_operator>::from_word(const std::string &word);
 template operator_sum<spin_operator> operator_sum<spin_operator>::random(std::size_t nQubits, std::size_t nTerms, unsigned int seed);
 template operator_sum<spin_operator>::operator_sum(const std::vector<double> &input_vec, std::size_t nQubits);
 #endif

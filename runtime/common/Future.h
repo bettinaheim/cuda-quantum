@@ -129,20 +129,22 @@ public:
         throw std::runtime_error(
             "Returning an observe_result requires a spin_op.");
 
-      auto checkRegName = spinOp->to_string(false);
+      auto checkRegName = spinOp->to_string();
       if (data.has_expectation(checkRegName))
         return observe_result(data.expectation(checkRegName), *spinOp, data);
 
       // this assumes we ran in shots mode.
       double sum = 0.0;
-      spinOp->for_each_term([&](spin_op &term) {
+      auto terms = spinOp->get_terms();
+      for (const auto &term : terms) {
         if (term.is_identity())
-          sum += term.get_coefficient().real();
+          // FIXME: .real...
+          sum += term.get_coefficient().evaluate().real(); // fails if we have parameters 
         else
+          // FIXME: .real...
           sum += data.expectation(term.to_string(false)) *
-                 term.get_coefficient().real();
-      });
-
+                 term.get_coefficient().evaluate().real(); // fails if we have parameters 
+      }
       return observe_result(sum, *spinOp, data);
     }
 

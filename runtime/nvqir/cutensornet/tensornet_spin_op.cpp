@@ -28,8 +28,9 @@ TensorNetworkSpinOp::TensorNetworkSpinOp(const cudaq::spin_op &spinOp,
   if (spinOp.num_qubits() < NUM_QUBITS_THRESHOLD_DIRECT_OBS) {
     const auto spinMat = spinOp.to_matrix();
     std::vector<std::complex<double>> opMat;
-    for (size_t i = 0; i < spinMat.get_rows(); ++i) {
-      for (size_t j = 0; j < spinMat.get_columns(); ++j)
+    opMat.reserve(spinMat.rows() * spinMat.cols());
+    for (size_t i = 0; i < spinMat.rows(); ++i) {
+      for (size_t j = 0; j < spinMat.cols(); ++j)
         opMat.push_back(spinMat[{i, j}]);
     }
     void *opMat_d{nullptr};

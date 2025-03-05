@@ -141,7 +141,7 @@ public:
   virtual void applyExpPauli(double theta,
                              const std::vector<std::size_t> &controls,
                              const std::vector<std::size_t> &qubitIds,
-                             const cudaq::spin_op &op) {
+                             const cudaq::spin_op_term &op) {
     if (op.is_identity()) {
       if (controls.empty()) {
         // exp(i*theta*Id) is noop if this is not a controlled gate.
@@ -157,21 +157,27 @@ public:
     }
     flushGateQueue();
     cudaq::info(" [CircuitSimulator decomposing] exp_pauli({}, {})", theta,
-                op.to_string(false));
+                op.to_string());
     std::vector<std::size_t> qubitSupport;
     std::vector<std::function<void(bool)>> basisChange;
-    op.for_each_pauli([&](cudaq::pauli type, std::size_t qubitIdx) {
-      auto qId = qubitIds[qubitIdx];
-      if (type != cudaq::pauli::I)
+    auto ops = op.get_terms();
+    if (ops.size() != qubitIds.size())
+      throw std::runtime_error("incorrect number of qubits in exp_pauli - expecting " + std::to_string(ops.size()) + " qubits");
+
+    for (std::size_t idx = 0; idx < ops.size(); ++idx) {
+      // operator targets are relative to the qubit argument vector
+      auto qId = qubitIds[idx];
+      auto p_str = ops[idx].to_string(false);
+      if (p_str != "I")
         qubitSupport.push_back(qId);
 
-      if (type == cudaq::pauli::Y)
+      if (p_str == "Y")
         basisChange.emplace_back([this, qId](bool reverse) {
           rx(!reverse ? M_PI_2 : -M_PI_2, qId);
         });
-      else if (type == cudaq::pauli::X)
+      else if (p_str == "X")
         basisChange.emplace_back([this, qId](bool) { h(qId); });
-    });
+    }
 
     if (!basisChange.empty())
       for (auto &basis : basisChange)
@@ -1419,9 +1425,10 @@ public:
       return;
     }
 
+    // FIXME: check if any backend directly handles measuring multiple terms
     assert(op.num_terms() == 1 && "Number of terms is not 1.");
 
-    cudaq::info("Measure {}", op.to_string(false));
+    cudaq::info("Measure {}", op.to_string());
     std::vector<std::size_t> qubitsToMeasure;
     std::vector<std::function<void(bool)>> basisChange;
     op.for_each_pauli([&](cudaq::pauli type, std::size_t qubitIdx) {

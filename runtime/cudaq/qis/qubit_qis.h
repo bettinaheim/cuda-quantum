@@ -697,7 +697,7 @@ void exp_pauli(double theta, QubitRange &&qubits, const char *pauliWord) {
   std::transform(qubits.begin(), qubits.end(), std::back_inserter(quditInfos),
                  [](auto &q) { return cudaq::qubitToQuditInfo(q); });
   getExecutionManager()->apply("exp_pauli", {theta}, {}, quditInfos, false,
-                               spin_op::from_word(pauliWord));
+                               spin_op::from_word(pauliWord)); // FIXME: why not just keep the word??!
 }
 
 /// @brief Apply a general Pauli rotation, takes a qubit register and the size
@@ -845,7 +845,7 @@ void __nvqpp_vector_bool_free_temporary_initlists(std::vector<char *> *);
 } // namespace support
 
 // Measure the state in the given spin_op basis.
-inline SpinMeasureResult measure(cudaq::spin_op &term) {
+inline SpinMeasureResult measure(const cudaq::spin_op &term) {
   return getExecutionManager()->measure(term);
 }
 

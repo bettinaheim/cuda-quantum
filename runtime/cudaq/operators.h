@@ -17,14 +17,27 @@
 #include "dynamics/operator_leafs.h"
 #include "dynamics/templates.h"
 #include "utils/cudaq_utils.h"
-#include "utils/tensor.h"
+#include "utils/matrix.h"
 #include "common/FmtCore.h"
 
 namespace cudaq {
 
-// fixme: here backward compatibility only
+// Here primarily for backward compatibility
 enum class pauli { I, X, Y, Z };
 class spin_operator;
+
+#define HANDLER_SPECIFIC_TEMPLATE(ConcreteTy)                                             \
+  template <typename T = HandlerTy, std::enable_if_t<                                     \
+                                      std::is_same<HandlerTy, ConcreteTy>::value &&       \
+                                      std::is_same<HandlerTy, T>::value, bool> = true>
+
+  // utility functions for backward compatibility
+
+#define SPIN_OPS_BACKWARD_COMPATIBILITY                                                   \
+  template <typename T = HandlerTy, std::enable_if_t<                                     \
+                                      std::is_same<HandlerTy, spin_operator>::value &&    \
+                                      std::is_same<HandlerTy, T>::value, bool> = true>
+
 
 /// @brief Represents an operator expression consisting of a sum of terms, where
 /// each term is a product of elementary and scalar operators. Operator
@@ -141,7 +154,7 @@ public:
   ///                      degrees of freedom: `{0:2, 1:2}`.
   /// @arg `parameters` : A map of the parameter names to their concrete,
   /// complex values.
-  matrix_2 to_matrix(std::unordered_map<int, int> dimensions = {},
+  complex_matrix to_matrix(std::unordered_map<int, int> dimensions = {},
                      const std::unordered_map<std::string, std::complex<double>>
                          &parameters = {},
                      bool application_order = true) const;
@@ -277,12 +290,24 @@ public:
   template <typename T>
   friend operator_sum<T> operator_handler::empty();
 
-  // utility functions for backward compatibility
+  // handler specific operators
 
-#define SPIN_OPS_BACKWARD_COMPATIBILITY                                                   \
-  template <typename T = HandlerTy, std::enable_if_t<                                     \
-                                      std::is_same<HandlerTy, spin_operator>::value &&    \
-                                      std::is_same<HandlerTy, T>::value, bool> = true>
+  HANDLER_SPECIFIC_TEMPLATE(spin_operator)
+  static operator_sum<HandlerTy> empty();
+
+  HANDLER_SPECIFIC_TEMPLATE(spin_operator)
+  static product_operator<HandlerTy> i(int target);
+
+  HANDLER_SPECIFIC_TEMPLATE(spin_operator)
+  static product_operator<HandlerTy> x(int target);
+
+  HANDLER_SPECIFIC_TEMPLATE(spin_operator)
+  static product_operator<HandlerTy> y(int target);
+
+  HANDLER_SPECIFIC_TEMPLATE(spin_operator)
+  static product_operator<HandlerTy> z(int target);
+
+  // utility functions for backward compatibility
 
   SPIN_OPS_BACKWARD_COMPATIBILITY
   size_t num_qubits() const {
@@ -317,6 +342,7 @@ public:
       functor(term); // FIXME: functor could modify the term??
   }
 
+  // FIXME: I DON'T THINK WE NEED THIS HERE - get rid of it!
   SPIN_OPS_BACKWARD_COMPATIBILITY
   bool is_identity() const {
     // ignores the coefficients (according to the old behavior)
@@ -335,6 +361,8 @@ public:
     return this->coefficients[0].evaluate(); // fails if we have parameters
   }
 
+  // FIXME: REMOVE
+  /*
   SPIN_OPS_BACKWARD_COMPATIBILITY
   std::string to_string(bool printCoeffs) const {
     std::unordered_map<int, int> dims;
@@ -361,10 +389,10 @@ public:
       }
     }
     return ss.str();
-  }
+  } */
 
   SPIN_OPS_BACKWARD_COMPATIBILITY
-  static operator_sum<HandlerTy> from_word(const std::string &word);
+  static product_operator<HandlerTy> from_word(const std::string &word);
 
   SPIN_OPS_BACKWARD_COMPATIBILITY
   std::vector<operator_sum<HandlerTy>> distribute_terms(std::size_t numChunks) const {
@@ -390,6 +418,8 @@ public:
   SPIN_OPS_BACKWARD_COMPATIBILITY
   operator_sum(const std::vector<double> &input_vec, std::size_t nQubits);
 
+  /*
+  // FIXME: NO LONGER USED
   SPIN_OPS_BACKWARD_COMPATIBILITY
   std::pair<std::vector<std::vector<bool>>, std::vector<std::complex<double>>> get_raw_data() const {
     // fixme: I think we want to start from 0 here, even if the operator 
@@ -426,6 +456,7 @@ public:
     return std::pair<std::vector<std::vector<bool>>, std::vector<std::complex<double>>>(
       std::move(bsf_terms), std::move(coeffs));
   }
+  */
 
   SPIN_OPS_BACKWARD_COMPATIBILITY
   std::vector<double> getDataRepresentation() const {
@@ -603,7 +634,7 @@ public:
   ///                      degrees of freedom: `{0:2, 1:2}`.
   /// @arg `parameters` : A map of the parameter names to their concrete,
   /// complex values.
-  matrix_2 to_matrix(std::unordered_map<int, int> dimensions = {},
+  complex_matrix to_matrix(std::unordered_map<int, int> dimensions = {},
                      const std::unordered_map<std::string, std::complex<double>>
                          &parameters = {},
                      bool application_order = true) const;
@@ -766,10 +797,21 @@ public:
 
   // common operators
 
+  // FIXME: remove
   template <typename T>
   friend product_operator<T> operator_handler::identity();
   template <typename T>
   friend product_operator<T> operator_handler::identity(int target);
+
+  // handler specific operators
+
+  // handler specific operators
+
+  HANDLER_SPECIFIC_TEMPLATE(spin_operator)
+  static product_operator<HandlerTy> identity();
+
+  HANDLER_SPECIFIC_TEMPLATE(spin_operator)
+  static product_operator<HandlerTy> identity(int target);
 
   // utility functions for backward compatibility
   
@@ -781,12 +823,37 @@ public:
     return true;
   }
 
+  SPIN_OPS_BACKWARD_COMPATIBILITY
+  std::vector<bool> get_binary_symplectic_form() const;
+
+  // FIXME: IT LOOKS LIKE THE CODE EXPECTS THAT WE ID PAD TO HAVE CONSECUTIVE DEGREES!
+  SPIN_OPS_BACKWARD_COMPATIBILITY
+  std::string to_string(bool printCoeffs) const {
+    std::unordered_map<int, int> dims;
+    auto terms = std::move(
+      this->evaluate(
+              operator_arithmetics<operator_handler::canonical_evaluation>(
+                  dims, {})) // fails if operator is parameterized
+          .terms);
+    assert(terms.size() == 1);
+    std::stringstream ss;
+    if (!printCoeffs) {
+      ss << terms[0].second;
+    } else {
+      auto coeff = terms[0].first;
+      ss << fmt::format("[{}{}{}j]", coeff.real(),
+                        coeff.imag() < 0.0 ? "-" : "+", std::fabs(coeff.imag()));
+      ss << " " << terms[0].second << "\n";
+    }
+    return ss.str();
+  }
 };
 
 // type aliases for convenience
 typedef std::unordered_map<std::string, std::complex<double>> parameter_map;
 typedef std::unordered_map<int, int> dimension_map;
 typedef operator_sum<spin_operator> spin_op;
+typedef product_operator<spin_operator> spin_op_term;
 
 #ifndef CUDAQ_INSTANTIATE_TEMPLATES
 extern template class product_operator<matrix_operator>;

@@ -28,8 +28,8 @@ struct deuteron_n3_ansatz {
 
 CUDAQ_TEST(ObserveResult, checkSimple) {
 
-  cudaq::spin_op h = 5.907 - 2.1433 * cudaq::spin_operator::x(0) * cudaq::spin_operator::x(1) - 2.1433 * cudaq::spin_operator::y(0) * cudaq::spin_operator::y(1) +
-                     .21829 * cudaq::spin_operator::z(0) - 6.125 * cudaq::spin_operator::z(1);
+  cudaq::spin_op h = 5.907 - 2.1433 * cudaq::spin_op::x(0) * cudaq::spin_op::x(1) - 2.1433 * cudaq::spin_op::y(0) * cudaq::spin_op::y(1) +
+                     .21829 * cudaq::spin_op::z(0) - 6.125 * cudaq::spin_op::z(1);
 
   auto ansatz = [](double theta) __qpu__ {
     cudaq::qubit q, r;
@@ -72,13 +72,13 @@ CUDAQ_TEST(ObserveResult, checkSimple) {
   printf("Energy from observe_result with shots %lf\n", obs_res2.expectation());
   obs_res2.dump();
 
-  for (const auto &term : h.get_terms()) // td::size_t i = 0; i < h.num_terms(); i++)
+  for (const auto &term : h.get_terms())
     if (!term.is_identity())
       printf("Fine-grain data access: %s = %lf\n", term.to_string().data(),
-             obs_res2.expectation(cudaq::operator_sum<cudaq::spin_operator>(term)));
+             obs_res2.expectation(term));
 
-  auto observable = cudaq::spin_operator::x(0) * cudaq::spin_operator::x(1);
-  auto x0x1Counts = obs_res2.counts(cudaq::operator_sum<cudaq::spin_operator>(observable));
+  auto observable = cudaq::spin_op::x(0) * cudaq::spin_op::x(1);
+  auto x0x1Counts = obs_res2.counts(observable);
   x0x1Counts.dump();
   EXPECT_TRUE(x0x1Counts.size() == 4);
 }
@@ -98,21 +98,21 @@ CUDAQ_TEST(ObserveResult, checkExpValBug) {
     cz(qubits[1], qubits[2]);
   };
 
-  auto hamiltonian = cudaq::spin_operator::z(0) + cudaq::spin_operator::z(1);
+  auto hamiltonian = cudaq::spin_op::z(0) + cudaq::spin_op::z(1);
 
   auto result = cudaq::observe(kernel, hamiltonian);
-  auto observable = cudaq::spin_operator::z(0);
-  auto exp = result.expectation(cudaq::operator_sum<cudaq::spin_operator>(observable));
+  auto observable = cudaq::spin_op::z(0);
+  auto exp = result.expectation(observable);
   printf("exp %lf \n", exp);
   EXPECT_NEAR(exp, .79, 1e-1);
 
-  observable = cudaq::spin_operator::z(1);
-  exp = result.expectation(cudaq::operator_sum<cudaq::spin_operator>(observable));
+  observable = cudaq::spin_op::z(1);
+  exp = result.expectation(observable);
   printf("exp %lf \n", exp);
   EXPECT_NEAR(exp, .62, 1e-1);
 
-  observable = cudaq::spin_operator::z(0) * cudaq::spin_operator::i(1);
-  exp = result.expectation(cudaq::operator_sum<cudaq::spin_operator>(observable));
+  observable = cudaq::spin_op::z(0) * cudaq::spin_op::i(1);
+  exp = result.expectation(observable);
   printf("exp %lf \n", exp);
   EXPECT_NEAR(exp, .79, 1e-1);
 }
