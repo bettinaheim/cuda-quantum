@@ -76,7 +76,7 @@ void bindSpinOperator(py::module &mod) {
 
   py::class_<cudaq::spin_op_term>(mod, "SpinOperatorTerm")
       .def(py::init([]() { return cudaq::spin_op::identity(); }))
-      .def(py::init<const cudaq::spin_op_term>(), py::arg("spin_operator"),
+      .def(py::init<cudaq::spin_op_term>(), py::arg("spin_operator"),
            "Copy constructor, given another :class:`SpinOperatorTerm`.")
 
       /// @brief Bind the member functions.
@@ -157,6 +157,14 @@ void bindSpinOperator(py::module &mod) {
           "to each pauli element in the term. The function must have "
           "`void(pauli, int)` signature where `pauli` is the Pauli matrix "
           "type and the `int` is the qubit index.")
+      .def("distribute_terms", [](cudaq::spin_op_term &op, std::size_t chunks) {
+            return cudaq::spin_op(op).distribute_terms(chunks);
+          },
+          py::arg("chunk_count"),
+          "Return a list of :class:`SpinOperator` representing a distribution "
+          "of the "
+          "terms in this :class:`SpinOperator` into `chunk_count` sized "
+          "chunks.")
 
       /// @brief Arithmetic operators between different data types
 
@@ -531,7 +539,10 @@ void bindSpinOperator(py::module &mod) {
 void bindSpinWrapper(py::module &mod) {
   bindSpinClass(mod);
   bindSpinOperator(mod);
-  py::implicitly_convertible<spin_op_term, spin_op>();
+  // We may run into issue with implicitly convertible
+  // because the execution context merely stores a reference
+  // to an existing object rather than a copy...
+  //py::implicitly_convertible<spin_op_term, spin_op>();
 }
 
 } // namespace cudaq

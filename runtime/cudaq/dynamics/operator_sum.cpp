@@ -1472,6 +1472,10 @@ std::vector<sum_op<HandlerTy>> sum_op<HandlerTy>::distribute_terms(std::size_t n
       chunk += product_op<HandlerTy>(this->coefficients[it->second], this->terms[it->second]);
     chunks.push_back(chunk);
   }
+  // Not sure if we need this - we might need this when parallelizing a spin_op 
+  // over QPUs when the system has more processors than we have terms.
+  while (chunks.size() < numChunks)
+    chunks.push_back(sum_op<HandlerTy>());
   return std::move(chunks);
 }
 
