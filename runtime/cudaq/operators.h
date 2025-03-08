@@ -873,4 +873,13 @@ extern template class sum_op<boson_handler>;
 extern template class sum_op<fermion_handler>;
 #endif
 
+// here only for backwards compatibility - 
+// to be removed
+namespace spin {
+  spin_op i(const std::size_t idx);
+  spin_op x(const std::size_t idx);
+  spin_op y(const std::size_t idx);
+  spin_op z(const std::size_t idx);
+}
+
 } // namespace cudaq

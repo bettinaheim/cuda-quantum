@@ -182,4 +182,15 @@ sum_op<spin_handler> spin_handler::minus(int degree) {
   return 0.5 * x(degree) - std::complex<double>(0., 0.5) * y(degree);
 }
 
+// here only for backwards compatibility - 
+// to be removed
+namespace spin {
+  // FIXME: make target size_t?
+  // FIXME: spin op or spin op term?
+  spin_op i(const std::size_t idx) { return spin_handler::i((int)idx); }
+  spin_op x(const std::size_t idx) { return spin_handler::x((int)idx); }
+  spin_op y(const std::size_t idx) { return spin_handler::y((int)idx); }
+  spin_op z(const std::size_t idx) { return spin_handler::z((int)idx); }
+}
+
 } // namespace cudaq

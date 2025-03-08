@@ -1,0 +1,388 @@
+Build directory: /workspaces/cuda-quantum/build
+CUDA version 12.0 detected.
+Using cuQuantum installation in /usr/local/lib/python3.10/dist-packages/cuquantum.
+Using cuTensor installation in /usr/local/lib/python3.10/dist-packages/cutensor.
+Configuring nvq++ to use the lld linker by default.
+Preparing CUDA-Q build with LLVM installation in /usr/local/llvm...
+-- Submodule update
+-- CUDA Quantum static linking disabled.
+-- Using LLVMConfig.cmake in: /usr/local/llvm/lib/cmake/llvm
+-- Using ClangConfig.cmake in: /usr/local/llvm/lib/cmake/clang
+-- Using MLIRConfig.cmake in: /usr/local/llvm/lib/cmake/mlir
+-- Build type is Debug
+-- MPI CXX Found: /usr/local/openmpi/bin/mpiexec
+-- Building default MPI Comm plugin
+-- Module support is disabled.
+-- Version: 8.1.2
+-- Build type: Debug
+-- CXX_STANDARD: 20
+-- Required features: cxx_variadic_templates
+-- Build spdlog: 1.11.0
+-- Build type: Debug
+-- Using system curl for CPR.
+-- C++ Requests CMake Options
+-- =======================================================
+--   CPR_GENERATE_COVERAGE: OFF
+--   CPR_CURL_NOSIGNAL: OFF
+--   CPR_USE_SYSTEM_GTEST: OFF
+--   CPR_FORCE_USE_SYSTEM_CURL: TRUE
+--   CPR_ENABLE_SSL: ON
+--   CPR_FORCE_OPENSSL_BACKEND: ON
+--   CPR_FORCE_WINSSL_BACKEND: OFF
+--   CPR_FORCE_DARWINSSL_BACKEND: OFF
+--   CPR_FORCE_MBEDTLS_BACKEND: OFF
+--   CPR_ENABLE_LINTING: OFF
+--   CPR_ENABLE_CPPCHECK: OFF
+--   CPR_BUILD_TESTS: OFF
+--   CPR_BUILD_TESTS_SSL: OFF
+-- =======================================================
+-- Disabled SSL backend auto detect since either CPR_FORCE_OPENSSL_BACKEND, CPR_FORCE_DARWINSSL_BACKEND, CPR_FORCE_MBEDTLS_BACKEND, or CPR_FORCE_WINSSL_BACKEND is enabled.
+-- Using OpenSSL.
+-- Curl 8.5.0 found on this system.
+-- OpenMP Found. Adding interface definitions to target libqpp.
+-- Cuda language found.
+-- Building with -fPIC
+-- Building with -fPIC
+-- Building with -fPIC
+-- OpenSSL Found, building REST Client.
+-- OpenMP Found. Adding build flags to target nvqir-qpp: -fopenmp.
+-- OpenMP Found. Adding build flags to target nvqir-dm: -fopenmp.
+-- Found Python: /usr/bin/python3.10 (found version "3.10.12") found components: Interpreter Development Development.Module Development.Embed 
+-- Could NOT find pybind11 (missing: pybind11_DIR)
+-- CUSTATEVEC_ROOT and CUDA_FOUND - building custatevec NVQIR backend.
+-- CUSTATEVEC_LIB: /usr/local/lib/python3.10/dist-packages/cuquantum/lib/libcustatevec.so.1
+-- CUTENSOR_LIB: /usr/local/lib/python3.10/dist-packages/cutensor/lib/libcutensor.so.2
+-- CUTENSORNET_LIB: /usr/local/lib/python3.10/dist-packages/cuquantum/lib/libcutensornet.so.2
+-- CUTENSORNET_INC: /usr/local/lib/python3.10/dist-packages/cuquantum/include/cutensornet.h
+-- Found cutensornet version: 2.6.0
+-- cudensitymat header: /usr/local/lib/python3.10/dist-packages/cuquantum/include/cudensitymat.h
+-- Building with -fPIC
+-- OpenMP Found. Adding build flags to target cudaq-em-photonics: -fopenmp.
+-- OpenMP Found. Adding build flags to target cudaq-ensmallen: -fopenmp.
+-- Building with -fPIC
+-- Building REST QPU.
+-- Found AWS SDK for C++, Version: 1.11.454, Install Root:/usr/local/aws, Platform Prefix:, Platform Dependent Libraries: pthread;curl
+-- Components specified for AWSSDK: braket;s3-crt;sts, application will be depending on libs: aws-cpp-sdk-braket;aws-cpp-sdk-s3-crt;aws-cpp-sdk-sts;aws-cpp-sdk-core;aws-crt-cpp;aws-c-http;aws-c-mqtt;aws-c-cal;aws-c-auth;aws-c-common;aws-c-io;aws-checksums;aws-c-event-stream;aws-c-s3;aws-c-compression;aws-c-sdkutils;pthread;curl
+-- Try finding aws-cpp-sdk-core
+-- LibCrypto Include Dir: /usr/local/openssl/include
+-- LibCrypto Shared Lib:  crypto_SHARED_LIBRARY-NOTFOUND
+-- LibCrypto Static Lib:  crypto_STATIC_LIBRARY-NOTFOUND
+-- Found aws-cpp-sdk-core
+-- Try finding aws-cpp-sdk-sts
+-- Found aws-cpp-sdk-sts
+-- Try finding aws-cpp-sdk-s3-crt
+-- Found aws-cpp-sdk-s3-crt
+-- Try finding aws-cpp-sdk-braket
+-- Found aws-cpp-sdk-braket
+-- Found AWS SDK for C++, Version: 1.11.454, Install Root:/usr/local/aws, Platform Prefix:, Platform Dependent Libraries: pthread;curl
+-- Components specified for AWSSDK: braket;s3-crt;sts, application will be depending on libs: aws-cpp-sdk-braket;aws-cpp-sdk-s3-crt;aws-cpp-sdk-sts;aws-cpp-sdk-core;aws-crt-cpp;aws-c-http;aws-c-mqtt;aws-c-cal;aws-c-auth;aws-c-common;aws-c-io;aws-checksums;aws-c-event-stream;aws-c-s3;aws-c-compression;aws-c-sdkutils;pthread;curl
+-- Try finding aws-cpp-sdk-core
+-- LibCrypto Include Dir: /usr/local/openssl/include
+-- LibCrypto Shared Lib:  crypto_SHARED_LIBRARY-NOTFOUND
+-- LibCrypto Static Lib:  crypto_STATIC_LIBRARY-NOTFOUND
+-- Found aws-cpp-sdk-core
+-- Try finding aws-cpp-sdk-sts
+-- Found aws-cpp-sdk-sts
+-- Try finding aws-cpp-sdk-s3-crt
+-- Found aws-cpp-sdk-s3-crt
+-- Try finding aws-cpp-sdk-braket
+-- Found aws-cpp-sdk-braket
+-- Could NOT find PkgConfig (missing: PKG_CONFIG_EXECUTABLE) 
+-- Minizip found: /usr/local/zlib/lib/libminizip.a and /usr/local/zlib/include/minizip/unzip.h
+-- Building ORCA REST QPU.
+-- Building Fermioniq REST QPU.
+-- Building QuEra REST QPU.
+-- Building Pasqal REST QPU.
+-- Building with -fPIC
+-- OpenMP Found. Adding build flags to target cudaq-chemistry: -fopenmp.
+-- OpenMP Found. Adding build flags to target cudaq-operator: -fopenmp.
+-- Building with -fPIC
+-- Building with -fPIC
+-- Found Python: /usr/bin/python3.10 (found suitable version "3.10.12", minimum required is "3") found components: Interpreter Development Development.Module Development.Embed 
+-- pybind11 v2.12.0 dev1
+-- Building with -fPIC
+-- Building cudaq-pyscf plugin.
+-- Pytest and Numpy found, building Python tests.
+-- CUDAQ_TEST_MOCK_SERVERS=TRUE and dependent modules available, building Python remote QPU tests.
+-- Building cutensornet backend tests.
+-- Building with -fPIC
+-- Registering CustomPassPlugin as a pass plugin (static build: OFF)
+-- Found Python: /usr/bin/python3.10 (found version "3.10.12") found components: Interpreter 
+-- OpenMP Found. Adding build flags to target nvqir-qpp-observe-test: -fopenmp.
+-- Building with -fPIC
+-- OpenFermion PySCF found, enabling chemistry tests.
+-- Configuring done (10.9s)
+-- Generating done (0.3s)
+-- Build files have been written to: /workspaces/cuda-quantum/build
+Building CUDA-Q with configuration Debug...
+[1/493] Building CXX object runtime/common/CMakeFiles/cudaq-common.dir/Trace.cpp.o
+[2/493] Building CXX object runtime/cudaq/CMakeFiles/cudaq.dir/utils/cudaq_utils.cpp.o
+[3/493] Building CXX object runtime/cudaq/CMakeFiles/cudaq.dir/qis/execution_manager_c_api.cpp.o
+[4/493] Building CXX object runtime/common/CMakeFiles/cudaq-common.dir/Resources.cpp.o
+[5/493] Building CXX object runtime/cudaq/CMakeFiles/cudaq.dir/qis/execution_manager.cpp.o
+[6/493] Building CXX object runtime/nvqir/CMakeFiles/nvqir.dir/__/cudaq/qis/state.cpp.o
+[7/493] Building CXX object runtime/nvqir/CMakeFiles/nvqir.dir/QIRTypes.cpp.o
+[8/493] Building CXX object runtime/cudaq/CMakeFiles/cudaq.dir/qis/state.cpp.o
+[9/493] Building CXX object runtime/nvqir/cutensornet/CMakeFiles/nvqir-tensornet-mps.dir/tensornet_spin_op.cpp.o
+[10/493] Building CXX object runtime/cudaq/qis/managers/default/CMakeFiles/cudaq-em-default.dir/__/__/execution_manager.cpp.o
+[11/493] Building CXX object runtime/nvqir/cutensornet/CMakeFiles/nvqir-tensornet.dir/tensornet_spin_op.cpp.o
+[12/493] Building CXX object runtime/common/CMakeFiles/cudaq-common.dir/ServerHelper.cpp.o
+[13/493] Building CXX object runtime/cudaq/CMakeFiles/cudaq.dir/algorithms/draw.cpp.o
+[14/493] Building CXX object runtime/nvqir/cutensornet/CMakeFiles/nvqir-tensornet.dir/tn_simulation_state.cpp.o
+[15/493] Building CXX object runtime/common/CMakeFiles/cudaq-common.dir/Executor.cpp.o
+[16/493] Building CXX object runtime/cudaq/CMakeFiles/cudaq.dir/platform/quantum_platform.cpp.o
+[17/493] Building CXX object runtime/cudaq/qis/managers/default/CMakeFiles/cudaq-em-default.dir/DefaultExecutionManager.cpp.o
+[18/493] Building CXX object runtime/cudaq/CMakeFiles/cudaq.dir/qis/remote_state.cpp.o
+[19/493] Building CXX object runtime/nvqir/cutensornet/CMakeFiles/nvqir-tensornet-mps.dir/tensornet_state.cpp.o
+[20/493] Building CXX object runtime/cudaq/CMakeFiles/cudaq.dir/cudaq.cpp.o
+[21/493] Building CXX object runtime/common/CMakeFiles/cudaq-common.dir/Future.cpp.o
+[22/493] Building CXX object runtime/nvqir/cutensornet/CMakeFiles/nvqir-tensornet.dir/tensornet_state.cpp.o
+[23/493] Building CXX object runtime/nvqir/CMakeFiles/nvqir.dir/NVQIR.cpp.o
+[24/493] Building CXX object runtime/nvqir/custatevec/CMakeFiles/nvqir-custatevec-fp32.dir/CuStateVecCircuitSimulatorF32.cpp.o
+[25/493] Building CXX object runtime/nvqir/cutensornet/CMakeFiles/nvqir-tensornet.dir/simulator_tensornet_register.cpp.o
+[26/493] Building CXX object runtime/nvqir/custatevec/CMakeFiles/nvqir-custatevec-fp64.dir/CuStateVecCircuitSimulator.cpp.o
+[27/493] Building CXX object runtime/nvqir/cutensornet/CMakeFiles/nvqir-tensornet-mps.dir/simulator_cutensornet.cpp.o
+[28/493] Building CXX object runtime/nvqir/cudensitymat/CMakeFiles/nvqir-dynamics.dir/CuDensityMatSim.cpp.o
+[29/493] Building CXX object runtime/cudaq/platform/default/rest/helpers/infleqtion/CMakeFiles/cudaq-serverhelper-infleqtion.dir/InfleqtionServerHelper.cpp.o
+[30/493] Building CXX object runtime/nvqir/cutensornet/CMakeFiles/nvqir-tensornet-mps.dir/simulator_mps_register.cpp.o
+[31/493] Building CXX object runtime/nvqir/stim/CMakeFiles/nvqir-stim.dir/StimCircuitSimulator.cpp.o
+[32/493] Building CXX object runtime/cudaq/platform/default/CMakeFiles/cudaq-platform-default.dir/DefaultQuantumPlatform.cpp.o
+[33/493] Building CXX object runtime/nvqir/cutensornet/CMakeFiles/nvqir-tensornet.dir/simulator_cutensornet.cpp.o
+[34/493] Building CXX object runtime/cudaq/platform/default/rest/CMakeFiles/cudaq-rest-qpu.dir/helpers/quantinuum/QuantinuumServerHelper.cpp.o
+[35/493] Building CXX object runtime/cudaq/platform/orca/CMakeFiles/cudaq-orca-qpu.dir/OrcaQPU.cpp.o
+[36/493] Building CXX object runtime/cudaq/platform/default/rest/CMakeFiles/cudaq-rest-qpu.dir/helpers/ionq/IonQServerHelper.cpp.o
+[37/493] Building CXX object runtime/common/CMakeFiles/cudaq-mlir-runtime.dir/ArgumentConversion.cpp.o
+[38/493] Building CXX object runtime/cudaq/platform/default/rest/CMakeFiles/cudaq-rest-qpu.dir/helpers/infleqtion/InfleqtionServerHelper.cpp.o
+[39/493] Building CXX object runtime/cudaq/platform/mqpu/custatevec/CMakeFiles/gpu-emulated-qpu.dir/GPUEmulatedQPU.cpp.o
+[40/493] Building CXX object runtime/cudaq/platform/default/rest/CMakeFiles/cudaq-rest-qpu.dir/helpers/anyon/AnyonServerHelper.cpp.o
+[41/493] Running utility command for CUDAQuantumPythonModules.sources.CUDAQuantumPythonSources.cc
+[42/493] Building CXX object runtime/cudaq/platform/default/rest/helpers/ionq/CMakeFiles/cudaq-serverhelper-ionq.dir/IonQServerHelper.cpp.o
+[43/493] Building CXX object runtime/cudaq/platform/default/rest/helpers/quantinuum/CMakeFiles/cudaq-serverhelper-quantinuum.dir/QuantinuumServerHelper.cpp.o
+[44/493] Building CXX object runtime/cudaq/platform/default/rest/CMakeFiles/cudaq-rest-qpu.dir/helpers/oqc/OQCServerHelp.cpp.o
+[45/493] Building CXX object runtime/cudaq/platform/default/rest/CMakeFiles/cudaq-rest-qpu.dir/helpers/braket/BraketServerHelper.cpp.o
+[46/493] Building CXX object runtime/cudaq/platform/default/rest/CMakeFiles/cudaq-rest-qpu.dir/helpers/iqm/IQMServerHelper.cpp.o
+[47/493] Building CXX object runtime/cudaq/platform/orca/CMakeFiles/cudaq-orca-qpu.dir/OrcaExecutor.cpp.o
+[48/493] Building CXX object runtime/cudaq/dynamics/CMakeFiles/cudaq-operator.dir/callback.cpp.o
+[49/493] Building CXX object runtime/cudaq/platform/default/rest/helpers/anyon/CMakeFiles/cudaq-serverhelper-anyon.dir/AnyonServerHelper.cpp.o
+[50/493] Building CXX object runtime/cudaq/platform/orca/CMakeFiles/cudaq-orca-qpu.dir/OrcaServerHelper.cpp.o
+[51/493] Building CXX object runtime/cudaq/platform/orca/CMakeFiles/cudaq-orca-qpu.dir/OrcaRemoteRESTQPU.cpp.o
+[52/493] Building CXX object runtime/cudaq/platform/mqpu/CMakeFiles/cudaq-platform-mqpu.dir/MultiQPUPlatform.cpp.o
+[53/493] Building CXX object runtime/cudaq/dynamics/CMakeFiles/cudaq-operator.dir/spin_operators.cpp.o
+[54/493] Building CXX object runtime/cudaq/platform/default/rest/helpers/oqc/CMakeFiles/cudaq-serverhelper-oqc.dir/OQCServerHelp.cpp.o
+[55/493] Running utility command for CUDAQuantumPythonModules.sources.CUDAQuantumPythonSources.cc.ops_gen
+[56/493] Running utility command for CUDAQuantumPythonModules.sources.CUDAQuantumPythonSources.quake.ops_gen
+[57/493] Running utility command for CUDAQuantumPythonModules.sources.CUDAQuantumPythonSources.quake
+[58/493] Building CXX object unittests/backends/pasqal/CMakeFiles/test_pasqal.dir/PasqalTester.cpp.o
+[59/493] cd /workspaces/cuda-quantum/build/python && /usr/local/cmake-3.26/bin/cmake -E copy_directory /workspaces/cuda-quantum/python /workspaces/cuda-quantum/build/python && /usr/local/cmake-3.26/bin/cmake -DMETADATA_FILE="/workspaces/cuda-quantum/build/python/cudaq/_metadata.py" -DCUDA_VERSION_MAJOR=12 -P /workspaces/cuda-quantum/python/metadata.cmake
+-- Creating metadata file in /workspaces/cuda-quantum/build/python/cudaq/_metadata.py.
+[60/493] Building CXX object runtime/cudaq/platform/default/rest/helpers/iqm/CMakeFiles/cudaq-serverhelper-iqm.dir/IQMServerHelper.cpp.o
+[61/493] Building CXX object runtime/cudaq/dynamics/CMakeFiles/cudaq-operator.dir/boson_operators.cpp.o
+[62/493] Building CXX object runtime/cudaq/dynamics/CMakeFiles/cudaq-operator.dir/fermion_operators.cpp.o
+[63/493] Building CXX object runtime/cudaq/dynamics/CMakeFiles/cudaq-operator.dir/scalar_operators.cpp.o
+[64/493] Building CXX object runtime/cudaq/platform/default/rest/helpers/braket/CMakeFiles/cudaq-serverhelper-braket.dir/BraketServerHelper.cpp.o
+[65/493] Building CXX object runtime/cudaq/dynamics/CMakeFiles/cudaq-operator.dir/helpers.cpp.o
+[66/493] Building CXX object runtime/cudaq/domains/chemistry/CMakeFiles/cudaq-chemistry.dir/molecule.cpp.o
+[67/493] Building CXX object runtime/cudaq/platform/default/rest/CMakeFiles/cudaq-rest-qpu.dir/helpers/braket/BraketExecutor.cpp.o
+[68/493] Building CXX object runtime/cudaq/dynamics/CMakeFiles/cudaq-operator.dir/handler.cpp.o
+[69/493] Building CXX object runtime/cudaq/platform/fermioniq/helpers/CMakeFiles/cudaq-serverhelper-fermioniq.dir/FermioniqServerHelper.cpp.o
+[70/493] Building CXX object runtime/cudaq/dynamics/CMakeFiles/cudaq-operator.dir/matrix_operators.cpp.o
+[71/493] Building CXX object runtime/cudaq/platform/fermioniq/CMakeFiles/cudaq-fermioniq-qpu.dir/helpers/FermioniqServerHelper.cpp.o
+[72/493] Building CXX object runtime/cudaq/platform/mqpu/remote/CMakeFiles/cudaq-remote-simulator-qpu.dir/RemoteSimulatorQPU.cpp.o
+[73/493] Building CXX object runtime/cudaq/builder/CMakeFiles/cudaq-builder.dir/kernels.cpp.o
+[74/493] Building CXX object runtime/cudaq/dynamics/CMakeFiles/cudaq-operator.dir/schedule.cpp.o
+[75/493] Building CXX object runtime/cudaq/dynamics/CMakeFiles/cudaq-operator.dir/product_operators.cpp.o
+[76/493] Building CXX object runtime/cudaq/platform/default/rest/helpers/braket/CMakeFiles/cudaq-serverhelper-braket.dir/BraketExecutor.cpp.o
+[77/493] Building CXX object runtime/cudaq/platform/quera/CMakeFiles/cudaq-quera-qpu.dir/QuEraExecutor.cpp.o
+[78/493] Building CXX object runtime/cudaq/CMakeFiles/cudaq.dir/utils/matrix.cpp.o
+[79/493] Building CXX object runtime/cudaq/dynamics/CMakeFiles/cudaq-operator.dir/operator_sum.cpp.o
+[80/493] Building CXX object runtime/cudaq/platform/quera/CMakeFiles/cudaq-quera-qpu.dir/QuEraServerHelper.cpp.o
+[81/493] Building CXX object runtime/cudaq/platform/quera/CMakeFiles/cudaq-serverhelper-quera.dir/QuEraServerHelper.cpp.o
+[82/493] Linking CXX shared library lib/libcudaq-operator.so
+[83/493] Building CXX object runtime/cudaq/platform/quera/CMakeFiles/cudaq-serverhelper-quera.dir/QuEraExecutor.cpp.o
+[84/493] Building CXX object runtime/cudaq/platform/pasqal/CMakeFiles/cudaq-pasqal-qpu.dir/PasqalServerHelper.cpp.o
+[85/493] Linking CXX shared library lib/libcudaq-chemistry.so
+[86/493] Building CXX object runtime/cudaq/builder/CMakeFiles/cudaq-builder.dir/kernel_builder.cpp.o
+[87/493] Linking CXX shared library lib/libcudaq-common.so
+/usr/bin/ld: missing --end-group; added as last command line option
+[88/493] Linking CXX shared library lib/libcudaq-serverhelper-infleqtion.so
+[89/493] Linking CXX shared library lib/libnvqir.so
+[90/493] Linking CXX shared library lib/libnvqir-stim.so
+[91/493] Linking CXX shared library lib/libnvqir-custatevec-fp64.so
+[92/493] Linking CXX shared library lib/libnvqir-custatevec-fp32.so
+[93/493] Building CXX object python/utils/CMakeFiles/cudaq-py-utils.dir/LinkedLibraryHolder.cpp.o
+[94/493] Building CXX object python/extension/CMakeFiles/CUDAQuantumPythonModules.extension._quakeDialects.dso.dir/__/__/runtime/cudaq/platform/orca/OrcaQPU.cpp.o
+[95/493] Building CXX object python/extension/CMakeFiles/CUDAQuantumPythonModules.extension._quakeDialects.dso.dir/__/runtime/cudaq/spin/py_matrix.cpp.o
+[96/493] Linking CXX shared library lib/libnvqir-dynamics.so
+[97/493] Linking CXX shared library lib/libcudaq-serverhelper-ionq.so
+[98/493] Building CXX object python/extension/CMakeFiles/CUDAQuantumPythonModules.extension._quakeDialects.dso.dir/__/runtime/cudaq/qis/py_execution_manager.cpp.o
+[99/493] Linking CXX shared library lib/libcudaq-em-default.so
+[100/493] Linking CXX shared library lib/libcudaq-serverhelper-anyon.so
+[101/493] Linking CXX shared library lib/libcudaq-serverhelper-iqm.so
+[102/493] Linking CXX shared library lib/libcudaq-serverhelper-oqc.so
+[103/493] Linking CXX shared library lib/libcudaq-serverhelper-quantinuum.so
+[104/493] Linking CXX shared library lib/libcudaq-serverhelper-fermioniq.so
+[105/493] Linking CXX shared library lib/libcudaq.so
+[106/493] Linking CXX shared library lib/libcudaq-serverhelper-braket.so
+[107/493] Building CXX object python/extension/CMakeFiles/CUDAQuantumPythonModules.extension._quakeDialects.dso.dir/__/runtime/cudaq/qis/py_qubit_qis.cpp.o
+[108/493] Linking CXX shared library lib/libnvqir-tensornet.so
+[109/493] Linking CXX shared library lib/libcudaq-platform-default.so
+[110/493] Linking CXX executable unittests/backends/pasqal/test_pasqal
+[111/493] Building CXX object python/extension/CMakeFiles/CUDAQuantumPythonModules.extension._quakeDialects.dso.dir/__/runtime/cudaq/spin/py_spin_op.cpp.o
+[112/493] Building CXX object python/extension/CMakeFiles/CUDAQuantumPythonModules.extension._quakeDialects.dso.dir/__/__/runtime/cudaq/platform/orca/OrcaExecutor.cpp.o
+[113/493] Linking CXX shared library lib/libcudaq-serverhelper-quera.so
+[114/493] Running utility command for CUDAQuantumPythonModules.sources.MLIRPythonSources.Dialects.bufferization
+[115/493] Running utility command for CUDAQuantumPythonModules.sources.MLIRPythonSources.Dialects.bufferization.ops_gen
+[116/493] Linking CXX shared library lib/libcudaq-platform-mqpu.so
+[117/493] Running utility command for CUDAQuantumPythonModules.sources.MLIRPythonSources.Dialects.async_dialect
+[118/493] Running utility command for CUDAQuantumPythonModules.sources.MLIRPythonSources.Dialects.async_dialect.ops_gen
+[119/493] Running utility command for CUDAQuantumPythonModules.sources.MLIRPythonSources.Dialects.builtin
+[120/493] Running utility command for CUDAQuantumPythonModules.sources.MLIRPythonSources.Dialects.builtin.ops_gen
+[121/493] Running utility command for CUDAQuantumPythonModules.sources.MLIRPythonSources.Dialects.complex
+[122/493] Linking CXX shared module python/cudaq/mlir/_mlir_libs/_mlirAsyncPasses.cpython-310-x86_64-linux-gnu.so
+[123/493] Running utility command for CUDAQuantumPythonModules.sources.MLIRPythonSources.Dialects.complex.ops_gen
+[124/493] Building CXX object python/extension/CMakeFiles/CUDAQuantumPythonModules.extension._quakeDialects.dso.dir/__/utils/LinkedLibraryHolder.cpp.o
+[125/493] Running utility command for CUDAQuantumPythonModules.sources.MLIRPythonSources.Dialects.cf
+[126/493] Running utility command for CUDAQuantumPythonModules.sources.MLIRPythonSources.Dialects.cf.ops_gen
+[127/493] Running utility command for CUDAQuantumPythonModules.sources.MLIRPythonSources.Dialects.func.ops_gen
+[128/493] Running utility command for CUDAQuantumPythonModules.sources.MLIRPythonSources.Dialects.func
+[129/493] Running utility command for CUDAQuantumPythonModules.sources.MLIRPythonSources.Dialects.gpu
+[130/493] Running utility command for CUDAQuantumPythonModules.sources.MLIRPythonSources.Dialects.gpu.ops_gen
+[131/493] Running utility command for CUDAQuantumPythonModules.sources.MLIRPythonSources.Dialects.linalg.ops_gen
+[132/493] Building CXX object python/extension/CMakeFiles/CUDAQuantumPythonModules.extension._quakeDialects.dso.dir/__/runtime/cudaq/target/py_testing_utils.cpp.o
+[133/493] Running utility command for CUDAQuantumPythonModules.sources.MLIRPythonSources.Dialects.linalg
+[134/493] Linking CXX shared library lib/libcudaq-py-utils.so
+[135/493] Linking CXX shared module python/cudaq/mlir/_mlir_libs/_mlirRegisterEverything.cpython-310-x86_64-linux-gnu.so
+[136/493] Building CXX object python/extension/CMakeFiles/CUDAQuantumPythonModules.extension._quakeDialects.dso.dir/__/runtime/utils/PyRemoteSimulatorQPU.cpp.o
+[137/493] Linking CXX shared module python/cudaq/mlir/_mlir_libs/_mlirGPUPasses.cpython-310-x86_64-linux-gnu.so
+[138/493] Building CXX object python/extension/CMakeFiles/CUDAQuantumPythonModules.extension._quakeDialects.dso.dir/__/__/runtime/cudaq/platform/orca/OrcaRemoteRESTQPU.cpp.o
+[139/493] Running utility command for CUDAQuantumPythonModules.sources.MLIRPythonSources.Dialects.transform
+[140/493] Running utility command for CUDAQuantumPythonModules.sources.MLIRPythonSources.Dialects.transform.ops_gen
+[141/493] Linking CXX shared module python/cudaq/mlir/_mlir_libs/_mlirLinalgPasses.cpython-310-x86_64-linux-gnu.so
+[142/493] Running utility command for CUDAQuantumPythonModules.sources.MLIRPythonSources.Dialects.loop_transform
+[143/493] Running utility command for CUDAQuantumPythonModules.sources.MLIRPythonSources.Dialects.loop_transform.ops_gen
+[144/493] Running utility command for CUDAQuantumPythonModules.sources.MLIRPythonSources.Dialects.structured_transform
+[145/493] Running utility command for CUDAQuantumPythonModules.sources.MLIRPythonSources.Dialects.structured_transform.ops_gen
+[146/493] Linking CXX shared module python/cudaq/mlir/_mlir_libs/_mlirDialectsLinalg.cpython-310-x86_64-linux-gnu.so
+[147/493] Running utility command for CUDAQuantumPythonModules.sources.MLIRPythonSources.Dialects.math
+[148/493] Running utility command for CUDAQuantumPythonModules.sources.MLIRPythonSources.Dialects.math.ops_gen
+[149/493] Running utility command for CUDAQuantumPythonModules.sources.MLIRPythonSources.Dialects.arith.ops_gen
+[150/493] Running utility command for CUDAQuantumPythonModules.sources.MLIRPythonSources.Dialects.arith
+[151/493] Running utility command for CUDAQuantumPythonModules.sources.MLIRPythonSources.Dialects.memref.ops_gen
+[152/493] Running utility command for CUDAQuantumPythonModules.sources.MLIRPythonSources.Dialects.memref
+[153/493] Running utility command for CUDAQuantumPythonModules.sources.MLIRPythonSources.Dialects.ml_program.ops_gen
+[154/493] Running utility command for CUDAQuantumPythonModules.sources.MLIRPythonSources.Dialects.ml_program
+[155/493] Running utility command for CUDAQuantumPythonModules.sources.MLIRPythonSources.Dialects.quant
+[156/493] Running utility command for CUDAQuantumPythonModules.sources.MLIRPythonSources.Dialects.pdl
+[157/493] Running utility command for CUDAQuantumPythonModules.sources.MLIRPythonSources.Dialects.pdl.ops_gen
+[158/493] Building CXX object runtime/cudaq/platform/default/rest/CMakeFiles/cudaq-rest-qpu.dir/RemoteRESTQPU.cpp.o
+[159/493] Running utility command for CUDAQuantumPythonModules.sources.MLIRPythonSources.Dialects.scf
+[160/493] Running utility command for CUDAQuantumPythonModules.sources.MLIRPythonSources.Dialects.scf.ops_gen
+[161/493] Running utility command for CUDAQuantumPythonModules.sources.MLIRPythonSources.Dialects.shape
+[162/493] Running utility command for CUDAQuantumPythonModules.sources.MLIRPythonSources.Dialects.shape.ops_gen
+[163/493] Running utility command for CUDAQuantumPythonModules.sources.MLIRPythonSources.Dialects.sparse_tensor
+[164/493] Running utility command for CUDAQuantumPythonModules.sources.MLIRPythonSources.Dialects.sparse_tensor.ops_gen
+[165/493] Linking CXX shared module python/cudaq/mlir/_mlir_libs/_mlirDialectsPDL.cpython-310-x86_64-linux-gnu.so
+[166/493] Linking CXX shared module python/cudaq/mlir/_mlir_libs/_mlirSparseTensorPasses.cpython-310-x86_64-linux-gnu.so
+[167/493] Running utility command for CUDAQuantumPythonModules.sources.MLIRPythonSources.Dialects.tensor
+[168/493] Running utility command for CUDAQuantumPythonModules.sources.MLIRPythonSources.Dialects.tensor.ops_gen
+[169/493] Running utility command for CUDAQuantumPythonModules.sources.MLIRPythonSources.Dialects.tosa
+[170/493] Running utility command for CUDAQuantumPythonModules.sources.MLIRPythonSources.Dialects.tosa.ops_gen
+[171/493] Running utility command for CUDAQuantumPythonModules.sources.MLIRPythonSources.Dialects.vector
+[172/493] Running utility command for CUDAQuantumPythonModules.sources.MLIRPythonSources.Dialects.vector.ops_gen
+[173/493] Running utility command for CUDAQuantumPythonModules.sources.MLIRPythonSources.Core
+[174/493] Building CXX object python/extension/CMakeFiles/CUDAQuantumPythonModules.extension._quakeDialects.dso.dir/__/__/runtime/common/ArgumentConversion.cpp.o
+[175/493] Building CXX object runtime/cudaq/qis/managers/photonics/CMakeFiles/cudaq-em-photonics.dir/PhotonicsExecutionManager.cpp.o
+[176/493] Building CXX object python/extension/CMakeFiles/CUDAQuantumPythonModules.extension._quakeDialects.dso.dir/__/__/runtime/cudaq/platform/orca/OrcaServerHelper.cpp.o
+[177/493] Building CXX object runtime/nvqir/qpp/CMakeFiles/nvqir-qpp.dir/QppCircuitSimulator.cpp.o
+[178/493] Building CXX object python/extension/CMakeFiles/CUDAQuantumPythonModules.extension._quakeDialects.dso.dir/__/__/runtime/cudaq/platform/pasqal/PasqalServerHelper.cpp.o
+[179/493] Building CXX object python/extension/CMakeFiles/CUDAQuantumPythonModules.extension._quakeDialects.dso.dir/__/runtime/cudaq/algorithms/py_draw.cpp.o
+[180/493] Building CXX object runtime/nvqir/qpp/CMakeFiles/nvqir-dm.dir/QppDMCircuitSimulator.cpp.o
+[181/493] Building CXX object python/extension/CMakeFiles/CUDAQuantumPythonModules.extension._quakeDialects.dso.dir/__/runtime/common/py_ObserveResult.cpp.o
+FAILED: python/extension/CMakeFiles/CUDAQuantumPythonModules.extension._quakeDialects.dso.dir/__/runtime/common/py_ObserveResult.cpp.o 
+/usr/local/llvm/bootstrap/cxx -DCUDAQ_DEBUG -DCUDAQuantumPythonModules_extension__quakeDialects_dso_EXPORTS -DFMT_HEADER_ONLY=1 -DMLIR_PYTHON_PACKAGE_PREFIX=cudaq.mlir. -D_DEBUG -D__STDC_CONSTANT_MACROS -D__STDC_FORMAT_MACROS -D__STDC_LIMIT_MACROS -I/workspaces/cuda-quantum/build/include -I/workspaces/cuda-quantum/include -I/workspaces/cuda-quantum/python -I/workspaces/cuda-quantum/python/utils -I/workspaces/cuda-quantum/runtime -I/workspaces/cuda-quantum/tpls/eigen -I/usr/local/cuda-12.0/include -I/workspaces/cuda-quantum/tpls/fmt/include -isystem /usr/local/llvm/include -isystem /workspaces/cuda-quantum/tpls/json/include -isystem /usr/include/python3.10 -isystem /workspaces/cuda-quantum/tpls/pybind11/include -isystem /usr/local/zlib/include -fPIC -fno-semantic-interposition -fvisibility-inlines-hidden -Werror=date-time -Wall -Wextra -Wno-unused-parameter -Wwrite-strings -Wcast-qual -Wno-missing-field-initializers -Wimplicit-fallthrough -Wno-class-memaccess -Wno-redundant-move -Wno-pessimizing-move -Wno-noexcept-type -Wdelete-non-virtual-dtor -Wsuggest-override -Wno-comment -Wno-misleading-indentation -Wctad-maybe-unsupported -fdiagnostics-color -g -std=gnu++20 -fPIC -fvisibility=hidden   -D_GNU_SOURCE -D_DEBUG -D__STDC_CONSTANT_MACROS -D__STDC_FORMAT_MACROS -D__STDC_LIMIT_MACROS -Wno-ambiguous-reversed-operator -frtti -fexceptions -Werror -MD -MT python/extension/CMakeFiles/CUDAQuantumPythonModules.extension._quakeDialects.dso.dir/__/runtime/common/py_ObserveResult.cpp.o -MF python/extension/CMakeFiles/CUDAQuantumPythonModules.extension._quakeDialects.dso.dir/__/runtime/common/py_ObserveResult.cpp.o.d -o python/extension/CMakeFiles/CUDAQuantumPythonModules.extension._quakeDialects.dso.dir/__/runtime/common/py_ObserveResult.cpp.o -c /workspaces/cuda-quantum/python/runtime/common/py_ObserveResult.cpp
+In file included from /workspaces/cuda-quantum/python/runtime/common/py_ObserveResult.cpp:11:
+/workspaces/cuda-quantum/runtime/common/ObserveResult.h: In instantiation of ‘cudaq::sample_result cudaq::observe_result::counts(SpinOpType) [with SpinOpType = cudaq::sum_op<cudaq::spin_handler>]’:
+/workspaces/cuda-quantum/python/runtime/common/py_ObserveResult.cpp:53:11:   required from here
+/workspaces/cuda-quantum/runtime/common/ObserveResult.h:80:24: error: static assertion failed: Must provide a spin_op_term
+   80 |     static_assert(std::is_same_v<spin_op_term, std::remove_reference_t<SpinOpType>>,
+      |                   ~~~~~^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+/workspaces/cuda-quantum/runtime/common/ObserveResult.h:80:24: note: ‘std::is_same_v<cudaq::product_op<cudaq::spin_handler>, cudaq::sum_op<cudaq::spin_handler> >’ evaluates to false
+/workspaces/cuda-quantum/runtime/common/ObserveResult.h:83:25: error: ‘class cudaq::sum_op<cudaq::spin_handler>’ has no member named ‘get_term_id’
+   83 |     auto termStr = term.get_term_id();
+      |                    ~~~~~^~~~~~~~~~~
+/workspaces/cuda-quantum/runtime/common/ObserveResult.h:82:10: error: unused variable ‘numQubits’ [-Werror=unused-variable]
+   82 |     auto numQubits = spinOp.num_qubits();
+      |          ^~~~~~~~~
+/workspaces/cuda-quantum/runtime/common/ObserveResult.h: In instantiation of ‘double cudaq::observe_result::expectation(SpinOpType) [with SpinOpType = cudaq::sum_op<cudaq::spin_handler>]’:
+/workspaces/cuda-quantum/python/runtime/common/py_ObserveResult.cpp:86:36:   required from here
+/workspaces/cuda-quantum/runtime/common/ObserveResult.h:68:24: error: static assertion failed: Must provide a spin_op_term
+   68 |     static_assert(std::is_same_v<spin_op_term, std::remove_reference_t<SpinOpType>>,
+      |                   ~~~~~^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+/workspaces/cuda-quantum/runtime/common/ObserveResult.h:68:24: note: ‘std::is_same_v<cudaq::product_op<cudaq::spin_handler>, cudaq::sum_op<cudaq::spin_handler> >’ evaluates to false
+/workspaces/cuda-quantum/runtime/common/ObserveResult.h:71:25: error: ‘class cudaq::sum_op<cudaq::spin_handler>’ has no member named ‘get_term_id’
+   71 |     auto termStr = term.get_term_id();
+      |                    ~~~~~^~~~~~~~~~~
+/workspaces/cuda-quantum/runtime/common/ObserveResult.h:70:10: error: unused variable ‘numQubits’ [-Werror=unused-variable]
+   70 |     auto numQubits = spinOp.num_qubits();
+      |          ^~~~~~~~~
+cc1plus: note: unrecognized command-line option ‘-Wno-ambiguous-reversed-operator’ may have been intended to silence earlier diagnostics
+cc1plus: all warnings being treated as errors
+[182/493] Building CXX object python/extension/CMakeFiles/CUDAQuantumPythonModules.extension._quakeDialects.dso.dir/__/runtime/common/py_AnalogHamiltonian.cpp.o
+[183/493] Linking CXX shared library lib/libnvqir-qpp.so
+[184/493] Linking CXX shared library lib/libcudaq-em-photonics.so
+[185/493] Linking CXX shared library lib/libnvqir-dm.so
+[186/493] Building CXX object python/extension/CMakeFiles/CUDAQuantumPythonModules.extension._mlirDialectsTransform.dso.dir/usr/local/llvm/src/python/MLIRPythonExtension.Dialects.Transform.Pybind/DialectTransform.cpp.o
+[187/493] Building CXX object python/extension/CMakeFiles/CUDAQuantumPythonModules.extension._quakeDialects.dso.dir/__/runtime/cudaq/algorithms/py_translate.cpp.o
+[188/493] Building CXX object runtime/cudaq/platform/fermioniq/CMakeFiles/cudaq-fermioniq-qpu.dir/FermioniqQPU.cpp.o
+[189/493] Building CXX object python/extension/CMakeFiles/CUDAQuantumPythonModules.extension._quakeDialects.dso.dir/__/runtime/cudaq/algorithms/py_observe_async.cpp.o
+[190/493] Building CXX object python/extension/CMakeFiles/CUDAQuantumPythonModules.extension._quakeDialects.dso.dir/__/runtime/cudaq/algorithms/py_optimizer.cpp.o
+[191/493] Building CXX object python/extension/CMakeFiles/CUDAQuantumPythonModules.extension._quakeDialects.dso.dir/__/runtime/cudaq/algorithms/py_sample_async.cpp.o
+[192/493] Building CXX object runtime/cudaq/platform/quera/CMakeFiles/cudaq-quera-qpu.dir/QuEraRemoteRESTQPU.cpp.o
+[193/493] Building CXX object python/extension/CMakeFiles/CUDAQuantumPythonModules.extension._quakeDialects.dso.dir/__/runtime/common/py_ExecutionContext.cpp.o
+[194/493] Building CXX object python/extension/CMakeFiles/CUDAQuantumPythonModules.extension._mlir.dso.dir/usr/local/llvm/src/python/MLIRPythonExtension.Core/MainModule.cpp.o
+[195/493] Building CXX object python/extension/CMakeFiles/CUDAQuantumPythonModules.extension._mlirDialectsQuant.dso.dir/usr/local/llvm/src/python/MLIRPythonExtension.Dialects.Quant.Pybind/DialectQuant.cpp.o
+[196/493] Building CXX object python/extension/CMakeFiles/CUDAQuantumPythonModules.extension._mlirDialectsSparseTensor.dso.dir/usr/local/llvm/src/python/MLIRPythonExtension.Dialects.SparseTensor.Pybind/DialectSparseTensor.cpp.o
+[197/493] Building CXX object python/extension/CMakeFiles/CUDAQuantumPythonModules.extension._mlir.dso.dir/usr/local/llvm/src/python/MLIRPythonExtension.Core/IRInterfaces.cpp.o
+[198/493] Building CXX object unittests/backends/qpp_observe/CMakeFiles/nvqir-qpp-observe-test.dir/QPPObserveBackend.cpp.o
+[199/493] Building CXX object runtime/cudaq/platform/pasqal/CMakeFiles/cudaq-pasqal-qpu.dir/PasqalRemoteRESTQPU.cpp.o
+[200/493] Building CXX object python/extension/CMakeFiles/CUDAQuantumPythonModules.extension._quakeDialects.dso.dir/__/runtime/common/py_EvolveResult.cpp.o
+[201/493] Building CXX object python/extension/CMakeFiles/CUDAQuantumPythonModules.extension._quakeDialects.dso.dir/__/runtime/cudaq/algorithms/py_vqe.cpp.o
+[202/493] Building CXX object python/extension/CMakeFiles/CUDAQuantumPythonModules.extension._quakeDialects.dso.dir/__/runtime/common/py_NoiseModel.cpp.o
+[203/493] Building CXX object python/extension/CMakeFiles/CUDAQuantumPythonModules.extension._quakeDialects.dso.dir/CUDAQuantumExtension.cpp.o
+FAILED: python/extension/CMakeFiles/CUDAQuantumPythonModules.extension._quakeDialects.dso.dir/CUDAQuantumExtension.cpp.o 
+/usr/local/llvm/bootstrap/cxx -DCUDAQ_DEBUG -DCUDAQuantumPythonModules_extension__quakeDialects_dso_EXPORTS -DFMT_HEADER_ONLY=1 -DMLIR_PYTHON_PACKAGE_PREFIX=cudaq.mlir. -D_DEBUG -D__STDC_CONSTANT_MACROS -D__STDC_FORMAT_MACROS -D__STDC_LIMIT_MACROS -I/workspaces/cuda-quantum/build/include -I/workspaces/cuda-quantum/include -I/workspaces/cuda-quantum/python -I/workspaces/cuda-quantum/python/utils -I/workspaces/cuda-quantum/runtime -I/workspaces/cuda-quantum/tpls/eigen -I/usr/local/cuda-12.0/include -I/workspaces/cuda-quantum/tpls/fmt/include -isystem /usr/local/llvm/include -isystem /workspaces/cuda-quantum/tpls/json/include -isystem /usr/include/python3.10 -isystem /workspaces/cuda-quantum/tpls/pybind11/include -isystem /usr/local/zlib/include -fPIC -fno-semantic-interposition -fvisibility-inlines-hidden -Werror=date-time -Wall -Wextra -Wno-unused-parameter -Wwrite-strings -Wcast-qual -Wno-missing-field-initializers -Wimplicit-fallthrough -Wno-class-memaccess -Wno-redundant-move -Wno-pessimizing-move -Wno-noexcept-type -Wdelete-non-virtual-dtor -Wsuggest-override -Wno-comment -Wno-misleading-indentation -Wctad-maybe-unsupported -fdiagnostics-color -g -std=gnu++20 -fPIC -fvisibility=hidden   -D_GNU_SOURCE -D_DEBUG -D__STDC_CONSTANT_MACROS -D__STDC_FORMAT_MACROS -D__STDC_LIMIT_MACROS -Wno-ambiguous-reversed-operator -frtti -fexceptions -Werror -MD -MT python/extension/CMakeFiles/CUDAQuantumPythonModules.extension._quakeDialects.dso.dir/CUDAQuantumExtension.cpp.o -MF python/extension/CMakeFiles/CUDAQuantumPythonModules.extension._quakeDialects.dso.dir/CUDAQuantumExtension.cpp.o.d -o python/extension/CMakeFiles/CUDAQuantumPythonModules.extension._quakeDialects.dso.dir/CUDAQuantumExtension.cpp.o -c /workspaces/cuda-quantum/python/extension/CUDAQuantumExtension.cpp
+/workspaces/cuda-quantum/python/extension/CUDAQuantumExtension.cpp: In lambda function:
+/workspaces/cuda-quantum/python/extension/CUDAQuantumExtension.cpp:239:52: error: cannot convert ‘cudaq::spin_op’ {aka ‘cudaq::sum_op<cudaq::spin_handler>’} to ‘cudaq::spin_op_term’ {aka ‘cudaq::product_op<cudaq::spin_handler>’}
+  239 |                                             cudaq::spin_op());
+      |                                                    ^~~~~~~~~
+      |                                                    |
+      |                                                    cudaq::spin_op {aka cudaq::sum_op<cudaq::spin_handler>}
+In file included from /workspaces/cuda-quantum/runtime/cudaq/qis/qudit.h:11,
+                 from /workspaces/cuda-quantum/runtime/cudaq/qis/qview.h:12,
+                 from /workspaces/cuda-quantum/runtime/cudaq/qis/qvector.h:12,
+                 from /workspaces/cuda-quantum/runtime/cudaq/builder/kernel_builder.h:14,
+                 from /workspaces/cuda-quantum/runtime/cudaq/platform.h:11,
+                 from /workspaces/cuda-quantum/runtime/cudaq/qis/qubit_qis.h:13,
+                 from /workspaces/cuda-quantum/runtime/cudaq.h:13,
+                 from /workspaces/cuda-quantum/python/extension/CUDAQuantumExtension.cpp:10:
+/workspaces/cuda-quantum/runtime/cudaq/qis/execution_manager.h:134:65: note:   initializing argument 6 of ‘virtual void cudaq::ExecutionManager::apply(std::string_view, const std::vector<double>&, const std::vector<cudaq::QuditInfo>&, const std::vector<cudaq::QuditInfo>&, bool, cudaq::spin_op_term)’
+  134 |                      bool isAdjoint = false, const spin_op_term op = cudaq::spin_op::identity()) = 0;
+      |                                              ~~~~~~~~~~~~~~~~~~~^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+At global scope:
+cc1plus: note: unrecognized command-line option ‘-Wno-ambiguous-reversed-operator’ may have been intended to silence earlier diagnostics
+[204/493] Building CXX object python/extension/CMakeFiles/CUDAQuantumPythonModules.extension._quakeDialects.dso.dir/__/runtime/cudaq/algorithms/py_state.cpp.o
+[205/493] Building CXX object python/extension/CMakeFiles/CUDAQuantumPythonModules.extension._quakeDialects.dso.dir/__/runtime/cudaq/algorithms/py_evolve.cpp.o
+[206/493] Building CXX object runtime/cudaq/platform/default/rest_server/CMakeFiles/rest-remote-platform-client.dir/helpers/RestRemoteClient.cpp.o
+[207/493] Building CXX object python/extension/CMakeFiles/CUDAQuantumPythonModules.extension._mlir.dso.dir/usr/local/llvm/src/python/MLIRPythonExtension.Core/IRAffine.cpp.o
+[208/493] Building CXX object python/extension/CMakeFiles/CUDAQuantumPythonModules.extension._quakeDialects.dso.dir/__/runtime/utils/PyQuEraRemoteRESTQPU.cpp.o
+[209/493] Building CXX object python/extension/CMakeFiles/CUDAQuantumPythonModules.extension._quakeDialects.dso.dir/__/runtime/utils/PyFermioniqRESTQPU.cpp.o
+[210/493] Linking CXX shared library lib/libcudaq-mlir-runtime.so
+[211/493] Building CXX object python/extension/CMakeFiles/CUDAQuantumPythonModules.extension._mlir.dso.dir/usr/local/llvm/src/python/MLIRPythonExtension.Core/IRAttributes.cpp.o
+[212/493] Building CXX object python/extension/CMakeFiles/CUDAQuantumPythonModules.extension._quakeDialects.dso.dir/__/__/runtime/cudaq/platform/pasqal/PasqalRemoteRESTQPU.cpp.o
+[213/493] Building CXX object runtime/cudaq/platform/default/rest_server/CMakeFiles/rest-remote-platform-server.dir/helpers/RestRemoteServer.cpp.o
+[214/493] Building CXX object python/extension/CMakeFiles/CUDAQuantumPythonModules.extension._quakeDialects.dso.dir/__/runtime/utils/PyRestRemoteClient.cpp.o
+[215/493] Building CXX object python/extension/CMakeFiles/CUDAQuantumPythonModules.extension._quakeDialects.dso.dir/__/runtime/cudaq/platform/py_alt_launch_kernel.cpp.o
+[216/493] Building CXX object python/extension/CMakeFiles/CUDAQuantumPythonModules.extension._mlir.dso.dir/usr/local/llvm/src/python/MLIRPythonExtension.Core/IRCore.cpp.o
+[217/493] Building CXX object runtime/nvqir/cutensornet/CMakeFiles/nvqir-tensornet-mps.dir/mps_simulation_state.cpp.o
+[218/493] Building CXX object python/extension/CMakeFiles/CUDAQuantumPythonModules.extension._quakeDialects.dso.dir/__/runtime/utils/PyRemoteRESTQPU.cpp.o
+ninja: build stopped: subcommand failed.

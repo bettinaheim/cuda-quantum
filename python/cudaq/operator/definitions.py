@@ -152,7 +152,11 @@ class operators:
     def momentum(cls, degree: int) -> ElementaryOperator:
         return ElementaryOperator("op_momentum", [degree])
 
+SpinOperator = cudaq_runtime.SpinOperator
+SpinOperatorTerm = cudaq_runtime.SpinOperatorTerm
+spin = cudaq_runtime.spin
 
+'''
 class spin:
     ElementaryOperator.define(
         "pauli_x", [2], lambda: cudaq_runtime.spin.x(0).to_matrix().to_numpy())
@@ -247,3 +251,4 @@ class SpinOperator(OperatorSum):
             return OperatorSum._from_spin_op(
                 cudaq_runtime.SpinOperator.random(qubit_count, term_count,
                                                   seed))
+'''
