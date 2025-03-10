@@ -9,6 +9,7 @@
 #pragma once
 
 #include <functional>
+#include <optional>
 #include <set>
 #include <type_traits>
 #include <unordered_map>
@@ -68,11 +69,19 @@ protected:
                 // terms)
   std::vector<std::vector<HandlerTy>> terms;
   std::vector<scalar_operator> coefficients;
-  bool is_default = false;
+  // We have a "magic placeholder" state for sum_op, for the 
+  // sole purpose of being able to provide a somewhat reasonable
+  // default constructor. The sum is considered uninitialized
+  // unit the first time it is combined with an initialized object.
+  // At that time, it takes the value of that object times a scalar factor.
+  // The uninitialized property is used to store any scalar factors that 
+  // are applied to an uninitialized sum until the sum is properly initialized. 
+  // After that it will be none.
+  std::optional<scalar_operator> uninitialized = {};
 
-  constexpr sum_op(bool is_default) : is_default(is_default) {};
-  sum_op(const sum_op<HandlerTy> &other, bool is_default, int size);
-  sum_op(sum_op<HandlerTy> &&other, bool is_default, int size);
+  sum_op(std::optional<scalar_operator> &&uninit) : uninitialized(std::move(uninit)) {};
+  sum_op(const sum_op<HandlerTy> &other, std::optional<scalar_operator> &&uninit, int size);
+  sum_op(sum_op<HandlerTy> &&other, std::optional<scalar_operator> &&uninit, int size);
 
 public:
 
@@ -142,8 +151,7 @@ public:
   // A default initialized sum will act as both the additive
   // and multiplicative identity. To construct a true "0" value
   // (neutral element for addition only), use sum_op<T>::empty().
-  constexpr sum_op()
-    : is_default(true) {};
+  constexpr sum_op() : uninitialized(1.) {};
 
   template <typename... Args,
             std::enable_if_t<std::conjunction<std::is_same<
