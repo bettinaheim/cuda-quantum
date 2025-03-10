@@ -944,7 +944,7 @@ sum_op<HandlerTy> product_op<HandlerTy>::operator*(
     const sum_op<HandlerTy> &other) const {
   if (other.uninitialized.has_value()) 
     return other.uninitialized.value() * (*this);
-  sum_op<HandlerTy> sum(false); // everything needs to be updated, so creating a new sum makes sense
+  sum_op<HandlerTy> sum(std::optional<scalar_operator>{}); // everything needs to be updated, so creating a new sum makes sense
   sum.coefficients.reserve(other.coefficients.size());
   sum.term_map.reserve(other.terms.size());
   sum.terms.reserve(other.terms.size());
@@ -962,7 +962,7 @@ sum_op<HandlerTy> product_op<HandlerTy>::operator*(
   sum_op<HandlerTy> product_op<HandlerTy>::operator op(            \
       const sum_op<HandlerTy> &other) const & {                          \
     if (other.uninitialized.has_value()) return *this;                         \
-    sum_op<HandlerTy> sum(false);                                               \
+    sum_op<HandlerTy> sum(std::optional<scalar_operator>{});                                               \
     sum.coefficients.reserve(other.coefficients.size() + 1);                   \
     sum.term_map = other.term_map;                                             \
     sum.terms = other.terms;                                                   \
@@ -976,7 +976,7 @@ sum_op<HandlerTy> product_op<HandlerTy>::operator*(
   sum_op<HandlerTy> product_op<HandlerTy>::operator op(            \
       const sum_op<HandlerTy> &other) && {                               \
     if (other.uninitialized.has_value()) return *this;                         \
-    sum_op<HandlerTy> sum(false);                                               \
+    sum_op<HandlerTy> sum(std::optional<scalar_operator>{});                                               \
     sum.coefficients.reserve(other.coefficients.size() + 1);                   \
     sum.term_map = other.term_map;                                             \
     sum.terms = other.terms;                                                   \
