@@ -5,7 +5,8 @@ Documentation][cuda_quantum_docs]. The page also contains [installation
 instructions][official_install] for released packages and nightly builds.
 
 [cuda_quantum_docs]: https://nvidia.github.io/cuda-quantum/latest
-[official_install]: https://nvidia.github.io/cuda-quantum/latest/using/quick_start.html#install-cuda-q
+[official_install]:
+    https://nvidia.github.io/cuda-quantum/latest/using/quick_start.html#install-cuda-q
 [data_center_install]:
     https://nvidia.github.io/cuda-quantum/latest/using/install/data_center_install.html
 
@@ -22,12 +23,11 @@ script](./scripts/build_cudaq.sh) to build and install CUDA-Q in a local folder.
 If you run out of memory while building CUDA-Q, you can limit the number of
 parallel build jobs by passing `-j N` to the build script, where `N` is the
 number of parallel jobs you wish to allow. Lower values of `N` are less likely
-to run out of memory but will build slower.
-The path where CUDA-Q will be installed can be configured by setting the
-environment variable `CUDAQ_INSTALL_PREFIX`. If you customize this path or do
-not work in our development container, you either need to invoke the
-built/installed binaries with the full path or modify your path variables as
-follows:
+to run out of memory but will build slower. The path where CUDA-Q will be
+installed can be configured by setting the environment variable
+`CUDAQ_INSTALL_PREFIX`. If you customize this path or do not work in our
+development container, you either need to invoke the built/installed binaries
+with the full path or modify your path variables as follows:
 
 ```bash
 export PATH="${CUDAQ_INSTALL_PREFIX}/bin:${PATH}"
@@ -58,6 +58,9 @@ simply be omitted from the build. However, to use or develop and test GPU-based
 simulators, you will need to make sure you have a suitable NVIDIA GPU with the
 [latest driver][nvidia_driver] installed. You can confirm the GPU is properly
 detected running the command `nvidia-smi` in your development environment.
+
+> **NOTE**: Support for CUDA 11 will be removed in future releases. Please
+> update to CUDA 12.
 
 [cuquantum]: https://developer.nvidia.com/cuquantum-sdk
 [cutensor]: https://developer.nvidia.com/cutensor

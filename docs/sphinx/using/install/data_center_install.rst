@@ -155,6 +155,10 @@ CUDA version used for the build, and the installed driver on the host
 system supports that CUDA version. We recommend using the latest CUDA version
 that is supported by the driver on the host system.
 
+.. note::
+
+  Support for CUDA 11 will be removed in future releases. Please update to CUDA 12.    
+
 Download a suitable `CUDA version <https://developer.nvidia.com/cuda-toolkit-archive>`__
 following the installation guide for your platform in the online documentation
 linked on that page.
