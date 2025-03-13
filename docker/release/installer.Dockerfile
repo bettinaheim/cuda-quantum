@@ -54,6 +54,16 @@ RUN source /cuda-quantum/scripts/configure_build.sh && \
     ## [<CUDAQuantumAssets]
 
 ## [Self-extracting Archive]
+ARG deprecation_notice=""
+RUN if [ -z "${deprecation_notice}" ] && [ "${CUDA_VERSION#11.}" != "${CUDA_VERSION}" ]; then \
+        deprecation_notice="**Note**: Support for CUDA 11 will be removed in future releases. Please update to CUDA 12."; \
+    fi && \
+    if [ -n "${deprecation_notice}" ]; then \
+        notice="deprecation_notice='"${deprecation_notice}"'" && \
+        key='expected_key="Enter any key to continue."' && \
+        prompt='while true; do read -p "$deprecation_notice $expected_key" -r choice < /dev/tty; case "$choice" in * ) break;; esac; done' && \
+        echo "$notice" >> install.sh && echo "$key" >> install.sh && echo "$prompt" >> install.sh; \
+    fi
 RUN bash /makeself/makeself.sh --gzip --sha256 --license /cuda-quantum/LICENSE \
         /cuda_quantum_assets install_cuda_quantum_cu$(echo ${CUDA_VERSION} | cut -d . -f1).$(uname -m) \
         "CUDA-Q toolkit for heterogeneous quantum-classical workflows" \
