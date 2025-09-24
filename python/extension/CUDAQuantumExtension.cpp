@@ -311,11 +311,12 @@ PYBIND11_MODULE(_quakeDialects, m) {
         auto ctx = unwrap(mod).getContext();
         auto moduleB = mlir::parseSourceString<mlir::ModuleOp>(code, ctx);
         auto moduleA = unwrap(mod);
-        moduleB->walk([&moduleA](mlir::func::FuncOp op) {
-          if (!moduleA.lookupSymbol<mlir::func::FuncOp>(op.getName()))
-            moduleA.push_back(op.clone());
-          return mlir::WalkResult::advance();
-        });
+        if (moduleB)
+            moduleB->walk([&moduleA](mlir::func::FuncOp op) {
+              if (!moduleA.lookupSymbol<mlir::func::FuncOp>(op.getName()))
+                moduleA.push_back(op.clone());
+              return mlir::WalkResult::advance();
+            });
         return kName;
       },
       "Given a python module name like `mod1.mod2.func`, see if there is a "
