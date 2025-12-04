@@ -5,19 +5,24 @@
 # This source code and the accompanying materials are made available under     #
 # the terms of the Apache License 2.0 which accompanies this distribution.     #
 # ============================================================================ #
+
 from __future__ import annotations
 import ast
+import inspect
 import re
 import sys
 import traceback
+import importlib
 import numpy as np
 from typing import get_origin, get_args, Callable, List
 import types
-import weakref
-
+from cudaq.mlir.execution_engine import ExecutionEngine
+from cudaq.mlir.dialects import func
 from cudaq.mlir._mlir_libs._quakeDialects import cudaq_runtime
 from cudaq.mlir.dialects import quake, cc
-from cudaq.mlir.ir import ComplexType, F32Type, F64Type, IntegerType
+from cudaq.mlir.ir import (ComplexType, F32Type, F64Type, IntegerType, Context,
+                           Module)
+from cudaq.mlir._mlir_libs._quakeDialects import register_all_dialects
 
 State = cudaq_runtime.State
 qvector = cudaq_runtime.qvector
@@ -29,10 +34,6 @@ qreg = qvector
 nvqppPrefix = '__nvqpp__mlirgen__'
 
 ahkPrefix = '__analog_hamiltonian_kernel__'
-
-# Keep a global registry of all kernel FuncOps
-# keyed on their name (without `__nvqpp__mlirgen__` prefix)
-globalKernelRegistry = {}
 
 # Keep a global registry of all kernel Python AST modules
 # keyed on their name (without `__nvqpp__mlirgen__` prefix).
@@ -46,9 +47,44 @@ globalRegisteredOperations = {}
 # Keep a global registry of any custom data types
 globalRegisteredTypes = cudaq_runtime.DataClassRegistry
 
-# Keep track of all kernel decorators
-# We only track alive decorators so we use a `WeakSet`
-globalKernelDecorators = weakref.WeakSet()
+
+def getMLIRContext():
+    """
+    This code creates an MLIRContext singleton for this python process. We do
+    not want to have a brand new context every time Python does something with a
+    kernel.
+    """
+    global cudaq__global_mlir_context
+    try:
+        cudaq__global_mlir_context
+    except NameError:
+        cudaq__global_mlir_context = Context()
+        register_all_dialects(cudaq__global_mlir_context)
+        quake.register_dialect(context=cudaq__global_mlir_context)
+        cc.register_dialect(context=cudaq__global_mlir_context)
+        cudaq_runtime.registerLLVMDialectTranslation(cudaq__global_mlir_context)
+    return cudaq__global_mlir_context
+
+
+class Initializer:
+    # We need static initializers to run in the CAPI `ExecutionEngine`, so here
+    # we run a simple JIT compile at global scope.
+    def initialize(self):
+        self.context = getMLIRContext()
+        self.module = Module.parse("llvm.func @none() { llvm.return }",
+                                   context=self.context)
+        ExecutionEngine(self.module)
+
+
+try:
+    globalExecutionEngineInitialized
+except NameError:
+    globalExecutionEngineInitialized = True
+    try:
+        Initializer().initialize()
+    except Exception as e:
+        print("python failed to load the execution engine", file=sys.stderr)
+        sys.exit()
 
 
 class Color:
@@ -56,6 +92,122 @@ class Color:
     RED = '\033[91m'
     BOLD = '\033[1m'
     END = '\033[0m'
+
+
+# Name of module attribute to recover the name of the entry-point for the python
+# kernel decorator.  The associated StringAttr is *without* the nvqppPrefix.
+cudaq__unique_attr_name = "cc.python_uniqued"
+
+
+def recover_func_op(module, name):
+    for op in module.body:
+        if isinstance(op, func.FuncOp):
+            if op.sym_name.value == name:
+                return op
+    return None
+
+
+def resolve_qualified_symbol(y):
+    """
+    If `y` is a qualified symbol (containing a '.' in the name), then resolve
+    the symbol to the kernel decorator object. Returns `None` if the qualified
+    name cannot be resolved.
+
+    For legacy reasons, this supports improper use of qualified names. For
+    example, in the module `cudaq.kernels.uccsd` there is a kernel named
+    `uccsd`. However, legacy tests just use the module name and omit the kernel
+    decorator name.
+    """
+    parts = y.split('.')
+    for i in range(len(parts), 0, -1):
+        modName = ".".join(parts[:i])
+        try:
+            mod = importlib.import_module(modName)
+        except ModuleNotFoundError:
+            continue
+        obj = mod
+        try:
+            for attr in parts[i:]:
+                obj = getattr(obj, attr)
+        except AttributeError:
+            return None
+        from .kernel_decorator import isa_kernel_decorator
+        if not isa_kernel_decorator(obj):
+            # FIXME: Legacy hack to support incorrect Python spellings of kernel
+            # names.
+            try:
+                obj = getattr(obj, parts[-1])
+            except AttributeError:
+                pass
+        return obj
+    return None
+
+
+def recover_value_of_or_none(name, resMod):
+    """
+    Recover the Python value of the symbol `name` from the enclosing context.
+    The enclosing context is the context in which the `PyKernelDecorator`
+    object's `__init__` or `__call__` method were invoked.
+
+    If `name` is qualified, then lookup the symbol in the module that is
+    specified in the name itself.
+
+    If there is a resolve-in module, `resMod`, then resolve the symbol in the
+    given module.
+
+    Otherwise, the symbol is neither qualified nor is there another module to
+    resolve the name in.  So perform a normal LEGB resolution of the symbol in
+    the current set of stack frames. (Actually, EGB since the symbol cannot be
+    local.)
+
+    Note that this need not be used with a `PyKernel` object as the semantics of
+    the kernel builder presumes immediate lookup and resolution of all symbols
+    during construction.
+    """
+    from .kernel_decorator import isa_kernel_decorator
+
+    if '.' in name:
+        return resolve_qualified_symbol(name)
+
+    if resMod:
+        return resMod.__dict__.get(name, None)
+
+    def drop_front():
+        drop = 0
+        for frameinfo in inspect.stack():
+            frame = frameinfo.frame
+            if 'self' in frame.f_locals:
+                if isa_kernel_decorator(frame.f_locals['self']):
+                    return drop
+            drop = drop + 1
+        return drop
+
+    drop = drop_front()
+    for frameinfo in inspect.stack()[drop:]:
+        frame = frameinfo.frame
+        if name in frame.f_locals:
+            return frame.f_locals[name]
+        if name in frame.f_globals:
+            return frame.f_globals[name]
+    return None
+
+
+def is_recovered_value_ok(result):
+    try:
+        if result != None:
+            return True
+    except ValueError:
+        # nd.array values raise ValueError with the above `if result` but are
+        # otherwise legit here.
+        return True
+    return False
+
+
+def recover_value_of(name, resMod):
+    result = recover_value_of_or_none(name, resMod)
+    if is_recovered_value_ok(result):
+        return result
+    raise RuntimeError("'" + name + "' is not available in this scope.")
 
 
 def emitFatalError(msg):
@@ -427,8 +579,13 @@ def mlirTypeFromPyType(argType, ctx, **kwargs):
         argInstance = kwargs['argInstance']
         if argInstance == None or (len(argInstance) == 0):
             emitFatalError(f'Cannot infer runtime argument type for {argType}')
-        eleTypes = [mlirTypeFromPyType(type(ele), ctx) for ele in argInstance]
-        tupleTy = mlirTryCreateStructType(eleTypes, context=ctx)
+        argTypeToCompareTo = (kwargs['argTypeToCompareTo']
+                              if 'argTypeToCompareTo' in kwargs else None)
+        if argTypeToCompareTo is None:
+            eleTypes = [mlirTypeFromPyType(type(ele), ctx) for ele in argInstance]
+            tupleTy = mlirTryCreateStructType(eleTypes, context=ctx)
+        else:
+            tupleTy = argTypeToCompareTo
         if tupleTy is None:
             emitFatalError(
                 "Hybrid quantum-classical data types and nested quantum structs are not allowed."
@@ -445,7 +602,7 @@ def mlirTypeFromPyType(argType, ctx, **kwargs):
     if 'argInstance' in kwargs:
         argInstance = kwargs['argInstance']
         if isinstance(argInstance, Callable):
-            return cc.CallableType.get(argInstance.argTypes, ctx)
+            return cc.CallableType.get(ctx, argInstance.argTypes, [])
 
     for name in globalRegisteredTypes.classes:
         customTy, memberTys = globalRegisteredTypes.getClassAttributes(name)
@@ -479,7 +636,7 @@ def mlirTypeFromPyType(argType, ctx, **kwargs):
             return cc.StdvecType.get(mlirTypeFromPyType(float, ctx), ctx)
 
     emitFatalError(
-        f"Can not handle conversion of python type {argType} to MLIR type.")
+        f"Cannot handle conversion of python type {argType} to MLIR type.")
 
 
 def mlirTypeToPyType(argType):
