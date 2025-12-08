@@ -36,8 +36,6 @@ from .utils import (Color, globalAstRegistry, globalRegisteredOperations,
                     recover_func_op, is_recovered_value_ok,
                     recover_value_of_or_none, cudaq__unique_attr_name,
                     mlirTryCreateStructType, resolve_qualified_symbol)
-from .kernel_decorator import isa_kernel_decorator
-from .kernel_builder import isa_dynamic_kernel
 
 State = cudaq_runtime.State
 
@@ -1802,7 +1800,7 @@ class PyASTBridge(ast.NodeVisitor):
                 self.emitFatalError("invalid target for assignment", node)
             target_root_defined_in_parent_scope = (
                 target_root.id in self.symbolTable and
-                target_root.id not in self.symbolTable.symbolTable[-1])
+                False) # FIXME: was: target_root.id not in self.symbolTable.symbolTable[-1])
             value_root = self.__get_root_value(value)
 
             def update_in_parent_scope(destination, value):
@@ -2385,28 +2383,28 @@ class PyASTBridge(ast.NodeVisitor):
         # FIXME: unify with processFunctionCall?
         def processDecoratorCall(symName):
             assert symName in self.symbolTable
-            self.visit(symName)
+            self.visit(ast.Name(symName))
             kernel = self.popValue()
             if not cc.CallableType.isinstance(kernel.type):
                 self.emitFatalError(
                     f"`{symName}` object is not callable, found symbol of type {kernel.type}",
                     node)
-
-            nrArgs = len(kernel.type.inputs)
+            functionTy = FunctionType(cc.CallableType.getFunctionType(kernel.type))
+            nrArgs = len(functionTy.inputs)
             values = self.__groupValues(node.args, [(nrArgs, nrArgs)])
-            values = convertArguments([t for t in kernel.type.inputs], values)
-            call = cc.CallCallableOp(kernel.type.results, kernel, values)
+            values = convertArguments([t for t in functionTy.inputs], values)
+            call = cc.CallCallableOp(functionTy.results, kernel, values)
             call.attributes.__setitem__('symbol', StringAttr.get(symName))
 
-            if len(kernel.type.results) == 0:
+            if len(functionTy.results) == 0:
                 return
-            if len(kernel.type.results) == 1:
+            if len(functionTy.results) == 1:
                 result = call.results[0]
             else:
                 # FIXME: SPLIT OUT INTO HELPER FUNCTION
                 for res in call.results:
                     self.__validate_container_entry(res, node)
-                structTy = mlirTryCreateStructType(kernel.type.results,
+                structTy = mlirTryCreateStructType(functionTy.results,
                                                    name='tuple',
                                                    context=self.ctx)
                 if structTy is None:
@@ -5092,7 +5090,8 @@ class PyASTBridge(ast.NodeVisitor):
         # Check if a nonlocal symbol, and process it.
         value = recover_value_of_or_none(node.id, None)
         if is_recovered_value_ok(value):
-
+            from .kernel_decorator import isa_kernel_decorator
+            from .kernel_builder import isa_dynamic_kernel
             if isa_kernel_decorator(value) or isa_dynamic_kernel(value):
                 # Not a data variable. Symbol bound to kernel object. This case is
                 # handled elsewhere.
