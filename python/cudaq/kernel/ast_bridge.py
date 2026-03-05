@@ -883,6 +883,10 @@ class PyASTBridge(ast.NodeVisitor):
                 id in ['swap', 'u3', 'exp_pauli'] or
                 id in globalRegisteredOperations)
 
+    def __isBuiltInGate(self, id):
+        return (self.__isUnitaryGate(id) or self.__isMeasurementGate(id) or
+                id == 'reset')
+
     def __createStdvecWithKnownValues(self, listElementValues):
         assert (len(set((v.type for v in listElementValues))) == 1)
         arrSize = self.getConstantInt(len(listElementValues))
@@ -2701,6 +2705,14 @@ class PyASTBridge(ast.NodeVisitor):
                                     self.pushValue(res)
                                 return
 
+                # Handle `cudaq.*` module prefix for built-in gates
+                elif devKey == 'cudaq' and self.__isBuiltInGate(name):
+                    node.func = ast.Name(name)
+                elif name == 'ctrl' or name == 'adj':
+                    devKey = otherFuncName.removeprefix('cudaq.')
+                    if self.__isBuiltInGate(devKey):
+                        node.func = ast.Attribute(devKey, name)
+
         if isinstance(node.func, ast.Name):
             symName = (node.func.id if node.func.id in self.symbolTable else
                        processDecorator(node.func.id))
@@ -3510,9 +3522,9 @@ class PyASTBridge(ast.NodeVisitor):
                                 "calling cudaq.control or cudaq.adjoint on "
                                 "a globally registered operation is not "
                                 "supported", node)
-                        elif self.__isUnitaryGate(
-                                otherFuncName) or self.__isMeasurementGate(
-                                    otherFuncName):
+                        elif (self.__isBuiltInGate(otherFuncName) or
+                              self.__isBuiltInGate(
+                                  otherFuncName.removeprefix('cudaq.'))):
                             self.emitFatalError(
                                 "calling cudaq.control or cudaq.adjoint on a "
                                 "built-in gate is not supported", node)
@@ -3665,7 +3677,6 @@ class PyASTBridge(ast.NodeVisitor):
 
                     return ''
 
-                # We have a `func_name.ctrl`
                 if self.__isSimpleGate(node.func.value.id):
                     if node.func.attr == 'ctrl':
                         processQuakeCtor(node.func.value.id.title(),
